@@ -1,0 +1,54 @@
+<!--order.wxml-->
+<view class="page">
+  <!-- 订单为空 -->
+  <view wx:if="{{orders.length === 0}}" class="empty-state">
+    <mp-icon icon="info" color="#999999" size="80"></mp-icon>
+    <text class="empty-text">暂无订单</text>
+    <button class="weui-btn weui-btn_primary" bindtap="goToIndex">去逛逛</button>
+  </view>
+
+  <!-- 订单列表 -->
+  <view wx:else class="page__bd">
+    <view class="order-list">
+      <view class="order-card" wx:for="{{orders}}" wx:key="id">
+        <view class="order-header">
+          <view class="order-info">
+            <mp-icon icon="waiting" color="#999999" size="28" style="margin-right: 8rpx;"></mp-icon>
+            <text class="order-time">{{item.time}}</text>
+          </view>
+          <view class="order-status-wrapper">
+            <view class="order-status-badge" style="background-color: {{getStatusColor(item.status)}};">
+              <text class="order-status-text">{{item.status}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="order-body">
+          <view class="order-item" wx:for="{{item.items}}" wx:key="id" bindtap="goToGoodsDetail" data-id="{{item.id}}">
+            <image class="order-item-image" src="{{item.image}}" mode="aspectFill"></image>
+            <view class="order-item-info">
+              <text class="order-item-name">{{item.name}}</text>
+              <view class="order-item-detail">
+                <text class="order-item-specs">{{item.specs}}</text>
+                <view class="order-item-price-row">
+                  <text class="order-item-price">¥{{item.price}}/{{item.unit}}</text>
+                  <text class="order-item-count">x{{item.count}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="order-footer">
+          <text class="order-total-label">共{{item.items.length}}件商品 合计：</text>
+          <text class="order-total-price">¥{{item.totalPrice}}</text>
+        </view>
+        <view class="order-actions">
+          <button class="weui-btn weui-btn_primary mini-btn detail-btn" size="mini" bindtap="viewOrderDetail" data-id="{{item.id}}">查看详情</button>
+          <button wx:if="item.status === '待处理' || item.status === '未送达' || item.status === '已送达未支付'" class="weui-btn weui-btn_default mini-btn" size="mini" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载提示 -->
+  <mp-loading type="circle" tips="加载中..." show="{{loading}}"></mp-loading>
+</view>

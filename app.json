@@ -1,0 +1,75 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/category/category",
+    "pages/cart/cart",
+    "pages/order/order",
+    "pages/profile/profile",
+    "pages/goodsDetail/goodsDetail"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#003183",
+    "navigationBarTitleText": "味都美副食商城",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#003183",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/category/category",
+        "text": "分类",
+        "iconPath": "images/category.png",
+        "selectedIconPath": "images/category-active.png"
+      },
+      {
+        "pagePath": "pages/cart/cart",
+        "text": "购物车",
+        "iconPath": "images/cart.png",
+        "selectedIconPath": "images/cart-active.png"
+      },
+      {
+        "pagePath": "pages/order/order",
+        "text": "订单",
+        "iconPath": "images/order.png",
+        "selectedIconPath": "images/order-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "个人中心",
+        "iconPath": "images/profile.png",
+        "selectedIconPath": "images/profile-active.png"
+      }
+    ]
+  },
+  "usingComponents": {
+    "mp-badge": "miniprogram_npm/weui-miniprogram/badge/badge",
+    "mp-cell": "miniprogram_npm/weui-miniprogram/cell/cell",
+    "mp-cells": "miniprogram_npm/weui-miniprogram/cells/cells",
+    "mp-icon": "miniprogram_npm/weui-miniprogram/icon/icon",
+    "mp-loading": "miniprogram_npm/weui-miniprogram/loading/loading",
+    "mp-searchbar": "miniprogram_npm/weui-miniprogram/searchbar/searchbar",
+    "mp-slideview": "miniprogram_npm/weui-miniprogram/slideview/slideview",
+    "mp-tabbar": "miniprogram_npm/weui-miniprogram/tabbar/tabbar",
+    "mp-half-screen-dialog": "miniprogram_npm/weui-miniprogram/half-screen-dialog/half-screen-dialog",
+    "mp-action-sheet": "miniprogram_npm/weui-miniprogram/actionsheet/actionsheet",
+    "mp-dialog": "miniprogram_npm/weui-miniprogram/dialog/dialog",
+    "mp-msg": "miniprogram_npm/weui-miniprogram/msg/msg",
+    "mp-toptips": "miniprogram_npm/weui-miniprogram/toptips/toptips",
+    "mp-form": "miniprogram_npm/weui-miniprogram/form/form",
+    "mp-form-page": "miniprogram_npm/weui-miniprogram/form-page/form-page",
+    "mp-checkbox": "miniprogram_npm/weui-miniprogram/checkbox/checkbox",
+    "mp-checkbox-group": "miniprogram_npm/weui-miniprogram/checkbox-group/checkbox-group",
+    "mp-uploader": "miniprogram_npm/weui-miniprogram/uploader/uploader"
+  },
+  "sitemapLocation": "sitemap.json"
+}

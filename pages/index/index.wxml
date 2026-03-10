@@ -1,0 +1,52 @@
+<!--index.wxml-->
+<view class="page">
+  <!-- 搜索栏 -->
+  <view class="search-container">
+    <view class="search-box">
+      <mp-icon icon="search" color="#999999" size="32" class="search-icon"></mp-icon>
+      <input class="search-input" type="text" placeholder="输入你想搜索的物品" confirm-type="search" bindconfirm="onSearch" />
+    </view>
+  </view>
+
+  <!-- 轮播图 -->
+  <swiper class="swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500">
+    <swiper-item class="swiper-item" wx:for="{{banners}}" wx:key="id">
+      <image class="swiper-image" src="{{item.image}}" mode="aspectFill"></image>
+    </swiper-item>
+  </swiper>
+
+  <!-- 推荐商品 -->
+  <view class="page__bd">
+    <view class="weui-cells__title">推荐商品</view>
+    <view class="goods-list">
+      <view class="goods-card" wx:for="{{recommendedGoods}}" wx:key="id">
+        <view class="goods-image-wrapper" bindtap="goToGoodsDetail" data-id="{{item.id}}">
+          <image class="goods-image" src="{{item.image}}" mode="aspectFill"></image>
+        </view>
+        <view class="goods-info">
+          <view class="goods-name-wrapper" bindtap="goToGoodsDetail" data-id="{{item.id}}">
+            <text class="goods-name">{{item.name}}</text>
+          </view>
+          <view class="goods-price-row">
+            <text class="goods-price">¥{{item.price}}/{{item.unit}}</text>
+            <text class="goods-specs" wx:if="{{item.specs}}">({{item.specs}})</text>
+          </view>
+          <view class="goods-actions">
+            <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.id}}">-</button>
+            <text class="goods-count">{{item.count || 0}}</text>
+            <picker class="unit-picker" bindchange="changeUnit" data-id="{{item.id}}" value="{{item.unitIndex || 0}}" range="{{units}}">
+              <view class="picker-view">{{item.unit}} ▼</view>
+            </picker>
+            <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.id}}">+</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载提示 -->
+  <mp-loading type="circle" tips="加载中..." show="{{loading}}"></mp-loading>
+
+  <!-- 顶部提示 -->
+  <mp-toptips msg="{{errorMsg}}" type="error" show="{{showError}}"></mp-toptips>
+</view>

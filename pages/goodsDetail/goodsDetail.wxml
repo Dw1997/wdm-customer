@@ -1,0 +1,188 @@
+<!--pages/goodsDetail/goodsDetail.wxml-->
+<view class="page">
+  <!-- 商品图片轮播 -->
+  <swiper class="detail-swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500" circular>
+    <swiper-item wx:for="{{goods.images}}" wx:key="index">
+      <image class="swiper-image" src="{{item}}" mode="aspectFill"></image>
+    </swiper-item>
+  </swiper>
+
+  <!-- 商品信息卡片 -->
+  <view class="info-card">
+    <view class="price-row">
+      <view class="price-wrapper">
+        <text class="price-symbol">¥</text>
+        <text class="detail-price">{{goods.price}}</text>
+        <text class="detail-unit">/{{goods.unit}}</text>
+      </view>
+      <view class="share-btn" bindtap="shareGoods">
+        <mp-icon icon="share" color="#666666" size="32"></mp-icon>
+        <text class="share-text">分享</text>
+      </view>
+    </view>
+    <text class="detail-name">{{goods.name}}</text>
+    <view class="tags-row">
+      <view class="tag" wx:for="{{goods.tags}}" wx:key="index">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 规格选择 -->
+  <view class="specs-card">
+    <mp-cells>
+      <mp-cell>
+        <view slot="title" class="cell-label">规格</view>
+        <view>{{goods.specs}}</view>
+      </mp-cell>
+      <mp-cell>
+        <view slot="title" class="cell-label">库存</view>
+        <view class="stock-text">充足</view>
+      </mp-cell>
+      <mp-cell>
+        <view slot="title" class="cell-label">运费</view>
+        <view class="free-shipping">免运费</view>
+      </mp-cell>
+    </mp-cells>
+  </view>
+
+  <!-- 商品详情 -->
+  <view class="detail-section">
+    <view class="section-header">
+      <view class="section-line"></view>
+      <text class="section-title">商品详情</text>
+      <view class="section-line"></view>
+    </view>
+    <view class="detail-content">
+      <text class="detail-desc">{{goods.description}}</text>
+      <image wx:for="{{goods.detailImages}}" wx:key="index" src="{{item}}" mode="widthFix" class="detail-image"></image>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 120rpx;"></view>
+
+  <!-- 底部操作栏 -->
+  <view class="detail-bottom">
+    <view class="bottom-left">
+      <view class="icon-btn" bindtap="showCartPreview">
+        <image class="cart-icon" src="/images/cart.png" mode="aspectFit"></image>
+        <text class="icon-text">购物车</text>
+        <mp-badge content="{{cartCount}}" wx:if="{{cartCount > 0}}" class="cart-badge"></mp-badge>
+      </view>
+    </view>
+    <view class="bottom-right">
+      <button class="weui-btn weui-btn_primary add-cart-btn" bindtap="showAddCartDialog">加入购物车</button>
+      <button class="weui-btn weui-btn_warn buy-btn" bindtap="showBuyNowDialog">立即购买</button>
+    </view>
+  </view>
+
+  <!-- 数量选择模态框 -->
+  <view wx:if="{{showQuantityDialog}}" class="modal-overlay" bindtap="closeQuantityDialog">
+    <view class="modal-content" catchtap="noop">
+      <view class="dialog-header">
+        <view class="dialog-title">选择规格</view>
+        <view class="dialog-close" bindtap="closeQuantityDialog">
+          <mp-icon icon="close" color="#666666" size="32"></mp-icon>
+        </view>
+      </view>
+      <view class="goods-info-section">
+        <image class="dialog-goods-image" src="{{goods.images[0]}}" mode="aspectFill"></image>
+        <view class="dialog-goods-info">
+          <text class="dialog-goods-name">{{goods.name}}</text>
+          <view class="dialog-price">
+            <text class="dialog-price-symbol">¥</text>
+            <text class="dialog-price-value">{{goods.price}}</text>
+            <text class="dialog-price-unit">/{{goods.unit}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="quantity-section">
+        <view class="quantity-row">
+          <text class="dialog-label">数量：</text>
+          <view class="quantity-input-wrapper">
+            <button class="weui-btn mini-btn qty-btn" size="mini" bindtap="dialogDecreaseCount">-</button>
+            <text class="qty-count">{{dialogCount}}</text>
+            <button class="weui-btn mini-btn qty-btn" size="mini" bindtap="dialogIncreaseCount">+</button>
+          </view>
+        </view>
+        <view class="quantity-row">
+          <text class="dialog-label">单位：</text>
+          <picker class="unit-picker" mode="selector" range="{{units}}" bindchange="dialogChangeUnit" value="{{dialogUnitIndex}}">
+            <view class="picker-view">{{dialogUnit}} ▼</view>
+          </picker>
+        </view>
+      </view>
+      <view class="dialog-footer">
+        <button class="weui-btn weui-btn_primary add-cart-dialog-btn" bindtap="confirmQuantityDialog">
+          {{currentAction === 'addCart' ? '加入购物车' : '立即购买'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 购物车预览模态框 -->
+  <view wx:if="{{showCartPreviewDialog}}" class="modal-overlay" bindtap="closeCartPreview">
+    <view class="modal-content cart-preview-modal" catchtap="noop">
+      <view class="dialog-header">
+        <view class="dialog-title">购物车 ({{cartCount}}件商品)</view>
+        <view class="dialog-close" bindtap="closeCartPreview">
+          <mp-icon icon="close" color="#666666" size="32"></mp-icon>
+        </view>
+      </view>
+      <scroll-view class="cart-preview-list" scroll-y="true" enhanced="true" show-scrollbar="true" catchtouchmove="noop">
+        <block wx:if="{{cartItems.length === 0}}">
+          <view class="cart-preview-empty">
+            <mp-icon icon="info" color="#999999" size="64"></mp-icon>
+            <text class="cart-preview-empty-text">购物车是空的</text>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="cart-preview-item" wx:for="{{cartItems}}" wx:key="id">
+            <image class="cart-preview-image" src="{{item.image}}" mode="aspectFill"></image>
+            <view class="cart-preview-info">
+              <text class="cart-preview-name">{{item.name}}</text>
+              <view class="cart-preview-specs">
+                <text class="cart-preview-spec">{{item.specs}}</text>
+                <text class="cart-preview-unit">{{item.unit}}</text>
+              </view>
+              <view class="cart-preview-bottom">
+                <text class="cart-preview-price">¥{{item.price}}/{{item.unit}}</text>
+              </view>
+            </view>
+            <view class="cart-preview-right">
+              <text class="cart-preview-count">x{{item.count}}</text>
+              <text class="cart-preview-total">¥{{item.totalPrice}}</text>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+      <view class="dialog-footer cart-preview-footer">
+        <view class="cart-preview-total-info">
+          <text class="cart-preview-total-label">合计：</text>
+          <text class="cart-preview-total-price">¥{{cartTotalPrice}}</text>
+        </view>
+        <button class="weui-btn weui-btn_primary go-cart-btn" bindtap="goToCart">去购物车结算</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部提示 -->
+  <mp-toptips msg="{{tipMsg}}" type="{{tipType}}" show="{{showTip}}"></mp-toptips>
+
+  <!-- 分享弹窗 -->
+  <mp-half-screen-dialog show="{{showShareDialog}}" bindclose="closeShareDialog" title="分享给好友">
+    <view class="share-options">
+      <view class="share-option" bindtap="shareToFriend">
+        <view class="share-icon wechat-icon">
+          <text class="share-icon-text">微</text>
+        </view>
+        <text>微信好友</text>
+      </view>
+      <view class="share-option" bindtap="shareToTimeline">
+        <view class="share-icon moments-icon">
+          <text class="share-icon-text">圈</text>
+        </view>
+        <text>朋友圈</text>
+      </view>
+    </view>
+  </mp-half-screen-dialog>
+</view>

@@ -1,0 +1,187 @@
+/* profile.wxss */
+.page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 个人信息头部 */
+.profile-header {
+  position: relative;
+  padding: 40rpx 30rpx 60rpx;
+  overflow: hidden;
+}
+
+.profile-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 280rpx;
+  background: linear-gradient(135deg, #003183 0%, #4a90e2 100%);
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+.profile-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.avatar-wrapper {
+  position: relative;
+  margin-right: 30rpx;
+}
+
+.profile-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.15);
+}
+
+.avatar-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 44rpx;
+  height: 44rpx;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12rpx;
+  display: block;
+}
+
+.profile-phone {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.profile-edit {
+  width: 64rpx;
+  height: 64rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 统计信息卡片 */
+.stats-card {
+  margin: -20rpx 30rpx 30rpx;
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 2;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-icon-wrapper {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.stat-divider {
+  width: 2rpx;
+  height: 80rpx;
+  background-color: #f0f0f0;
+}
+
+/* 页面主体 */
+.page__bd {
+  padding: 0 30rpx 40rpx;
+}
+
+/* 单元格图标 */
+.cell-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.version-text {
+  font-size: 26rpx;
+  color: #999999;
+  margin-right: 12rpx;
+}
+
+/* 退出登录区域 */
+.logout-section {
+  padding: 40rpx 30rpx;
+}
+
+.weui-btn_warn {
+  background-color: #ff4d4f !important;
+}
+
+/* WeUI Cells 样式覆盖 */
+.weui-cells {
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.weui-cells__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333333;
+  padding: 30rpx 0 20rpx;
+}
+
+.weui-cell {
+  padding: 30rpx 24rpx !important;
+}
+
+.weui-cell__bd {
+  font-size: 30rpx;
+  color: #333333;
+}

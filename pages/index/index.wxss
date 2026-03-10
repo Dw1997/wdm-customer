@@ -1,0 +1,203 @@
+/* index.wxss */
+.page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.page__bd {
+  padding: 0 20rpx 40rpx;
+}
+
+/* 搜索栏样式 */
+.search-container {
+  background-color: #003183;
+  padding: 20rpx 30rpx;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 40rpx;
+  padding: 16rpx 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.search-icon {
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  height: 48rpx;
+  line-height: 48rpx;
+  font-size: 28rpx;
+  color: #333333;
+  border: none;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #999999;
+}
+
+/* 轮播图样式 */
+.swiper {
+  width: 100%;
+  height: 400rpx;
+  margin-bottom: 20rpx;
+}
+
+.swiper-item {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 商品列表 */
+.goods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* 商品卡片样式 - WeUI风格 */
+.goods-card {
+  background-color: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+}
+
+.goods-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.goods-image-wrapper {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.goods-image {
+  width: 100%;
+  height: 100%;
+}
+
+.goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180rpx;
+}
+
+.goods-name-wrapper {
+  margin-bottom: 12rpx;
+}
+
+.goods-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goods-price-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.goods-price {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #003183;
+}
+
+.goods-specs {
+  font-size: 26rpx;
+  color: #999999;
+  margin-left: 12rpx;
+}
+
+/* 操作按钮区域 */
+.goods-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.action-btn {
+  width: 56rpx !important;
+  height: 56rpx !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 56rpx !important;
+  font-size: 32rpx !important;
+  font-weight: 600;
+  color: #003183 !important;
+  background-color: #f0f5ff !important;
+  border: 2rpx solid #003183 !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.goods-count {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  min-width: 48rpx;
+  text-align: center;
+}
+
+.unit-picker {
+  flex: 1;
+}
+
+.picker-view {
+  font-size: 28rpx;
+  color: #003183;
+  background-color: #f5f5f5;
+  padding: 12rpx 20rpx;
+  border-radius: 8rpx;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* WeUI标题样式 */
+.weui-cells__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  padding: 30rpx 0 20rpx;
+  margin: 0;
+}
+
+/* 加载动画 */
+.weui-loadmore {
+  margin-top: 40rpx;
+}
