@@ -3,8 +3,40 @@
 ## 1. 基础信息
 
 ### 1.1 接口基础路径
+接口基础路径已在 `app.js` 中全局配置：
+
+```javascript
+// app.js
+globalData: {
+  api: {
+    baseUrl: 'http://localhost:5000/miniapi', // 商品相关API地址
+    categoryUrl: 'http://localhost:5001/miniapi' // 分类相关API地址
+  }
+}
 ```
-https://api.example.com/v1
+
+所有API请求使用全局配置：
+
+```javascript
+const app = getApp();
+
+// 商品相关API
+wx.request({
+  url: app.globalData.api.baseUrl + '/接口路径',
+  method: 'GET',
+  success: (res) => {
+    // 处理响应
+  }
+});
+
+// 分类相关API
+wx.request({
+  url: app.globalData.api.categoryUrl + '/接口路径',
+  method: 'GET',
+  success: (res) => {
+    // 处理响应
+  }
+});
 ```
 
 ### 1.2 响应格式
@@ -30,24 +62,7 @@ https://api.example.com/v1
   | id | number | 轮播图ID |
   | image | string | 轮播图图片URL |
 
-### 2.2 获取推荐商品
-- **路径**: `/goods/recommended`
-- **请求方式**: `GET`
-- **请求参数**:
-  | 参数名 | 类型 | 必填 | 描述 |
-  |-------|------|------|------|
-  | page | number | 否 | 页码，默认1 |
-  | limit | number | 否 | 每页数量，默认10 |
-- **返回字段**:
-  | 字段名 | 类型 | 描述 |
-  |-------|------|------|
-  | id | number | 商品ID |
-  | name | string | 商品名称 |
-  | price | number | 商品价格 |
-  | unit | string | 商品单位 |
-  | specs | string | 商品规格 |
-  | prices | object | 不同单位价格 |
-  | image | string | 商品图片URL |
+87
 
 ### 2.3 获取分类列表
 - **路径**: `/categories`

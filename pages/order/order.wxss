@@ -124,17 +124,52 @@
 .order-item-price-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.order-item-price {
-  font-size: 28rpx;
-  color: #666666;
+  gap: 8rpx;
+  margin: 12rpx 0;
+  padding: 12rpx 16rpx;
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%);
+  border-radius: 12rpx;
 }
 
 .order-item-count {
   font-size: 28rpx;
-  color: #999999;
+  font-weight: 600;
+  color: #003183;
+}
+
+.order-item-unit {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #666666;
+  margin: 0 8rpx;
+}
+
+.order-item-asterisk {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #ff6b6b;
+  margin: 0 8rpx;
+}
+
+.order-item-price {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #003183;
+  margin: 0 8rpx;
+}
+
+.order-item-equal {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #003183;
+  margin: 0 8rpx;
+}
+
+.order-item-total {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #003183;
+  text-shadow: 0 2rpx 4rpx rgba(0, 49, 131, 0.15);
 }
 
 /* 订单底部 */
@@ -179,11 +214,28 @@
   font-weight: 600 !important;
   padding: 16rpx 32rpx !important;
   font-size: 28rpx !important;
+  min-width: 160rpx;
 }
 
 .mini-btn.weui-btn_default {
   color: #666666 !important;
   border-color: #dddddd !important;
+  font-weight: 600 !important;
+  padding: 16rpx 32rpx !important;
+  font-size: 28rpx !important;
+  min-width: 160rpx;
+}
+
+.cancel-btn {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  border: 2rpx solid #dee2e6 !important;
+  color: #6c757d !important;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:active {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%) !important;
+  transform: scale(0.98);
 }
 
 /* 订单状态徽章样式 */

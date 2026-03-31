@@ -6,11 +6,24 @@ Page({
   },
 
   onLoad() {
-    this.loadOrders();
+    this.checkLogin();
   },
 
   onShow() {
-    this.loadOrders();
+    this.checkLogin();
+  },
+
+  checkLogin() {
+    const isLogin = wx.getStorageSync('isLogin') || false;
+    
+    if (!isLogin) {
+      // 未登录，跳转到登录页面
+      wx.redirectTo({
+        url: '/pages/login/login?from=order'
+      });
+    } else {
+      this.loadOrders();
+    }
   },
 
   loadOrders() {

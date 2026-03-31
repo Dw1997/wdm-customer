@@ -19,17 +19,22 @@
         </view>
         <view class="goods-info">
           <text class="goods-name" bindtap="goToGoodsDetail" data-id="{{item.id}}">{{item.name}}</text>
-          <view class="goods-specs-row">
-            <text class="goods-specs">{{item.specs}}</text>
-            <text class="goods-unit">{{item.unit}}</text>
+          <view class="goods-price-row">
+            <text class="goods-count-info">{{item.count}}</text>
+            <text class="goods-unit-info">{{item.unit}}</text>
+            <text class="goods-asterisk">*</text>
+            <text class="goods-price-info">{{item.price}}元/{{item.unit}}</text>
+            <text class="goods-equal">=</text>
+            <text class="goods-total">{{item.totalPrice}}元</text>
           </view>
           <view class="goods-bottom">
             <view class="goods-actions">
-              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.id}}">-</button>
+              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.id}}" data-sku-id="{{item.skuId}}">-</button>
               <text class="goods-count">{{item.count}}</text>
-              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.id}}">+</button>
+              <text class="goods-unit">{{item.unit}}</text>
+              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.id}}" data-sku-id="{{item.skuId}}">+</button>
             </view>
-            <text class="goods-total">¥{{item.totalPrice}}</text>
+            <button class="weui-btn mini-btn delete-btn" size="mini" bindtap="deleteItem" data-id="{{item.id}}" data-sku-id="{{item.skuId}}">删除</button>
           </view>
         </view>
       </view>

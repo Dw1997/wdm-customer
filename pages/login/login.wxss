@@ -1,0 +1,245 @@
+/* login.wxss */
+.page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 登录头部 */
+.login-header {
+  background: linear-gradient(135deg, #003183 0%, #4a90e2 100%);
+  padding: 100rpx 40rpx 80rpx;
+  text-align: center;
+}
+
+.logo-wrapper {
+  width: 160rpx;
+  height: 160rpx;
+  margin: 0 auto 30rpx;
+  border-radius: 50%;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(0, 49, 131, 0.2);
+}
+
+.logo {
+  width: 120rpx;
+  height: 120rpx;
+}
+
+.app-name {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 16rpx;
+}
+
+.welcome-text {
+  display: block;
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 登录表单 */
+.login-form {
+  margin: -40rpx 40rpx 40rpx;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+}
+
+.login-desc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-bottom: 40rpx;
+  padding: 24rpx;
+  background-color: #f0f5ff;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #003183;
+}
+
+.login-desc mp-icon {
+  flex-shrink: 0;
+}
+
+.login-desc text {
+  font-size: 26rpx;
+  color: #003183;
+  line-height: 1.6;
+}
+
+.wx-login-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #07c160 0%, #00b050 100%);
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  box-shadow: 0 8rpx 16rpx rgba(7, 193, 96, 0.3);
+}
+
+.wx-login-btn::after {
+  border: none;
+}
+
+.wx-login-btn:active {
+  background: linear-gradient(135deg, #00b050 0%, #009040 100%);
+  transform: scale(0.98);
+}
+
+/* 绑定表单 */
+.bind-form {
+  margin: -40rpx 40rpx 40rpx;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+}
+
+.bind-desc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-bottom: 40rpx;
+  padding: 24rpx;
+  background-color: #fff7e6;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #ff9800;
+}
+
+.bind-desc mp-icon {
+  flex-shrink: 0;
+}
+
+.bind-desc text {
+  font-size: 26rpx;
+  color: #ff9800;
+  line-height: 1.6;
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 600;
+}
+
+.form-label mp-icon {
+  margin-right: 12rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 24rpx;
+  background-color: #f5f5f5;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #333333;
+  box-sizing: border-box;
+  border: 2rpx solid #e0e0e0;
+}
+
+.form-input:focus {
+  border-color: #003183;
+  background-color: #ffffff;
+}
+
+.bind-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #003183 0%, #4a90e2 100%);
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+  border: none;
+  margin-top: 24rpx;
+  box-shadow: 0 8rpx 16rpx rgba(0, 49, 131, 0.3);
+}
+
+.bind-btn::after {
+  border: none;
+}
+
+.bind-btn:active {
+  background: linear-gradient(135deg, #4a90e2 0%, #003183 100%);
+  transform: scale(0.98);
+}
+
+/* 手机号授权 */
+.phone-auth-form {
+  margin: -40rpx 40rpx 40rpx;
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+}
+
+.phone-auth-desc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-bottom: 40rpx;
+  padding: 24rpx;
+  background-color: #e6f7ff;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #1890ff;
+}
+
+.phone-auth-desc mp-icon {
+  flex-shrink: 0;
+}
+
+.phone-auth-desc text {
+  font-size: 26rpx;
+  color: #1890ff;
+  line-height: 1.6;
+}
+
+.phone-auth-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  box-shadow: 0 8rpx 16rpx rgba(24, 144, 255, 0.3);
+}
+
+.phone-auth-btn::after {
+  border: none;
+}
+
+.phone-auth-btn:active {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
+  transform: scale(0.98);
+}

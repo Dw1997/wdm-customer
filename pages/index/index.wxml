@@ -34,7 +34,7 @@
           <view class="goods-actions">
             <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.id}}">-</button>
             <text class="goods-count">{{item.count || 0}}</text>
-            <picker class="unit-picker" bindchange="changeUnit" data-id="{{item.id}}" value="{{item.unitIndex || 0}}" range="{{units}}">
+            <picker class="unit-picker" bindchange="changeUnit" data-id="{{item.id}}" value="{{item.units.indexOf(item.unit)}}" range="{{item.units}}">
               <view class="picker-view">{{item.unit}} ▼</view>
             </picker>
             <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.id}}">+</button>

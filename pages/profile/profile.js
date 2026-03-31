@@ -1,66 +1,204 @@
 // pages/profile/profile.js
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    userInfo: {
+      avatar: '',
+      nickname: '客户',
+      phone: '138****8888',
+      isVip: false,
+      isLogin: false
+    },
+    customerInfo: {
+      name: '',
+      phone: '',
+      isBound: false
+    },
+    stats: {
+      unsettledAmount: '0.00',
+      totalOrders: 0,
+      totalAmount: '0.00'
+    },
+    tipMsg: '',
+    tipType: '',
+    showTip: false
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
   onLoad(options) {
-
+    this.checkLogin();
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow() {
-
+    this.checkLogin();
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
+  checkLogin() {
+    const isLogin = wx.getStorageSync('isLogin') || false;
+    
+    if (isLogin) {
+      this.loadUserInfo();
+      this.loadStats();
+    } else {
+      // 未登录，跳转到登录页面
+      wx.redirectTo({
+        url: '/pages/login/login?from=profile'
+      });
+    }
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
+  loadUserInfo() {
+    const isLogin = wx.getStorageSync('isLogin') || false;
+    const userInfo = wx.getStorageSync('userInfo') || {};
+    const customerInfo = wx.getStorageSync('customerInfo') || {};
 
+    if (isLogin && userInfo) {
+      this.setData({
+        userInfo: {
+          avatar: userInfo.avatarUrl || userInfo.avatar || '',
+          nickname: userInfo.nickName || userInfo.nickname || userInfo.username || '客户',
+          phone: customerInfo.phone || userInfo.phone || '138****8888',
+          isVip: customerInfo.isVip || false,
+          isLogin: true
+        },
+        customerInfo: {
+          name: customerInfo.name || '',
+          phone: customerInfo.phone || userInfo.phone || '',
+          isBound: !!customerInfo.name // 有姓名则表示已绑定
+        }
+      });
+    } else {
+      this.setData({
+        userInfo: {
+          avatar: '',
+          nickname: '客户',
+          phone: '138****8888',
+          isVip: false,
+          isLogin: false
+        },
+        customerInfo: {
+          name: '',
+          phone: '',
+          isBound: false
+        }
+      });
+    }
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
+  loadStats() {
+    const orders = wx.getStorageSync('orders') || [];
+    
+    const totalOrders = orders.length;
+    const totalAmount = orders.reduce((sum, order) => sum + parseFloat(order.totalPrice || 0), 0);
+    const unsettledAmount = orders
+      .filter(order => order.status === '待处理' || order.status === '未送达' || order.status === '已送达未支付')
+      .reduce((sum, order) => sum + parseFloat(order.totalPrice || 0), 0);
 
+    this.setData({
+      stats: {
+        unsettledAmount: unsettledAmount.toFixed(2),
+        totalOrders,
+        totalAmount: totalAmount.toFixed(2)
+      }
+    });
   },
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
+  editProfile() {
+    if (!this.data.customerInfo.isBound) {
+      this.showTip('账号尚未与客户信息关联，请联系管理员', 'warn');
+      return;
+    }
+    
+    wx.showToast({
+      title: '编辑个人资料',
+      icon: 'none'
+    });
   },
 
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
+  goToAddress() {
+    if (!this.data.customerInfo.isBound) {
+      this.showTip('账号尚未与客户信息关联，请联系管理员', 'warn');
+      return;
+    }
+    
+    wx.showToast({
+      title: '收货地址',
+      icon: 'none'
+    });
+  },
 
+  contactService() {
+    wx.showToast({
+      title: '联系客服',
+      icon: 'none'
+    });
+  },
+
+  goToAbout() {
+    wx.showToast({
+      title: '关于我们',
+      icon: 'none'
+    });
+  },
+
+  clearCache() {
+    wx.showModal({
+      title: '确认清除',
+      content: '确定要清除缓存吗？',
+      success: (res) => {
+        if (res.confirm) {
+          wx.clearStorageSync();
+          this.loadUserInfo();
+          this.loadStats();
+          this.showTip('缓存已清除', 'success');
+        }
+      }
+    });
+  },
+
+  checkUpdate() {
+    this.showTip('已是最新版本', 'success');
+  },
+
+  logout() {
+    wx.showModal({
+      title: '确认退出',
+      content: '确定要退出登录吗？',
+      success: (res) => {
+        if (res.confirm) {
+          wx.removeStorageSync('token');
+          wx.removeStorageSync('userInfo');
+          wx.removeStorageSync('customerInfo');
+          wx.removeStorageSync('isLogin');
+          
+          // 退出登录后跳转到登录页面
+          wx.redirectTo({
+            url: '/pages/login/login?from=profile'
+          });
+        }
+      }
+    });
+  },
+
+  goToOrders(e) {
+    if (!this.data.customerInfo.isBound) {
+      this.showTip('账号尚未与客户信息关联，请联系管理员', 'warn');
+      return;
+    }
+    
+    const status = e.currentTarget.dataset.status;
+    wx.switchTab({
+      url: '/pages/order/order'
+    });
+  },
+
+  showTip(msg, type) {
+    this.setData({
+      tipMsg: msg,
+      tipType: type,
+      showTip: true
+    });
+
+    setTimeout(() => {
+      this.setData({ showTip: false });
+    }, 2000);
   }
 })

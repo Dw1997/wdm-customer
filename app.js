@@ -8,7 +8,8 @@ App({
   },
   globalData: {
     userInfo: null,
-    baseUrl: 'https://api.example.com', // 后端API地址
+    apiBase: 'http://localhost:5001/miniapi', // 后端API地址
+    baseUrl: 'http://localhost:5001/miniapi', // 后端API地址（兼容旧代码）
     colors: {
       primary: '#003183',
       secondary: '#f5f5f5',

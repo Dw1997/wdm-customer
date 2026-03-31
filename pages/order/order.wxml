@@ -27,13 +27,15 @@
             <image class="order-item-image" src="{{item.image}}" mode="aspectFill"></image>
             <view class="order-item-info">
               <text class="order-item-name">{{item.name}}</text>
-              <view class="order-item-detail">
-                <text class="order-item-specs">{{item.specs}}</text>
-                <view class="order-item-price-row">
-                  <text class="order-item-price">¥{{item.price}}/{{item.unit}}</text>
-                  <text class="order-item-count">x{{item.count}}</text>
-                </view>
+              <view class="order-item-price-row">
+                <text class="order-item-count">{{item.count}}</text>
+                <text class="order-item-unit">{{item.unit}}</text>
+                <text class="order-item-asterisk">*</text>
+                <text class="order-item-price">{{item.price}}元/{{item.unit}}</text>
+                <text class="order-item-equal">=</text>
+                <text class="order-item-total">{{item.totalPrice || item.price * item.count}}元</text>
               </view>
+              <text class="order-item-specs" wx:if="{{item.specs}}">{{item.specs}}</text>
             </view>
           </view>
         </view>
@@ -43,7 +45,7 @@
         </view>
         <view class="order-actions">
           <button class="weui-btn weui-btn_primary mini-btn detail-btn" size="mini" bindtap="viewOrderDetail" data-id="{{item.id}}">查看详情</button>
-          <button wx:if="item.status === '待处理' || item.status === '未送达' || item.status === '已送达未支付'" class="weui-btn weui-btn_default mini-btn" size="mini" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
+          <button wx:if="{{item.status === '待处理' || item.status === '未送达' || item.status === '已送达未支付' || item.status === '处理中'}}" class="weui-btn weui-btn_default mini-btn cancel-btn" size="mini" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
         </view>
       </view>
     </view>

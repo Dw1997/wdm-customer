@@ -34,7 +34,7 @@ Page({
     cart = cart.map(item => ({
       ...item,
       checked: true,
-      totalPrice: (item.price * item.count).toFixed(2)
+      totalPrice: (item.price * item.count).toFixed(1)
     }));
     this.setData({ cart });
     this.calculateTotal();
@@ -79,20 +79,20 @@ Page({
     const totalPrice = selectedItems.reduce((total, item) => total + item.price * item.count, 0);
     const selectedCount = selectedItems.reduce((count, item) => count + item.count, 0);
     this.setData({
-      totalPrice: totalPrice.toFixed(2),
+      totalPrice: totalPrice.toFixed(1),
       selectedCount: selectedCount
     });
   },
 
   increaseCount(e) {
-    const goodsId = e.currentTarget.dataset.id;
+    const { id, skuId } = e.currentTarget.dataset;
     const cart = this.data.cart.map(item => {
-      if (item.id === goodsId) {
+      if (item.id === id && item.skuId === skuId) {
         const newCount = item.count + 1;
         return { 
           ...item, 
           count: newCount,
-          totalPrice: (item.price * newCount).toFixed(2)
+          totalPrice: (item.price * newCount).toFixed(1)
         };
       }
       return item;
@@ -103,14 +103,14 @@ Page({
   },
 
   decreaseCount(e) {
-    const goodsId = e.currentTarget.dataset.id;
+    const { id, skuId } = e.currentTarget.dataset;
     const cart = this.data.cart.map(item => {
-      if (item.id === goodsId && item.count > 1) {
+      if (item.id === id && item.skuId === skuId && item.count > 1) {
         const newCount = item.count - 1;
         return { 
           ...item, 
           count: newCount,
-          totalPrice: (item.price * newCount).toFixed(2)
+          totalPrice: (item.price * newCount).toFixed(1)
         };
       }
       return item;
@@ -118,6 +118,27 @@ Page({
     this.setData({ cart });
     wx.setStorageSync('cart', cart);
     this.calculateTotal();
+  },
+
+  deleteItem(e) {
+    const { id, skuId } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这个商品吗？',
+      success: (res) => {
+        if (res.confirm) {
+          const cart = this.data.cart.filter(item => !(item.id === id && item.skuId === skuId));
+          this.setData({ cart });
+          wx.setStorageSync('cart', cart);
+          this.calculateTotal();
+          this.checkAllStatus();
+          wx.showToast({
+            title: '删除成功',
+            icon: 'success'
+          });
+        }
+      }
+    });
   },
 
   goToIndex() {
@@ -128,19 +149,21 @@ Page({
 
   // 右划按钮点击
   slideButtonTap(e) {
-    const goodsId = e.currentTarget.dataset.id;
+    const { id, skuId } = e.currentTarget.dataset;
     this.setData({
       showDeleteDialog: true,
-      deleteGoodsId: goodsId
+      deleteGoodsId: id,
+      deleteGoodsSkuId: skuId
     });
   },
 
   // 右划删除
   showDeleteDialog(e) {
-    const goodsId = e.currentTarget.dataset.id;
+    const { id, skuId } = e.currentTarget.dataset;
     this.setData({
       showDeleteDialog: true,
-      deleteGoodsId: goodsId
+      deleteGoodsId: id,
+      deleteGoodsSkuId: skuId
     });
   },
 
@@ -148,7 +171,8 @@ Page({
     const index = e.detail.index;
     if (index === 1) {
       // 点击确定按钮
-      const cart = this.data.cart.filter(item => item.id !== this.data.deleteGoodsId);
+      const { deleteGoodsId, deleteGoodsSkuId } = this.data;
+      const cart = this.data.cart.filter(item => !(item.id === deleteGoodsId && item.skuId === deleteGoodsSkuId));
       this.setData({ cart, showDeleteDialog: false });
       wx.setStorageSync('cart', cart);
       this.calculateTotal();
@@ -171,6 +195,24 @@ Page({
   },
 
   submitOrder() {
+    const isLogin = wx.getStorageSync('isLogin') || false;
+    
+    if (!isLogin) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再结算',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login?from=cart'
+            });
+          }
+        }
+      });
+      return;
+    }
+
     const checkedItems = this.data.cart.filter(item => item.checked);
     if (checkedItems.length === 0) {
       wx.showToast({

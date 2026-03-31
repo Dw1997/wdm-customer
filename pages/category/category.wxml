@@ -9,7 +9,7 @@
     </scroll-view>
 
     <!-- 右侧商品列表 -->
-    <scroll-view class="category-right" scroll-y="true">
+    <scroll-view class="category-right" scroll-y="true" bindscrolltolower="onReachBottom" bindscrolltoupper="onReachTop" upper-threshold="50">
       <view class="category-header">
         <text class="category-title">{{currentCategoryName}}</text>
         <mp-badge content="{{currentGoods.length}}" style="margin-left: 10rpx;" />
@@ -30,9 +30,9 @@
             <view class="goods-actions">
               <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.id}}">-</button>
               <text class="goods-count">{{item.count || 0}}</text>
-              <picker class="unit-picker" mode="selector" range="{{units}}" bindchange="changeUnit" data-id="{{item.id}}">
-                <view class="picker-view">{{item.unit}} ▼</view>
-              </picker>
+              <picker class="unit-picker" mode="selector" range="{{item.units}}" bindchange="changeUnit" data-id="{{item.id}}" value="{{item.units.indexOf(item.unit)}}">
+              <view class="picker-view">{{item.unit}} ▼</view>
+            </picker>
               <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.id}}">+</button>
             </view>
           </view>

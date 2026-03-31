@@ -7,6 +7,7 @@ Page({
       name: '八角茴香',
       price: 38.00,
       unit: '斤',
+      skuId: 1,
       prices: {
         '斤': 38.00,
         '件': 380.00,
@@ -126,11 +127,19 @@ Page({
     const unitIndex = e.detail.value;
     const unit = this.data.units[unitIndex];
     const price = this.data.goods.prices ? this.data.goods.prices[unit] : this.data.goods.price;
+    // 为不同单位设置不同的skuId
+    let skuId = 1;
+    if (unit === '件') {
+      skuId = 2;
+    } else if (unit === '袋') {
+      skuId = 3;
+    }
     this.setData({
       dialogUnitIndex: unitIndex,
       dialogUnit: unit,
       'goods.unit': unit,
-      'goods.price': price
+      'goods.price': price,
+      'goods.skuId': skuId
     });
   },
 
@@ -193,12 +202,13 @@ Page({
     const count = this.data.count;
 
     let cart = wx.getStorageSync('cart') || [];
-    const existingItem = cart.find(item => item.id === goods.id);
+    const existingItem = cart.find(item => item.id === goods.id && item.skuId === goods.skuId);
 
     if (existingItem) {
       existingItem.count += count;
+      existingItem.totalPrice = (existingItem.price * existingItem.count).toFixed(1);
     } else {
-      cart.push({ ...goods, count });
+      cart.push({ ...goods, count, totalPrice: (goods.price * count).toFixed(1) });
     }
 
     wx.setStorageSync('cart', cart);
@@ -214,8 +224,8 @@ Page({
     const order = {
       id: Date.now(),
       time: new Date().toLocaleString(),
-      items: [{ ...goods, count }],
-      totalPrice: (goods.price * count).toFixed(2),
+      items: [{ ...goods, count, totalPrice: (goods.price * count).toFixed(1) }],
+      totalPrice: (goods.price * count).toFixed(1),
       status: '待处理'
     };
 

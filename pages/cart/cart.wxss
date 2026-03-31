@@ -80,36 +80,110 @@
   margin-bottom: 12rpx;
 }
 
-.goods-specs-row {
+.goods-price-row {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+  padding: 12rpx 16rpx;
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%);
+  border-radius: 12rpx;
 }
 
-.goods-specs {
-  font-size: 26rpx;
-  color: #999999;
-  background-color: #f5f5f5;
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
+.goods-count-info {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #003183;
 }
 
-.goods-unit {
-  font-size: 26rpx;
+.goods-unit-info {
+  font-size: 28rpx;
+  font-weight: 600;
   color: #666666;
+  margin: 0 8rpx;
+}
+
+.goods-asterisk {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #ff6b6b;
+  margin: 0 8rpx;
+}
+
+.goods-price-info {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #003183;
+  margin: 0 8rpx;
+}
+
+.goods-equal {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #003183;
+  margin: 0 8rpx;
+}
+
+.goods-total {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #003183;
+  text-shadow: 0 2rpx 4rpx rgba(0, 49, 131, 0.15);
 }
 
 .goods-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: auto;
+  gap: 16rpx;
 }
 
 .goods-actions {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 16rpx;
+  padding: 8rpx 16rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16rpx;
+  flex: 1;
+}
+
+.goods-actions .goods-count {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #003183;
+  min-width: 48rpx;
+  text-align: center;
+}
+
+.goods-actions .goods-unit {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #003183;
+  margin-left: 4rpx;
+  margin-right: 4rpx;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%) !important;
+  color: white !important;
+  font-size: 24rpx !important;
+  padding: 10rpx 24rpx !important;
+  border-radius: 12rpx !important;
+  margin: 0 !important;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(255, 77, 79, 0.3);
+  transition: all 0.3s ease;
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 6rpx rgba(255, 77, 79, 0.4);
+}
+
+.delete-btn::after {
+  border: none;
 }
 
 .action-btn {

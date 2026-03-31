@@ -1,0 +1,422 @@
+接口对接:
+首页获取推荐商品接口是:
+### 1.2 获取推荐商品
+```bash
+curl -X GET "http://localhost:5000/miniapi/goods/recommended?page=1&limit=10"
+```
+返回的结果是
+{
+    "code": 200,
+    "data": [
+        {
+            "code": "100101",
+            "id": 9,
+            "image": "",
+            "name": "大红八角A",
+            "skus": [
+                {
+                    "sku_id": 222,
+                    "sku_is_default": true,
+                    "sku_selling_price": 27.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                },
+                {
+                    "sku_id": 223,
+                    "sku_is_default": false,
+                    "sku_selling_price": 760.0,
+                    "sku_specification": "40斤/箱",
+                    "sku_unit": "箱"
+                }
+            ]
+        },
+        {
+            "code": "100102",
+            "id": 10,
+            "image": "",
+            "name": "大红八角B",
+            "skus": [
+                {
+                    "sku_id": 212,
+                    "sku_is_default": true,
+                    "sku_selling_price": 22.0,
+                    "sku_specification": "None",
+                    "sku_unit": "斤"
+                },
+                {
+                    "sku_id": 213,
+                    "sku_is_default": false,
+                    "sku_selling_price": 1060.0,
+                    "sku_specification": "60斤/件",
+                    "sku_unit": "件"
+                }
+            ]
+        },
+        {
+            "code": "100103",
+            "id": 11,
+            "image": "",
+            "name": "干支八角",
+            "skus": [
+                {
+                    "sku_id": 214,
+                    "sku_is_default": true,
+                    "sku_selling_price": 15.0,
+                    "sku_specification": "None",
+                    "sku_unit": "斤"
+                },
+                {
+                    "sku_id": 215,
+                    "sku_is_default": false,
+                    "sku_selling_price": 840.0,
+                    "sku_specification": "60斤/件",
+                    "sku_unit": "件"
+                }
+            ]
+        },
+        {
+            "code": "100104",
+            "id": 12,
+            "image": "",
+            "name": "八角片",
+            "skus": [
+                {
+                    "sku_id": 216,
+                    "sku_is_default": true,
+                    "sku_selling_price": 9.0,
+                    "sku_specification": "None",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "100105",
+            "id": 13,
+            "image": "",
+            "name": "八角粉",
+            "skus": [
+                {
+                    "sku_id": 217,
+                    "sku_is_default": true,
+                    "sku_selling_price": 19.0,
+                    "sku_specification": "None",
+                    "sku_unit": "斤"
+                }
+            ]
+        }
+    ],
+    "message": "success"
+}
+
+修改首页推荐界面:
+图片用image字段
+下拉框显示skus中的sku_unit
+
+
+获取分类:
+接口对接:
+#### 获取分类列表
+```bash
+curl -X GET "http://localhost:5001/miniapi/categories"
+```
+返回结果：
+{
+    "code": 200,
+    "data": [
+        {
+            "id": 1,
+            "name": "香料大全"
+        },
+        {
+            "id": 2,
+            "name": "草药类"
+        },
+        {
+            "id": 3,
+            "name": "莲子"
+        },
+        {
+            "id": 4,
+            "name": "菌菇类"
+        },
+        {
+            "id": 5,
+            "name": "豆制品"
+        },
+        {
+            "id": 6,
+            "name": "糖类"
+        },
+        {
+            "id": 7,
+            "name": "海味类"
+        },
+        {
+            "id": 8,
+            "name": "五谷杂粮&其他"
+        },
+        {
+            "id": 9,
+            "name": "辣椒类"
+        },
+        {
+            "id": 10,
+            "name": "木耳类"
+        },
+        {
+            "id": 11,
+            "name": "肉皮类"
+        },
+        {
+            "id": 12,
+            "name": "小菜类"
+        },
+        {
+            "id": 13,
+            "name": "其他"
+        }
+    ],
+    "message": "success"
+}
+接入分类界面的获取分类接口
+
+接口对接:
+获取分类下面的商品接口:
+#### 获取分类商品
+```bash
+curl -X GET "http://localhost:5001/miniapi/goods/category/{分类id}?page=1&limit=10"
+```
+返回结果示例:
+{
+    "code": 200,
+    "data": [
+        {
+            "code": "101401",
+            "id": 40,
+            "image": "",
+            "name": "千里香",
+            "skus": [
+                {
+                    "sku_id": 40,
+                    "sku_is_default": true,
+                    "sku_selling_price": 12.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "102301",
+            "id": 53,
+            "image": "",
+            "name": "豆蔻",
+            "skus": [
+                {
+                    "sku_id": 53,
+                    "sku_is_default": true,
+                    "sku_selling_price": 35.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "102401",
+            "id": 54,
+            "image": "",
+            "name": "红豆蔻",
+            "skus": [
+                {
+                    "sku_id": 54,
+                    "sku_is_default": true,
+                    "sku_selling_price": 18.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "102501",
+            "id": 55,
+            "image": "",
+            "name": "香茅草",
+            "skus": [
+                {
+                    "sku_id": 55,
+                    "sku_is_default": true,
+                    "sku_selling_price": 6.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "102601",
+            "id": 56,
+            "image": "",
+            "name": "黄栀子",
+            "skus": [
+                {
+                    "sku_id": 56,
+                    "sku_is_default": true,
+                    "sku_selling_price": 25.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "102701",
+            "id": 57,
+            "image": "",
+            "name": "香果",
+            "skus": [
+                {
+                    "sku_id": 57,
+                    "sku_is_default": true,
+                    "sku_selling_price": 20.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "102801",
+            "id": 58,
+            "image": "",
+            "name": "香菜籽",
+            "skus": [
+                {
+                    "sku_id": 58,
+                    "sku_is_default": true,
+                    "sku_selling_price": 6.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                }
+            ]
+        },
+        {
+            "code": "100106",
+            "id": 166,
+            "image": "",
+            "name": "大红八角A",
+            "skus": [
+                {
+                    "sku_id": 166,
+                    "sku_is_default": true,
+                    "sku_selling_price": 920.0,
+                    "sku_specification": "",
+                    "sku_unit": "箱"
+                }
+            ]
+        },
+        {
+            "code": "100107",
+            "id": 167,
+            "image": "",
+            "name": "大红八角B",
+            "skus": [
+                {
+                    "sku_id": 167,
+                    "sku_is_default": true,
+                    "sku_selling_price": 1080.0,
+                    "sku_specification": "",
+                    "sku_unit": "件"
+                }
+            ]
+        },
+        {
+            "code": "100108",
+            "id": 168,
+            "image": "",
+            "name": "干支八角",
+            "skus": [
+                {
+                    "sku_id": 168,
+                    "sku_is_default": true,
+                    "sku_selling_price": 754.0,
+                    "sku_specification": "",
+                    "sku_unit": "件"
+                }
+            ]
+        }
+    ],
+    "message": "success"
+}
+图片用image字段
+下拉框显示skus中的sku_unit
+
+
+修复:
+修复区域:推荐商品+分类的商品卡片
+修复内容:如果此sku的规格是None 则不显示
+
+功能优化:
+分类商品列表下滑到底，加载新的商品，如果没有新的商品，则自动跳转到下一个分类
+
+bug修复：
+分类商品页:滑倒底部还是会触发下一页请求，但是最后一个请求商品数量小于10之后，再滑动不会发送请求也不会跳转到下一个分类
+
+bug修复：
+分类商品页:如果本分类只有少于10个商品，下滑不会触发跳转到下一个分类
+
+
+
+逻辑修改:
+商品分类界面下滑到底部则请求接口，如果接口返回空列表[]或者空对象{}商品，则自动跳转到下一个分类，
+正常情况下是返回列表，当商品没了，则返回空字典
+
+bug修复：
+当分类下少于界面高度显示的商品时，下滑并不会请求下一页接口导致不能跳转到下一分类
+
+逻辑体验不对:
+如果商品数量少于5个（通常小于屏幕高度），自动触发下一页请求,如果下一页返回空数据，会自动跳转到下一个分类,这样会导致商品数量少的时候轻轻一扫就到了下一个分类
+
+
+优化体验，跳转到下一个分类之后上滑可以返回上一个分类的最后的商品页
+
+只需修复这个
+bug修复:商品卡片显示功能，选择sku的单位之后，该sku有规格，但是单位价格后面不会自动加载该sku的规格，意思比如说八角，选择件这个sku之后，价格后面应该显示60斤/件(此sku的规格)，但是目前不会显示
+
+修改购物车界面显示:
+加入购物车都以商品+sku维度加入，购物车商品卡片显示如下
+左侧商品主图，右侧从上到下分为三个行
+第一行:商品名称
+第二行:数量+单位(等高等色) + "*"+该sku单位价格+'='+然后显示该商品总价
+第三行:"-"+ 数量+该sku的单位 "+" +删除按钮(红色等高)
+
+修改购物车界面显示:
+1.删除键靠右显示
+2.价格保留1位小数
+3.单位价格显示为x元/单位
+4.数量后的单位有点难看
+
+
+bug修复:
+在分类或者首页，点击商品卡片的+号，但是购物车内并不会把商品加入到购物车
+
+购车界面添加一个删除按钮，可以把商品从购物车移除
+美化一下购物车界面，不需要删减或者添加功能，要求符合审美
+
+存在bug:
+添加商品到购物车功能
+一个商品 选第一个sku +2数量，然后选第二个sku，加入购物车的时候时第二个sku数量2，逻辑应该为第一个sku+2，sku下拉栏的时候 第一个sku加入购物车，第二个sku数量初始化为0，+2后，也加入给购物车，这样就能解决可以想买1件八角+1斤八角的需求
+
+理念错误:创建订单都是以sku维度，sku_unit是sku的单位，也是sku的名称，只是本商城使用单位了表示名称而已，所以加入购物车应该以商品id+sku_id来限制唯一性，而不是sku_unit,sku_unit作为sku的名称可能会改
+
+修改订单界面订单商品显示:
+左侧商品主图，
+右侧从上到下分为三个行
+第一行:商品名称
+第二行:数量+单位(等高等色) + "*"+该sku单位价格+'='+然后显示该商品总价
+第三行:sku规格，如果有
+
+修改订单卡片:
+订单未配送，则可以取消，如果已配送，则不能取消，美化取消订单按钮显示，要求和查看详情订单一样大
+
+
+功能添加
+在个人中心界面登录功能。加入购车点击结算，如果没有登录，请求登录，请求手机号
+
+功能修改:
+删除账号密码登录,只支持微信登录，且登录必须绑定手机号，应为绑定手机号才能和原有系统进行账号融合
