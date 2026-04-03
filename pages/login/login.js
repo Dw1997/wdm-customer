@@ -2,10 +2,6 @@
 Page({
   data: {
     loading: false,
-    needPhoneAuth: false,
-    openid: '',
-    unionid: '',
-    userInfo: {},
     tipMsg: '',
     tipType: '',
     showTip: false
@@ -16,142 +12,78 @@ Page({
     this.setData({ from });
   },
 
-  onGetUserInfo(e) {
-    if (e.detail.userInfo) {
-      this.setData({ 
-        loading: true,
-        userInfo: e.detail.userInfo 
-      });
-
-      wx.login({
-        success: (res) => {
-          if (res.code) {
-            wx.request({
-              url: getApp().globalData.apiBase + '/login',
-              method: 'POST',
-              data: { 
-                code: res.code
-              },
-              success: (wxRes) => {
-                if (wxRes.data.code === 200) {
-                  const { token, userInfo, customerInfo, bound } = wxRes.data.data;
-                  
-                  if (bound) {
-                    // 已绑定，直接登录成功
-                    wx.setStorageSync('token', token);
-                    wx.setStorageSync('userInfo', userInfo);
-                    wx.setStorageSync('customerInfo', customerInfo);
-                    wx.setStorageSync('isLogin', true);
-
-                    this.showTip('登录成功', 'success');
-
-                    setTimeout(() => {
-                      if (this.data.from === 'cart') {
-                        wx.navigateBack();
-                      } else if (this.data.from === 'order') {
-                        wx.switchTab({
-                          url: '/pages/order/order'
-                        });
-                      } else if (this.data.from === 'profile') {
-                        wx.switchTab({
-                          url: '/pages/profile/profile'
-                        });
-                      } else {
-                        wx.switchTab({
-                          url: '/pages/profile/profile'
-                        });
-                      }
-                    }, 1500);
-                  } else {
-                    // 未绑定，显示手机号授权
-                    this.setData({ 
-                      needPhoneAuth: true, 
-                      openid: wxRes.data.data.openid,
-                      unionid: wxRes.data.data.unionid,
-                      loading: false
-                    });
-                  }
-                } else {
-                  this.setData({ loading: false });
-                  this.showTip(wxRes.data.message || '登录失败', 'warn');
-                }
-              },
-              fail: () => {
-                this.setData({ loading: false });
-                this.showTip('网络错误，请重试', 'error');
-              }
-            });
-          } else {
-            this.setData({ loading: false });
-            this.showTip('获取登录凭证失败', 'warn');
-          }
-        },
-        fail: () => {
-          this.setData({ loading: false });
-          this.showTip('微信登录失败', 'error');
-        }
-      });
+  onGetPhoneNumber(e) {
+    if (e.detail.errMsg === 'getPhoneNumber:ok') {
+      // 用户同意授权，拿到加密数据
+      const { encryptedData, iv } = e.detail;
+      this.setData({ loading: true });
+      
+      console.log('用户同意授权', e.detail);
+      
+      // 将加密数据 + 本地存储的 token 发送给后端
+      this.bindPhone(encryptedData, iv);
     } else {
-      this.showTip('需要授权才能登录', 'warn');
+      // 用户拒绝授权
+      console.log('用户拒绝授权', e.detail);
+      this.showTip('授权失败', 'warn');
     }
   },
 
-  onGetPhoneNumber(e) {
-    if (e.detail.code) {
-      this.setData({ loading: true });
-      
-      // 调用后端接口获取手机号并完成登录
-      wx.request({
-        url: getApp().globalData.apiBase + '/loginWithPhone',
-        method: 'POST',
-        data: {
-          code: e.detail.code,
-          openid: this.data.openid,
-          unionid: this.data.unionid,
-          nickName: this.data.userInfo.nickName,
-          avatarUrl: this.data.userInfo.avatarUrl
-        },
-        success: (res) => {
-          if (res.data.code === 200) {
-            const { token, userInfo, customerInfo } = res.data.data;
-            
-            wx.setStorageSync('token', token);
-            wx.setStorageSync('userInfo', userInfo);
-            wx.setStorageSync('customerInfo', customerInfo);
-            wx.setStorageSync('isLogin', true);
+  bindPhone(encryptedData, iv) {
+    const token = wx.getStorageSync('token');
+    
+    wx.showLoading({ title: '登录中...' });
+    
+    wx.request({
+      url: getApp().globalData.apiBase + '/bindPhone',
+      method: 'POST',
+      header: { 'token': token }, // 携带登录态
+      data: {
+        encryptedData: encryptedData,
+        iv: iv
+      },
+      success: (res) => {
+        wx.hideLoading();
+        this.setData({ loading: false });
+        
+        if (res.data.code === 200) {
+          // 登录成功，保存 token 和用户信息
+          const { token, userInfo, customerInfo } = res.data.data;
+          
+          wx.setStorageSync('token', token);
+          wx.setStorageSync('userInfo', userInfo);
+          wx.setStorageSync('customerInfo', customerInfo);
+          wx.setStorageSync('isLogin', true);
 
-            this.showTip('登录成功', 'success');
+          this.showTip('登录成功', 'success');
 
-            setTimeout(() => {
-              if (this.data.from === 'cart') {
-                wx.navigateBack();
-              } else if (this.data.from === 'order') {
-                wx.switchTab({
-                  url: '/pages/order/order'
-                });
-              } else if (this.data.from === 'profile') {
-                wx.switchTab({
-                  url: '/pages/profile/profile'
-                });
-              } else {
-                wx.switchTab({
-                  url: '/pages/profile/profile'
-                });
-              }
-            }, 1500);
-          } else {
-            this.setData({ loading: false });
-            this.showTip(res.data.message || '登录失败', 'warn');
-          }
-        },
-        fail: () => {
-          this.setData({ loading: false });
-          this.showTip('网络错误，请重试', 'error');
+          setTimeout(() => {
+            if (this.data.from === 'cart') {
+              wx.navigateBack();
+            } else if (this.data.from === 'order') {
+              wx.switchTab({
+                url: '/pages/order/order'
+              });
+            } else if (this.data.from === 'profile') {
+              wx.switchTab({
+                url: '/pages/profile/profile'
+              });
+            } else {
+              wx.switchTab({
+                url: '/pages/profile/profile'
+              });
+            }
+          }, 1500);
+        } else {
+          this.showTip(res.data.message || '登录失败', 'warn');
         }
-      });
-    } else {
-      this.showTip('需要授权手机号才能登录', 'warn');
-    }
+      },
+      fail: () => {
+        wx.hideLoading();
+        this.setData({ loading: false });
+        this.showTip('网络请求失败', 'error');
+      }
+    });
   },
 
   showTip(msg, type) {

@@ -1,4 +1,4 @@
-// cart.js
+// pages/cart/cart.js
 Page({
   data: {
     cart: [],
@@ -17,7 +17,8 @@ Page({
     dialogButtons: [
       { text: '取消', type: 'default' },
       { text: '确定', type: 'primary' }
-    ]
+    ],
+    submitting: false
   },
 
   onLoad() {
@@ -42,9 +43,9 @@ Page({
   },
 
   toggleChecked(e) {
-    const goodsId = e.currentTarget.dataset.id;
+    const { id, skuId } = e.currentTarget.dataset;
     const cart = this.data.cart.map(item => {
-      if (item.id === goodsId) {
+      if (item.id === id && item.skuId === skuId) {
         return { ...item, checked: !item.checked };
       }
       return item;
@@ -222,6 +223,9 @@ Page({
       return;
     }
 
+    this.setData({ submitting: true });
+    wx.showLoading({ title: '提交订单中...' });
+
     // 生成订单数据
     const now = new Date();
     const year = now.getFullYear();
@@ -232,31 +236,89 @@ Page({
     const seconds = String(now.getSeconds()).padStart(2, '0');
     const time = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     
-    const order = {
-      id: Date.now(),
-      time: time,
-      items: checkedItems,
-      totalPrice: this.data.totalPrice,
-      status: '待处理'
+    const orderData = {
+      items: checkedItems.map(item => ({
+        goods_id: item.id,
+        sku_id: item.skuId,
+        quantity: item.count,
+        price: item.price
+      })),
+      total_price: this.data.totalPrice,
+      order_time: time
     };
 
-    // 保存订单
-    let orders = wx.getStorageSync('orders') || [];
-    orders.unshift(order); // 新订单放在最前面
-    wx.setStorageSync('orders', orders);
+    // 发送请求到后端
+    const token = wx.getStorageSync('token');
+    wx.request({
+      url: getApp().globalData.apiBase + '/submitOrder',
+      method: 'POST',
+      header: {
+        'token': token,
+        'content-type': 'application/json'
+      },
+      data: orderData,
+      success: (res) => {
+        wx.hideLoading();
+        this.setData({ submitting: false });
+        
+        if (res.data.code === 200) {
+          // 保存订单到本地
+          const order = {
+            id: res.data.data.order_id || Date.now(),
+            time: time,
+            items: checkedItems,
+            totalPrice: this.data.totalPrice,
+            status: '待处理'
+          };
 
-    // 清空购物车中已结算的商品
-    const remainingCart = this.data.cart.filter(item => !item.checked);
-    wx.setStorageSync('cart', remainingCart);
+          let orders = wx.getStorageSync('orders') || [];
+          orders.unshift(order); // 新订单放在最前面
+          wx.setStorageSync('orders', orders);
 
-    // 跳转到订单页面
-    wx.switchTab({
-      url: '/pages/order/order'
-    });
+          // 清空购物车中已结算的商品
+          const remainingCart = this.data.cart.filter(item => !item.checked);
+          wx.setStorageSync('cart', remainingCart);
 
-    wx.showToast({
-      title: '订单提交成功',
-      icon: 'success'
+          // 跳转到订单页面
+          wx.switchTab({
+            url: '/pages/order/order'
+          });
+
+          wx.showToast({
+            title: '订单提交成功',
+            icon: 'success'
+          });
+        } else if (res.data.code === 401 || res.data.code === 402 || res.data.code === 403) {
+          // 登录失败，跳转到登录页面
+          wx.removeStorageSync('token');
+          wx.removeStorageSync('isLogin');
+          wx.showModal({
+            title: '登录过期',
+            content: '请重新登录',
+            confirmText: '去登录',
+            success: (res) => {
+              if (res.confirm) {
+                wx.redirectTo({
+                  url: '/pages/login/login?from=cart'
+                });
+              }
+            }
+          });
+        } else {
+          wx.showToast({
+            title: res.data.message || '订单提交失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        this.setData({ submitting: false });
+        wx.showToast({
+          title: '网络请求失败',
+          icon: 'none'
+        });
+      }
     });
   }
 })

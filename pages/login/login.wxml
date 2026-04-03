@@ -1,4 +1,3 @@
-<!--login.wxml-->
 <view class="page">
   <!-- 登录头部 -->
   <view class="login-header">
@@ -6,33 +5,30 @@
       <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
     </view>
     <text class="app-name">味都美副食商城</text>
-    <text class="welcome-text">欢迎登录</text>
+    <text class="welcome-text">欢迎回来</text>
   </view>
 
-  <!-- 微信登录 -->
-  <view class="login-form" wx:if="{{!needPhoneAuth}}">
+  <!-- 登录表单 -->
+  <view class="login-form">
     <view class="login-desc">
       <mp-icon icon="info" color="#003183" size="20"></mp-icon>
-      <text>使用微信登录，授权手机号即可</text>
+      <text>为了提供配送服务，请授权手机号</text>
     </view>
-    <button class="weui-btn weui-btn_primary wx-login-btn" open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
-      <mp-icon icon="weapp" color="#ffffff" size="24"></mp-icon>
-      <text>微信登录</text>
-    </button>
-  </view>
-
-  <!-- 手机号授权 -->
-  <view class="phone-auth-form" wx:if="{{needPhoneAuth}}">
-    <view class="phone-auth-desc">
-      <mp-icon icon="phone" color="#003183" size="24"></mp-icon>
-      <text>为了更好地为您服务，请授权手机号</text>
-    </view>
-    <button class="weui-btn weui-btn_primary phone-auth-btn" open-type="getPhoneNumber" bindgetphonenumber="onGetPhoneNumber" loading="{{loading}}">
+    
+    <!-- 手机号授权按钮 -->
+    <button 
+      class="weui-btn weui-btn_primary phone-login-btn" 
+      open-type="getPhoneNumber" 
+      bindgetphonenumber="onGetPhoneNumber" 
+      loading="{{loading}}"
+    >
       <mp-icon icon="phone" color="#ffffff" size="24"></mp-icon>
-      <text>授权手机号</text>
+      <text>微信一键授权手机号</text>
     </button>
   </view>
 
-  <!-- 顶部提示 -->
-  <mp-toptips msg="{{tipMsg}}" type="{{tipType}}" show="{{showTip}}"></mp-toptips>
+  <!-- 提示信息 -->
+  <view wx:if="{{showTip}}" class="tip-container tip-{{tipType}}">
+    <text class="tip-text">{{tipMsg}}</text>
+  </view>
 </view>
