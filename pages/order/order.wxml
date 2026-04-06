@@ -12,21 +12,12 @@
     <view class="order-list">
       <view class="order-card" wx:for="{{orders}}" wx:key="id">
         <view class="order-header">
-          <view class="order-info">
-            <text class="order-time">下单时间：{{item.time}}</text>
-            <text class="order-amount">金额：¥{{item.totalPrice}}</text>
-          </view>
+          <text class="order-time">下单时间：{{item.time}}</text>
           <view class="order-status-wrapper">
-            <view class="order-status-badge" style="background-color: {{getStatusColor(item.status)}};">
-              <text class="order-status-text">{{item.status === '已送达' ? '已送' : '预送'}}</text>
-            </view>
+            <text class="header-status-text">{{item.status}}</text>
           </view>
         </view>
         <view class="order-body">
-          <view class="order-payment-status">
-            <text class="payment-status-label">订单支付状态：</text>
-            <text class="payment-status-value">{{item.status}}</text>
-          </view>
           <view class="order-table">
             <view class="table-header">
               <text class="table-col table-col-name">商品名称</text>
@@ -41,11 +32,13 @@
                 <text class="table-col table-col-unit">{{item.unit}}</text>
                 <text class="table-col table-col-total">{{item.totalPrice || item.price * item.count}}元</text>
               </view>
+              <view class="table-row table-row-total">
+                <text class="table-col table-col-name">订单总金额：</text>
+                <text class="table-col table-col-count"></text>
+                <text class="table-col table-col-unit"></text>
+                <text class="table-col table-col-total total-price">¥{{item.totalPrice}}</text>
+              </view>
             </view>
-          </view>
-          <view class="order-total">
-            <text class="total-label">订单总金额：</text>
-            <text class="total-price">¥{{item.totalPrice}}</text>
           </view>
         </view>
         <view class="order-actions">

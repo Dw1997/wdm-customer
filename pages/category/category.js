@@ -255,7 +255,7 @@ Page({
       if (goods.id === goodsId) {
         // 从购物车中获取当前SKU的数量
         const cart = wx.getStorageSync('cart') || [];
-        const existingItem = cart.find(item => item.id === goodsId && item.sku_id === goods.skuId);
+        const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
         const currentCount = existingItem ? existingItem.count : 0;
         const newCount = Math.max(0, currentCount + change);
         // 更新购物车
