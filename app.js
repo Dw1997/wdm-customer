@@ -2,12 +2,36 @@
 App({
   onLaunch() {
     // 初始化购物车
-    if (!wx.getStorageSync('cart')) {
+    const cart = wx.getStorageSync('cart');
+    if (!cart || cart.length === 0) {
       wx.setStorageSync('cart', []);
+      // 从后端获取购物车数据
+      this.getCartFromBackend();
     }
     
     // 执行静默登录
     this.silentLogin();
+  },
+  
+  // 从后端获取购物车数据
+  getCartFromBackend() {
+    wx.request({
+      url: this.globalData.apiBase + '/cart',
+      method: 'GET',
+      success: (res) => {
+        if (res.data.code === 200) {
+          const cartData = res.data.data;
+          if (cartData && cartData.length > 0) {
+            // 保存到本地存储
+            wx.setStorageSync('cart', cartData);
+            console.log('从后端获取购物车数据成功:', cartData);
+          }
+        }
+      },
+      fail: (error) => {
+        console.error('从后端获取购物车数据失败:', error);
+      }
+    });
   },
   
   silentLogin: function () {

@@ -28,37 +28,127 @@ Page({
 
   loadOrders() {
     this.setData({ loading: true });
-    let orders = wx.getStorageSync('orders') || [];
     
-    // 格式化时间显示
-    orders = orders.map(order => {
-      if (order.time) {
-        // 如果时间已经是格式化的，直接使用
-        if (order.time.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-          return order;
+    // 从后端获取订单数据
+    const token = wx.getStorageSync('token');
+    wx.request({
+      url: getApp().globalData.apiBase + '/orders?page=1&limit=10',
+      method: 'GET',
+      header: {
+        'token': token,
+        'content-type': 'application/json'
+      },
+      success: (res) => {
+        if (res.data.code === 200) {
+          const backendOrders = res.data.data || [];
+          
+          // 转换后端数据为前端格式
+          const orders = backendOrders.map(order => ({
+            id: order.order_id,
+            time: order.create_at,
+            status: this.getStatusText(order.status),
+            totalPrice: order.total_amount,
+            items: order.items.map(item => ({
+              id: item.product_id || 0,
+              name: item.product_name,
+              unit: item.sku_unit,
+              price: item.sku_selling_price,
+              count: item.quantity,
+              totalPrice: (item.sku_selling_price * item.quantity).toFixed(1)
+            }))
+          }));
+          
+          // 保存到本地存储
+          wx.setStorageSync('orders', orders);
+          this.setData({ 
+            orders: orders,
+            loading: false
+          });
+        } else {
+          // 如果后端获取失败，从本地存储获取
+          let orders = wx.getStorageSync('orders') || [];
+          
+          // 格式化时间显示
+          orders = orders.map(order => {
+            if (order.time) {
+              // 如果时间已经是格式化的，直接使用
+              if (order.time.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+                return order;
+              }
+              // 否则格式化时间
+              const date = new Date(order.time);
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              const hours = String(date.getHours()).padStart(2, '0');
+              const minutes = String(date.getMinutes()).padStart(2, '0');
+              const seconds = String(date.getSeconds()).padStart(2, '0');
+              return {
+                ...order,
+                time: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+              };
+            }
+            return order;
+          });
+          
+          // 按时间排序，最新的订单在最前面
+          orders.sort((a, b) => new Date(b.time) - new Date(a.time));
+          this.setData({ 
+            orders: orders,
+            loading: false
+          });
         }
-        // 否则格式化时间
-        const date = new Date(order.time);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return {
-          ...order,
-          time: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-        };
+      },
+      fail: (error) => {
+        console.error('Failed to load orders:', error);
+        // 失败时从本地存储获取
+        let orders = wx.getStorageSync('orders') || [];
+        
+        // 格式化时间显示
+        orders = orders.map(order => {
+          if (order.time) {
+            // 如果时间已经是格式化的，直接使用
+            if (order.time.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+              return order;
+            }
+            // 否则格式化时间
+            const date = new Date(order.time);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return {
+              ...order,
+              time: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+            };
+          }
+          return order;
+        });
+        
+        // 按时间排序，最新的订单在最前面
+        orders.sort((a, b) => new Date(b.time) - new Date(a.time));
+        this.setData({ 
+          orders: orders,
+          loading: false
+        });
       }
-      return order;
     });
-    
-    // 按时间排序，最新的订单在最前面
-    orders.sort((a, b) => new Date(b.time) - new Date(a.time));
-    this.setData({ 
-      orders: orders,
-      loading: false
-    });
+  },
+  
+  // 获取状态文本
+  getStatusText(status) {
+    const statusMap = {
+      'pending': '待处理',
+      'pending_payment': '待支付',
+      'partial_paid': '部分支付',
+      'completed': '完成',
+      'cancelled': '取消',
+      'pending_delivery': '待配送',
+      'delivered': '已送达'
+    };
+    return statusMap[status] || status;
   },
 
   goToIndex() {

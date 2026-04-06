@@ -13,39 +13,44 @@
       <view class="order-card" wx:for="{{orders}}" wx:key="id">
         <view class="order-header">
           <view class="order-info">
-            <mp-icon icon="waiting" color="#999999" size="28" style="margin-right: 8rpx;"></mp-icon>
-            <text class="order-time">{{item.time}}</text>
+            <text class="order-time">下单时间：{{item.time}}</text>
+            <text class="order-amount">金额：¥{{item.totalPrice}}</text>
           </view>
           <view class="order-status-wrapper">
             <view class="order-status-badge" style="background-color: {{getStatusColor(item.status)}};">
-              <text class="order-status-text">{{item.status}}</text>
+              <text class="order-status-text">{{item.status === '已送达' ? '已送' : '预送'}}</text>
             </view>
           </view>
         </view>
         <view class="order-body">
-          <view class="order-item" wx:for="{{item.items}}" wx:key="id" bindtap="goToGoodsDetail" data-id="{{item.id}}">
-            <image class="order-item-image" src="{{item.image}}" mode="aspectFill"></image>
-            <view class="order-item-info">
-              <text class="order-item-name">{{item.name}}</text>
-              <view class="order-item-price-row">
-                <text class="order-item-count">{{item.count}}</text>
-                <text class="order-item-unit">{{item.unit}}</text>
-                <text class="order-item-asterisk">*</text>
-                <text class="order-item-price">{{item.price}}元/{{item.unit}}</text>
-                <text class="order-item-equal">=</text>
-                <text class="order-item-total">{{item.totalPrice || item.price * item.count}}元</text>
+          <view class="order-payment-status">
+            <text class="payment-status-label">订单支付状态：</text>
+            <text class="payment-status-value">{{item.status}}</text>
+          </view>
+          <view class="order-table">
+            <view class="table-header">
+              <text class="table-col table-col-name">商品名称</text>
+              <text class="table-col table-col-count">数量</text>
+              <text class="table-col table-col-unit">单位</text>
+              <text class="table-col table-col-total">总价</text>
+            </view>
+            <view class="table-body">
+              <view class="table-row" wx:for="{{item.items}}" wx:key="id" bindtap="goToGoodsDetail" data-id="{{item.id}}">
+                <text class="table-col table-col-name">{{item.name}}</text>
+                <text class="table-col table-col-count">{{item.count}}</text>
+                <text class="table-col table-col-unit">{{item.unit}}</text>
+                <text class="table-col table-col-total">{{item.totalPrice || item.price * item.count}}元</text>
               </view>
-              <text class="order-item-specs" wx:if="{{item.specs}}">{{item.specs}}</text>
             </view>
           </view>
-        </view>
-        <view class="order-footer">
-          <text class="order-total-label">共{{item.items.length}}件商品 合计：</text>
-          <text class="order-total-price">¥{{item.totalPrice}}</text>
+          <view class="order-total">
+            <text class="total-label">订单总金额：</text>
+            <text class="total-price">¥{{item.totalPrice}}</text>
+          </view>
         </view>
         <view class="order-actions">
           <button class="weui-btn weui-btn_primary mini-btn detail-btn" size="mini" bindtap="viewOrderDetail" data-id="{{item.id}}">查看详情</button>
-          <button wx:if="{{item.status === '待处理' || item.status === '未送达' || item.status === '已送达未支付' || item.status === '处理中'}}" class="weui-btn weui-btn_default mini-btn cancel-btn" size="mini" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
+          <button wx:if="{{item.status === '待处理' || item.status === '待支付' || item.status === '处理中'}}" class="weui-btn weui-btn_default mini-btn cancel-btn" size="mini" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
         </view>
       </view>
     </view>

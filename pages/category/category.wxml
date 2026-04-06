@@ -28,12 +28,12 @@
               <text class="goods-specs" wx:if="{{item.specs}}">({{item.specs}})</text>
             </view>
             <view class="goods-actions">
-              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.id}}">-</button>
+              <button class="weui-btn mini-btn action-btn minus" size="mini" bindtap="decreaseCount" data-id="{{item.id}}">-</button>
               <text class="goods-count">{{item.count || 0}}</text>
               <picker class="unit-picker" mode="selector" range="{{item.units}}" bindchange="changeUnit" data-id="{{item.id}}" value="{{item.units.indexOf(item.unit)}}">
               <view class="picker-view">{{item.unit}} ▼</view>
             </picker>
-              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.id}}">+</button>
+              <button class="weui-btn mini-btn action-btn plus" size="mini" bindtap="increaseCount" data-id="{{item.id}}">+</button>
             </view>
           </view>
         </view>

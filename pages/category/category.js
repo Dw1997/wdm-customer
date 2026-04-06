@@ -147,9 +147,9 @@ Page({
           
           // 加载购物车数据
           const cart = wx.getStorageSync('cart') || [];
-          // 更新商品的数量
+          // 更新商品的数量，基于当前SKU
           const goodsWithCount = recommendedGoods.map(goods => {
-            const cartItem = cart.find(item => item.id === goods.id);
+            const cartItem = cart.find(item => item.id === goods.id && item.sku_id === goods.skuId);
             return {
               ...goods,
               count: cartItem ? cartItem.count : 0
@@ -253,7 +253,11 @@ Page({
   updateGoodsCount(goodsId, change) {
     const currentGoods = this.data.currentGoods.map(goods => {
       if (goods.id === goodsId) {
-        const newCount = Math.max(0, (goods.count || 0) + change);
+        // 从购物车中获取当前SKU的数量
+        const cart = wx.getStorageSync('cart') || [];
+        const existingItem = cart.find(item => item.id === goodsId && item.sku_id === goods.skuId);
+        const currentCount = existingItem ? existingItem.count : 0;
+        const newCount = Math.max(0, currentCount + change);
         // 更新购物车
         this.updateCart(goodsId, newCount);
         return { ...goods, count: newCount };
@@ -269,20 +273,58 @@ Page({
     const goods = this.data.currentGoods.find(item => item.id === goodsId);
     if (!goods) return;
     
-    const existingItem = cart.find(item => item.id === goodsId && item.skuId === goods.skuId);
+    const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
     
     if (count > 0) {
       if (existingItem) {
         existingItem.count = count;
-        existingItem.totalPrice = (existingItem.price * existingItem.count).toFixed(1);
+        existingItem.sku_id = goods.skuId;
+        existingItem.sku_selling_price = goods.price;
+        existingItem.sku_specification = goods.specs;
+        existingItem.sku_unit = goods.unit;
+        existingItem.totalPrice = (goods.price * count).toFixed(1);
       } else {
-        cart.push({ ...goods, count, totalPrice: (goods.price * count).toFixed(1) });
+        cart.push({
+          product_id: goods.id,
+          code: goods.code,
+          name: goods.name,
+          image: goods.image,
+          sku_id: goods.skuId,
+          count: count,
+          sku_selling_price: goods.price,
+          sku_specification: goods.specs,
+          sku_unit: goods.unit,
+          totalPrice: (goods.price * count).toFixed(1)
+        });
       }
+      // 上传到后端
+      this.uploadCartToBackend(goods.id, goods.skuId, count, goods.price);
     } else {
-      cart = cart.filter(item => !(item.id === goodsId && item.skuId === goods.skuId));
+      cart = cart.filter(item => !(item.product_id === goodsId && item.skuId === goods.skuId));
+      // 上传到后端（删除操作）
+      this.uploadCartToBackend(goods.id, goods.skuId, 0, goods.price);
     }
     
     wx.setStorageSync('cart', cart);
+  },
+
+  uploadCartToBackend(goodsId, skuId, count, price) {
+    wx.request({
+      url: getApp().globalData.apiBase + '/cart',
+      method: 'POST',
+      data: {
+        product_id: goodsId,
+        sku_id: skuId,
+        count: count,
+        sku_selling_price: price
+      },
+      success: (res) => {
+        console.log('Cart upload success:', res.data);
+      },
+      fail: (error) => {
+        console.error('Cart upload failed:', error);
+      }
+    });
   },
 
   changeUnit(e) {

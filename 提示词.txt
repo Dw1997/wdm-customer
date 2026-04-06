@@ -420,3 +420,538 @@ bug修复:
 
 功能修改:
 删除账号密码登录,只支持微信登录，且登录必须绑定手机号，应为绑定手机号才能和原有系统进行账号融合
+
+
+界面修改:
+个人中心界面:
+1.顶部删除头像显示框
+2.保留显示客户名称功能(如果微信账号绑定了客户号，则显示客户号名称)，如果没有绑定则显示"未绑定店铺"
+3.保留显示手机号功能(显示微信账号绑定的手机号)
+
+界面修改:
+个人中心界面:
+1.店铺名称和手机号都居中显示
+2.店铺名称如果没有绑定客户显示您还暂未绑定店铺
+
+界面修改:
+个人中心界面:
+未结算，总消费等金额都只保留1位小数
+
+界面修改:
+个人中心界面:
+我的服务板块以九宫格形式排列
+显示内容:
+1.联系我们
+2.关于我们
+
+设置板块
+1.收获地址
+
+
+功能添加:
+个人搜索界面，联系我们->点击调起wx.makePhoneCall 拨打13330143106手机号
+实现步骤非常简单，主要分为两步：
+页面结构 (WXML)
+在页面上放置一个可点击的元素，比如 <button> 或 <view>，并绑定一个点击事件。
+html
+<view class="container">
+  <button type="primary" bindtap="makePhoneCall">
+    联系客服：13800138000
+  </button>
+</view>
+逻辑处理 (JS)
+在对应的 JS 文件中，编写点击事件的处理函数，调用 wx.makePhoneCall 并传入电话号码。
+javascript
+Page({
+  makePhoneCall() {
+    wx.makePhoneCall({
+      phoneNumber: '13800138000', // 替换为你要拨打的电话号码
+      success: () => {
+        console.log('成功唤起拨号界面');
+      },
+      fail: (err) => {
+        console.error('拨号失败', err);
+        wx.showToast({
+          title: '拨号失败，请检查权限',
+          icon: 'none'
+        });
+      }
+    });
+  },
+});
+
+
+
+修改个人中心订单统计板块显示->未结算|总订单|总消费
+不需要显示图标，就显示字样上面显示项目，下面显示金额，金额用以颜色区分开。
+
+完成小程序搜索功能
+接口curl是:curl --location 'http://127.0.0.1:5001/miniapi/goods/search?keyword=%E5%85%AB%E8%A7%92&page=1&limit=3'
+返回的内容是：
+{
+    "code": 200,
+    "data": [
+        {
+            "code": "100101",
+            "id": 9,
+            "image": "",
+            "name": "大红八角A",
+            "skus": [
+                {
+                    "sku_id": 222,
+                    "sku_is_default": true,
+                    "sku_selling_price": 27.0,
+                    "sku_specification": "",
+                    "sku_unit": "斤"
+                },
+                {
+                    "sku_id": 223,
+                    "sku_is_default": false,
+                    "sku_selling_price": 760.0,
+                    "sku_specification": "40斤/箱",
+                    "sku_unit": "箱"
+                }
+            ]
+        },
+        {
+            "code": "100102",
+            "id": 10,
+            "image": "",
+            "name": "大红八角B",
+            "skus": [
+                {
+                    "sku_id": 212,
+                    "sku_is_default": true,
+                    "sku_selling_price": 22.0,
+                    "sku_specification": "None",
+                    "sku_unit": "斤"
+                },
+                {
+                    "sku_id": 213,
+                    "sku_is_default": false,
+                    "sku_selling_price": 1060.0,
+                    "sku_specification": "60斤/件",
+                    "sku_unit": "件"
+                }
+            ]
+        },
+        {
+            "code": "100103",
+            "id": 11,
+            "image": "",
+            "name": "干支八角",
+            "skus": [
+                {
+                    "sku_id": 214,
+                    "sku_is_default": true,
+                    "sku_selling_price": 15.0,
+                    "sku_specification": "None",
+                    "sku_unit": "斤"
+                },
+                {
+                    "sku_id": 215,
+                    "sku_is_default": false,
+                    "sku_selling_price": 840.0,
+                    "sku_specification": "60斤/件",
+                    "sku_unit": "件"
+                }
+            ]
+        }
+    ],
+    "message": "success"
+}
+功能要求:
+在搜索栏输入产品名称,下沿模态框显示搜索结果。模态框占屏幕高度2/3
+
+点击搜索框不需要跳转到单独的搜索界面，点击弹出输入，然后按输入结果在下方弹出搜索结果模态框
+
+bug修复:
+首页弹出搜索结构之后滑动，滑动的是下层推荐的商品，而不是搜索出来的结果
+
+bug修复:
+首页搜索框点击输入文字之后，输入框还是会变大一点点
+
+bug修复:
+首页搜素模态框弹出之后，只滑动模态框里面的内容，但是现在弹出搜索框，再往上滑还是会滑到下方界面
+
+
+界面修改:
+搜索模态框:
+商品显示：
+左侧显示图片
+右侧显示分为等高三行：
+第一行:商品名称
+第二行:checkbox sku选择(价格/sku的sku_unit)
+第三行:操作栏"-" 数量 选择的 sku_unit "+"
+点击图片和名称可以跳转到商品的详情页
+
+界面修改:
+搜索模态框:
+商品右侧显示：
+更改sku选择，使用左右布局，修改checkbox样式，改为选中高亮，而不是有个勾勾框
+优化搜索结果模态框样式
+
+
+bug修复:
+搜索结果模态框点击sku卡顿
+
+bug修复:
+首页搜索框点击输入文字之后，输入框还是会变大一点点
+是不是因为搜索图标和×按钮的问题
+
+
+存在bug:
+搜索结果添加商品到购物车功能
+一个商品 选第一个sku +2数量，然后选第二个sku，加入购物车的时候时第二个sku数量2，逻辑应该为第一个sku+2，sku下拉栏的时候 第一个sku加入购物车，第二个sku数量初始化为0，+2后，也加入给购物车，这样就能解决可以想买1件八角+1斤八角的需求
+
+
+界面优化:搜索结果模态框
+数量操作栏，“+”按钮应该紧挨着单位显示，修改样式
+
+
+bug修复:
+搜索结果模态框sku选择卡顿，点击后切切换不了
+
+界面优化:
+搜索结果模态框商品卡片，放大字体，因为客户都是中年人
+
+界面优化:
+搜索结果模态框商品卡片，数量操作栏，加减按钮符号放大，减号底色需要描边
+
+
+界面优化:
+搜索结果模态框商品卡片，数量操作栏，加减按钮符号放大，减号底色需要描边
+
+显示优化:
+首页商品框 ”+“操作按钮加上底色，”-“操作按钮加上蓝色描边
+
+
+显示优化:
+商品分类页，商品框 ”+“操作按钮加上底色，”-“操作按钮加上蓝色描边
+
+显示优化：
+商品分类页:选中的分类需要突出显示，小程序界面针对的是中年人
+
+bug修复:
+首页搜索框:点击×图标报错，实现点击×图标删除搜索框内内容，
+搜索框内放大镜图标应该上下居中，现在偏低
+
+bug修复:
+首页搜索框内放大镜图标被覆盖了一部分
+
+bug修复：
+购物车界面:
+商品卡片，价格计算栏，内容过多会换行，要求不换行，缩小字体
+
+界面优化：
+购物车界面:
+商品卡片，价格计算栏，数量*单价可以显示紧凑点
+
+界面优化：
+购物车界面:
+商品卡片，价格计算栏，数量*单价的*号需要放大一点，而且目前不在数量和单价的同一条水平线，修改一下
+
+
+界面优化：
+购物车界面:
+底结算栏会挡住最后一个商品卡片的下部分，优化一下能显示卡片所有内容
+
+bug修复：
+修复购物车有些商品卡片不显示商品图片问题
+
+
+界面优化:
+商品详情页:
+加入购物车和立即购买模态框
+1.sku选择框需要显示规格，如果有，显示内容为价格/sku_id单位|规格
+
+
+界面优化:
+商品详情页:
+1.放大数量操作部分
+
+界面优化:
+商品详情页:
+立即购买和加入购物车模态框:
+商品展示栏：加粗加大商品名称，下方价格页加粗加大 显示为价格/已选sku单位
+
+
+列出商品详情页的接口需求,实现数据由接口获取
+
+
+## 修改商品详情页
+商品详情接口:
+curl --location 'http://127.0.0.1:5001/miniapi/goods/1（商品id）'
+返回数据:
+{
+    "code": 200,
+    "data": {
+        "code": "100102",
+        "description": "",
+        "id": 10,
+        "images": [],
+        "name": "大红八角B",
+        "skus": [
+            {
+                "sku_id": 212,
+                "sku_is_default": true,
+                "sku_selling_price": 22.0,
+                "sku_specification": "None",
+                "sku_unit": "斤"
+            },
+            {
+                "sku_id": 213,
+                "sku_is_default": false,
+                "sku_selling_price": 1060.0,
+                "sku_specification": "60斤/件",
+                "sku_unit": "件"
+            }
+        ],
+        "sub_images": [],
+        "tags": []
+    },
+    "message": "success"
+}
+
+修改要求:
+删除价格显示
+显示部分:
+顶部商品主图轮播图：对应字段images
+sku显示->价格/单位|规格->使用框框框起来
+tags->标签->如果没有，默认显示热销、品质保证、批发价
+商品描述
+商品详情图->sub_images
+
+不修改部分，底部购物车 接入购物车、立即购买部分
+
+bug修复
+商品详情页:
+<view class="sku-list" wx:if="{{goods.skus && goods.skus.length > 0}}">
+模块不显示商品价格
+
+界面优化:
+商品详情页:sku展示模块
+<!-- SKU 列表 -->
+    <view class="sku-list" wx:if="{{goods && goods.skus && goods.skus.length > 0}}">
+      <view class="sku-list-title">规格价格：</view>
+      <view class="sku-list-items">
+        <view class="sku-list-item" wx:for="{{goods.skus}}" wx:key="{{item.sku_id}}">
+          <text class="sku-list-unit">￥{{item.sku_selling_price}}元</text>
+          <text class="sku-list-unit">/{{item.sku_unit}}</text>
+          <text class="sku-list-unit">|{{item.sku_specification}}</text>
+        </view>
+      </view>
+    </view>
+
+保持目前上面显示的内容，优化如果sku没有单位，则不显示|+sku规格，sku规格字体变小，改变规格颜色
+
+界面优化:
+商品详情界面：
+商品名称和商品分享改为同一行左右布局
+
+
+bug修复:
+商品详情页点击分享不能分享，不会跳转
+
+
+后端接口对接:
+购物车列表:
+curl -X GET "basehost/cart" 
+返回数据示例
+{
+  "code": 200,
+  "message": "获取成功",
+  "data": [
+    {
+      "id": 1,
+      "name": "商品名称",
+      "sku_id": 1,
+      "sku_price": 99.99,
+      "sku_unit": "个",
+      "sku_specs": "规格1",
+      "image": "https://example.com/image.jpg",
+      "count": 2
+    },
+    {
+      "id": 2,
+      "name": "另一个商品",
+      "sku_id": 3,
+      "sku_price": 199.99,
+      "sku_unit": "件",
+      "sku_specs": "规格A",
+      "image": "https://example.com/another.jpg",
+      "count": 1
+    }
+  ]
+}
+
+实现商品详情页获取购物车商品详情操作，同步购物车界面本地数据和接口数据操作
+
+
+
+修改首页商品卡片、搜索结果商品卡片、分类页商品卡片、商品详情页加入购物车的逻辑:
+加入购物车都以sku维度进行操作。
+加入购物车需要保存到本地存储和上传到后端
+上传到后端需要参数id:商品id sku_id:sku的id count:数量 sku_selling_price:sku售价
+保存到本地需要:
+存储数据示例:
+{
+    'id':'商品id',
+    'code':'商品code',
+    'name':'商品名称',
+    'image':'商品主图',
+    'sku_id':'选中的sku_id',
+    'count':'数量',
+    "sku_selling_price": "sku售价",
+    "sku_specification": "sku规格",
+    "sku_unit": "sku单位"
+}
+
+存在bug:
+加入购物车时，点+  数量为1 则加了一条count为1的记录
+同商品 同sku 再点+ 数量为2 则又加了一条数量为2的记录
+
+## 字段修改:
+加入购物车id是商品id，现在重新命名为product_id
+
+## bug修复
+第一商品 默认sku 数量+1之后 再选择另外一个sku +1数量是从1起步的，这样是错误的，如果另外一个sku在购物车中为0 则应该从0起步，而不是跟着首选sku数量起步
+
+# 从后端获取购物商品接口
+路径 /cart
+返回的数据:
+{
+  "code": 200,
+  "message": "获取成功",
+  "data": [
+    {
+      "code": "102401",
+      "count": 3,
+      "id": 54,
+      "image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=star%20anise%20spice%20in%20package&image_size=square",
+      "name": "红豆蔻",
+      "sku_id": 54,
+      "sku_selling_price": 18,
+      "sku_specification": "",
+      "sku_unit": "斤",
+      "source": "user"
+    },
+    {
+      "code": "102402",
+      "count": 2,
+      "id": 55,
+      "image": "https://example.com/another.jpg",
+      "name": "八角",
+      "sku_id": 55,
+      "sku_selling_price": 25,
+      "sku_specification": "精选",
+      "sku_unit": "斤",
+      "source": "admin"
+    }
+  ]
+}
+
+当小程序启动时如果本地cart中没有数据，则请求这个接口获取云端购物车数据
+
+
+
+## 界面修改：
+依据购物车商品卡界面，修改商品详情内购物车模态框商品卡显示，但是要去除勾选框，以展示为主
+
+
+界面优化:
+商品详情购物车,购物车总价显示不正确，读不出cartTotalPrice字段的值，需动态计算cartTotalPrice的值
+
+
+界面优化:
+商品详情界面:
+立即购买模态框：商品价格根据已选sku的价格显示，规格显示为sku价格/sku单位|sku规格 如果规格是空 则只显示sku价格/sku单位
+
+
+# 完成立即购买方法
+请求内容包括当前商品id，已经选择sku的id 数量 已选择sku的价格
+立即购买不会删除购物车内商品，只是单独购买这个商品的这个sku
+
+
+bug修复
+购物车界面，商品点击删除并不会删除
+
+
+## 修改商品详情页的立即购买方法：
+请求路径:/order/buynow
+请求方法:post
+请求参数:
+{
+    'product_id':'商品id',
+    'sku_id':'选中的sku_id',
+    'count':'数量',
+    "sku_selling_price": "sku售价"
+}
+
+
+## 修改购物车计算的方法:
+请求路径:/order/submitOrder
+请求方法:post
+请求参数:
+[
+    {
+    'product_id':'商品id',
+    'sku_id':'选中的sku_id',
+    'count':'数量',
+    "sku_selling_price": "sku售价"
+    },
+    {
+    'product_id':'商品id',
+    'sku_id':'选中的sku_id',
+    'count':'数量',
+    "sku_selling_price": "sku售价"
+    }
+]
+
+
+
+## 修改订单界面功能
+以下是后端获取订单列表接口的curl
+curl -X GET "http://192.168.100.108:5001/miniapi/orders?page=1&limit=10" \
+  -H "Content-Type: application/json" \
+  -H "token: your_token_here"
+以下是示例数据:
+{
+  "code": 200,
+  "message": "获取成功",
+  "data": [
+    {
+      "order_id": 123,
+      "total_amount": 39.8,
+      "status": "pending_delivery",
+      "create_at": "2026-04-06 15:30:45",
+      "order_type": "pending_delivery",
+      "items_count": 1,
+      "items": [
+        {
+          "product_name": "红豆蔻",
+          "sku_unit": "斤",
+          "sku_selling_price": 19.9,
+          "quantity": 2
+        }
+      ]
+    }
+  ]
+}
+
+修改订单界面订单卡片显示以及结算订单是存储的数据，要求和后端返回的数据一样
+订单卡片显示:
+第一行: 
+左侧：下单时间 取total_amount
+右侧：订单类型 已送或者预送 取status字段
+第二行:
+订单支付状态：取字段status pending 待处理/待支付 - 订单刚创建，还未支付 partial_paid 部分支付 - 订单已经支付了部分金额，但还未完全支付 completed 完成 - 订单已经完全支付并处理完成 cancelled 取消 - 订单被取消，不再进行处理
+第三行:
+商品名称+sku数量+sku单位列表=该sku总价
+第四行：订单总金额
+
+
+订单界面优化
+优化订单里面所有商品显示，要求 在同一条垂直线上 
+商品 数量单位 总价 要在一条线上
+就是所有商品 是个二维表格

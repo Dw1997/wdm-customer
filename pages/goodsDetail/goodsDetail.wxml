@@ -9,39 +9,28 @@
 
   <!-- 商品信息卡片 -->
   <view class="info-card">
-    <view class="price-row">
-      <view class="price-wrapper">
-        <text class="price-symbol">¥</text>
-        <text class="detail-price">{{goods.price}}</text>
-        <text class="detail-unit">/{{goods.unit}}</text>
-      </view>
+    <view class="name-row">
+      <text class="detail-name">{{goods.name}}</text>
       <view class="share-btn" bindtap="shareGoods">
         <mp-icon icon="share" color="#666666" size="32"></mp-icon>
         <text class="share-text">分享</text>
       </view>
     </view>
-    <text class="detail-name">{{goods.name}}</text>
     <view class="tags-row">
       <view class="tag" wx:for="{{goods.tags}}" wx:key="index">{{item}}</view>
     </view>
-  </view>
-
-  <!-- 规格选择 -->
-  <view class="specs-card">
-    <mp-cells>
-      <mp-cell>
-        <view slot="title" class="cell-label">规格</view>
-        <view>{{goods.specs}}</view>
-      </mp-cell>
-      <mp-cell>
-        <view slot="title" class="cell-label">库存</view>
-        <view class="stock-text">充足</view>
-      </mp-cell>
-      <mp-cell>
-        <view slot="title" class="cell-label">运费</view>
-        <view class="free-shipping">免运费</view>
-      </mp-cell>
-    </mp-cells>
+    
+    <!-- SKU 列表 -->
+    <view class="sku-list" wx:if="{{goods && goods.skus && goods.skus.length > 0}}">
+      <view class="sku-list-title">规格价格：</view>
+      <view class="sku-list-items">
+        <view class="sku-list-item" wx:for="{{goods.skus}}" wx:key="{{item.sku_id}}">
+          <text class="sku-list-price">￥{{item.sku_selling_price}}元</text>
+          <text class="sku-list-unit" wx:if="{{item.sku_unit}}">/{{item.sku_unit}}</text>
+          <text class="sku-list-spec" wx:if="{{item.sku_unit && item.sku_specification && item.sku_specification !== 'None'}}">|{{item.sku_specification}}</text>
+        </view>
+      </view>
+    </view>
   </view>
 
   <!-- 商品详情 -->
@@ -92,6 +81,7 @@
             <text class="dialog-price-symbol">¥</text>
             <text class="dialog-price-value">{{goods.price}}</text>
             <text class="dialog-price-unit">/{{goods.unit}}</text>
+            <text class="dialog-price-spec" wx:if="{{goods.specs && goods.specs !== 'None'}}">|{{goods.specs}}</text>
           </view>
         </view>
       </view>
@@ -105,10 +95,22 @@
           </view>
         </view>
         <view class="quantity-row">
-          <text class="dialog-label">单位：</text>
-          <picker class="unit-picker" mode="selector" range="{{units}}" bindchange="dialogChangeUnit" value="{{dialogUnitIndex}}">
-            <view class="picker-view">{{dialogUnit}} ▼</view>
-          </picker>
+          <text class="dialog-label">选择规格：</text>
+          <view class="sku-options">
+            <view 
+              wx:for="{{goods.skus}}" 
+              wx:key="sku_id"
+              class="sku-option {{dialogUnit === item.sku_unit ? 'selected' : ''}}" 
+              bindtap="dialogChangeSku" 
+              data-unit="{{item.sku_unit}}" 
+              data-sku-id="{{item.sku_id}}"
+              data-price="{{item.sku_selling_price}}"
+            >
+              <text class="sku-price">¥{{item.sku_selling_price}}</text>
+              <text class="sku-unit">/{{item.sku_unit}}</text>
+              <text class="sku-spec">| {{item.sku_specification === 'None' ? '' : item.sku_specification}}</text>
+            </view>
+          </view>
         </view>
       </view>
       <view class="dialog-footer">
@@ -137,20 +139,22 @@
         </block>
         <block wx:else>
           <view class="cart-preview-item" wx:for="{{cartItems}}" wx:key="id">
-            <image class="cart-preview-image" src="{{item.image}}" mode="aspectFill"></image>
-            <view class="cart-preview-info">
-              <text class="cart-preview-name">{{item.name}}</text>
-              <view class="cart-preview-specs">
-                <text class="cart-preview-spec">{{item.specs}}</text>
-                <text class="cart-preview-unit">{{item.unit}}</text>
-              </view>
-              <view class="cart-preview-bottom">
-                <text class="cart-preview-price">¥{{item.price}}/{{item.unit}}</text>
+            <view class="goods-image-wrapper">
+              <image wx:if="{{item.image}}" class="cart-preview-image" src="{{item.image}}" mode="aspectFill"></image>
+              <view wx:else class="goods-placeholder">
+                <mp-icon icon="photo" color="#cccccc" size="48"></mp-icon>
               </view>
             </view>
-            <view class="cart-preview-right">
-              <text class="cart-preview-count">x{{item.count}}</text>
-              <text class="cart-preview-total">¥{{item.totalPrice}}</text>
+            <view class="cart-preview-info">
+              <text class="cart-preview-name">{{item.name}}</text>
+              <view class="cart-preview-price-row">
+                <text class="cart-preview-count-info">{{item.count}}</text>
+                <text class="cart-preview-unit-info">{{item.sku_unit}}</text>
+                <text class="cart-preview-asterisk">*</text>
+                <text class="cart-preview-price-info">{{item.sku_selling_price}}元/{{item.sku_unit || item.unit}}</text>
+                <text class="cart-preview-equal">=</text>
+                <text class="cart-preview-total-info">{{item.count*item.sku_selling_price}}元</text>
+              </view>
             </view>
           </view>
         </block>

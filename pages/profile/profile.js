@@ -14,9 +14,9 @@ Page({
       isBound: false
     },
     stats: {
-      unsettledAmount: '0.00',
+      unsettledAmount: '0.0',
       totalOrders: 0,
-      totalAmount: '0.00'
+      totalAmount: '0.0'
     },
     tipMsg: '',
     tipType: '',
@@ -94,9 +94,9 @@ Page({
 
     this.setData({
       stats: {
-        unsettledAmount: unsettledAmount.toFixed(2),
+        unsettledAmount: unsettledAmount.toFixed(1),
         totalOrders,
-        totalAmount: totalAmount.toFixed(2)
+        totalAmount: totalAmount.toFixed(1)
       }
     });
   },
@@ -126,9 +126,18 @@ Page({
   },
 
   contactService() {
-    wx.showToast({
-      title: '联系客服',
-      icon: 'none'
+    wx.makePhoneCall({
+      phoneNumber: '13330143106',
+      success: () => {
+        console.log('成功唤起拨号界面');
+      },
+      fail: (err) => {
+        console.error('拨号失败', err);
+        wx.showToast({
+          title: '拨号失败，请检查权限',
+          icon: 'none'
+        });
+      }
     });
   },
 

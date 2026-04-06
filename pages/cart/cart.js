@@ -35,7 +35,7 @@ Page({
     cart = cart.map(item => ({
       ...item,
       checked: true,
-      totalPrice: (item.price * item.count).toFixed(1)
+      totalPrice: (item.sku_selling_price * item.count).toFixed(1)
     }));
     this.setData({ cart });
     this.calculateTotal();
@@ -45,7 +45,7 @@ Page({
   toggleChecked(e) {
     const { id, skuId } = e.currentTarget.dataset;
     const cart = this.data.cart.map(item => {
-      if (item.id === id && item.skuId === skuId) {
+      if (item.product_id === id && item.sku_id === skuId) {
         return { ...item, checked: !item.checked };
       }
       return item;
@@ -77,7 +77,7 @@ Page({
 
   calculateTotal() {
     const selectedItems = this.data.cart.filter(item => item.checked);
-    const totalPrice = selectedItems.reduce((total, item) => total + item.price * item.count, 0);
+    const totalPrice = selectedItems.reduce((total, item) => total + item.sku_selling_price * item.count, 0);
     const selectedCount = selectedItems.reduce((count, item) => count + item.count, 0);
     this.setData({
       totalPrice: totalPrice.toFixed(1),
@@ -88,12 +88,12 @@ Page({
   increaseCount(e) {
     const { id, skuId } = e.currentTarget.dataset;
     const cart = this.data.cart.map(item => {
-      if (item.id === id && item.skuId === skuId) {
+      if (item.product_id === id && item.sku_id === skuId) {
         const newCount = item.count + 1;
         return { 
           ...item, 
           count: newCount,
-          totalPrice: (item.price * newCount).toFixed(1)
+          totalPrice: (item.sku_selling_price * newCount).toFixed(1)
         };
       }
       return item;
@@ -106,12 +106,12 @@ Page({
   decreaseCount(e) {
     const { id, skuId } = e.currentTarget.dataset;
     const cart = this.data.cart.map(item => {
-      if (item.id === id && item.skuId === skuId && item.count > 1) {
+      if (item.product_id === id && item.sku_id === skuId && item.count > 1) {
         const newCount = item.count - 1;
         return { 
           ...item, 
           count: newCount,
-          totalPrice: (item.price * newCount).toFixed(1)
+          totalPrice: (item.sku_selling_price * newCount).toFixed(1)
         };
       }
       return item;
@@ -128,7 +128,7 @@ Page({
       content: '确定要删除这个商品吗？',
       success: (res) => {
         if (res.confirm) {
-          const cart = this.data.cart.filter(item => !(item.id === id && item.skuId === skuId));
+          const cart = this.data.cart.filter(item => !(item.product_id === id && item.sku_id === skuId));
           this.setData({ cart });
           wx.setStorageSync('cart', cart);
           this.calculateTotal();
@@ -148,32 +148,12 @@ Page({
     });
   },
 
-  // 右划按钮点击
-  slideButtonTap(e) {
-    const { id, skuId } = e.currentTarget.dataset;
-    this.setData({
-      showDeleteDialog: true,
-      deleteGoodsId: id,
-      deleteGoodsSkuId: skuId
-    });
-  },
-
-  // 右划删除
-  showDeleteDialog(e) {
-    const { id, skuId } = e.currentTarget.dataset;
-    this.setData({
-      showDeleteDialog: true,
-      deleteGoodsId: id,
-      deleteGoodsSkuId: skuId
-    });
-  },
-
   onDeleteDialogTap(e) {
     const index = e.detail.index;
     if (index === 1) {
       // 点击确定按钮
       const { deleteGoodsId, deleteGoodsSkuId } = this.data;
-      const cart = this.data.cart.filter(item => !(item.id === deleteGoodsId && item.skuId === deleteGoodsSkuId));
+      const cart = this.data.cart.filter(item => !(item.id === deleteGoodsId && item.sku_id === deleteGoodsSkuId));
       this.setData({ cart, showDeleteDialog: false });
       wx.setStorageSync('cart', cart);
       this.calculateTotal();
@@ -236,16 +216,12 @@ Page({
     const seconds = String(now.getSeconds()).padStart(2, '0');
     const time = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     
-    const orderData = {
-      items: checkedItems.map(item => ({
-        goods_id: item.id,
-        sku_id: item.skuId,
-        quantity: item.count,
-        price: item.price
-      })),
-      total_price: this.data.totalPrice,
-      order_time: time
-    };
+    const orderData = checkedItems.map(item => ({
+      product_id: item.product_id,
+      sku_id: item.sku_id,
+      count: item.count,
+      sku_selling_price: item.sku_selling_price
+    }));
 
     // 发送请求到后端
     const token = wx.getStorageSync('token');
@@ -265,9 +241,9 @@ Page({
           // 保存订单到本地
           const order = {
             id: res.data.data.order_id || Date.now(),
-            time: time,
+            time: res.data.data.created_at || time(),
             items: checkedItems,
-            totalPrice: this.data.totalPrice,
+            totalPrice: this.data.total_amount,
             status: '待处理'
           };
 

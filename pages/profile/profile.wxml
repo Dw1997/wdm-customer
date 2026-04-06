@@ -4,14 +4,8 @@
   <view class="profile-header">
     <view class="profile-bg"></view>
     <view class="profile-content">
-      <view class="avatar-wrapper">
-        <image class="profile-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
-        <view class="avatar-badge" wx:if="{{userInfo.isVip}}">
-          <mp-icon icon="star" color="#FFD700" size="24"></mp-icon>
-        </view>
-      </view>
       <view class="profile-info">
-        <text class="profile-name">{{userInfo.nickname || '客户'}}</text>
+        <text class="profile-name">{{customerInfo.isBound ? customerInfo.name : '未绑定店铺'}}</text>
         <text class="profile-phone">{{userInfo.phone || '138****8888'}}</text>
       </view>
       <view class="profile-edit" bindtap="editProfile">
@@ -22,84 +16,53 @@
 
   <!-- 统计信息卡片 -->
   <view class="stats-card">
-    <view class="stat-item" bindtap="goToOrders" data-status="unsettled">
-      <view class="stat-icon-wrapper" style="background: linear-gradient(135deg, #ff6b6b, #ff8e8e);">
-        <mp-icon icon="money" color="#ffffff" size="36"></mp-icon>
-      </view>
-      <text class="stat-value">{{stats.unsettledAmount}}</text>
+    <view class="stat-item unsettled" bindtap="goToOrders" data-status="unsettled">
       <text class="stat-label">未结算</text>
+      <text class="stat-value">{{stats.unsettledAmount}}</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="goToOrders" data-status="all">
-      <view class="stat-icon-wrapper" style="background: linear-gradient(135deg, #003183, #4a90e2);">
-        <mp-icon icon="info" color="#ffffff" size="36"></mp-icon>
-      </view>
-      <text class="stat-value">{{stats.totalOrders}}</text>
+    <view class="stat-item total-orders" bindtap="goToOrders" data-status="all">
       <text class="stat-label">总订单</text>
+      <text class="stat-value">{{stats.totalOrders}}</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item" bindtap="goToOrders" data-status="completed">
-      <view class="stat-icon-wrapper" style="background: linear-gradient(135deg, #52c41a, #73d13d);">
-        <mp-icon icon="success" color="#ffffff" size="36"></mp-icon>
-      </view>
-      <text class="stat-value">{{stats.totalAmount}}</text>
+    <view class="stat-item total-amount" bindtap="goToOrders" data-status="completed">
       <text class="stat-label">总消费</text>
+      <text class="stat-value">{{stats.totalAmount}}</text>
     </view>
   </view>
 
-  <!-- 功能列表 - WeUI Cells -->
-  <view class="page__bd">
-    <mp-cells title="我的服务">
-      <mp-cell bindtap="goToAddress" hover>
-        <view slot="icon" class="cell-icon" style="background-color: #e6f7ff;">
-          <mp-icon icon="location" color="#003183" size="28"></mp-icon>
+  <!-- 我的服务 - 九宫格形式 -->
+  <view class="service-section">
+    <view class="section-title">我的服务</view>
+    <view class="service-grid">
+      <view class="service-item" bindtap="contactService">
+        <view class="service-icon" style="background-color: #fff7e6;">
+          <mp-icon icon="service" color="#ff9800" size="48"></mp-icon>
         </view>
-        <view>收货地址</view>
-        <view slot="footer">
-          <mp-icon icon="arrow" color="#c8c8cd" size="16"></mp-icon>
+        <text class="service-label">联系我们</text>
+      </view>
+      <view class="service-item" bindtap="goToAbout">
+        <view class="service-icon" style="background-color: #f6ffed;">
+          <mp-icon icon="info" color="#52c41a" size="48"></mp-icon>
         </view>
-      </mp-cell>
-      <mp-cell bindtap="contactService" hover>
-        <view slot="icon" class="cell-icon" style="background-color: #fff7e6;">
-          <mp-icon icon="service" color="#ff9800" size="28"></mp-icon>
-        </view>
-        <view>联系客服</view>
-        <view slot="footer">
-          <mp-icon icon="arrow" color="#c8c8cd" size="16"></mp-icon>
-        </view>
-      </mp-cell>
-      <mp-cell bindtap="goToAbout" hover>
-        <view slot="icon" class="cell-icon" style="background-color: #f6ffed;">
-          <mp-icon icon="info" color="#52c41a" size="28"></mp-icon>
-        </view>
-        <view>关于我们</view>
-        <view slot="footer">
-          <mp-icon icon="arrow" color="#c8c8cd" size="16"></mp-icon>
-        </view>
-      </mp-cell>
-    </mp-cells>
+        <text class="service-label">关于我们</text>
+      </view>
+    </view>
+  </view>
 
-    <mp-cells title="设置" style="margin-top: 20rpx;">
-      <mp-cell bindtap="clearCache" hover>
-        <view slot="icon" class="cell-icon" style="background-color: #fff2f0;">
-          <mp-icon icon="delete" color="#ff4d4f" size="28"></mp-icon>
+  <!-- 设置板块 -->
+  <view class="settings-section">
+    <view class="section-title">设置</view>
+    <view class="settings-list">
+      <view class="setting-item" bindtap="goToAddress">
+        <view class="setting-icon" style="background-color: #e6f7ff;">
+          <mp-icon icon="location" color="#003183" size="32"></mp-icon>
         </view>
-        <view>清除缓存</view>
-        <view slot="footer">
-          <mp-icon icon="arrow" color="#c8c8cd" size="16"></mp-icon>
-        </view>
-      </mp-cell>
-      <mp-cell bindtap="checkUpdate" hover>
-        <view slot="icon" class="cell-icon" style="background-color: #f9f0ff;">
-          <mp-icon icon="download" color="#722ed1" size="28"></mp-icon>
-        </view>
-        <view>检查更新</view>
-        <view slot="footer">
-          <text class="version-text">v1.0.0</text>
-          <mp-icon icon="arrow" color="#c8c8cd" size="16"></mp-icon>
-        </view>
-      </mp-cell>
-    </mp-cells>
+        <text class="setting-label">收货地址</text>
+        <mp-icon icon="arrow" color="#c8c8cd" size="24"></mp-icon>
+      </view>
+    </view>
   </view>
 
   <!-- 退出登录按钮 -->

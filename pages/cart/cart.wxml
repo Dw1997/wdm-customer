@@ -10,31 +10,34 @@
   <!-- 购物车商品列表 -->
   <view wx:else class="page__bd">
     <view class="cart-list">
-      <view class="cart-item" wx:for="{{cart}}" wx:key="id">
+      <view class="cart-item" wx:for="{{cart}}" wx:key="product_id">
         <view class="checkbox-wrapper">
-          <mp-checkbox checked="{{item.checked}}" bindchange="toggleChecked" data-id="{{item.id}}" data-sku-id="{{item.skuId}}" ext-class="cart-checkbox" label=""></mp-checkbox>
+          <mp-checkbox checked="{{item.checked}}" bindchange="toggleChecked" data-id="{{item.product_id}}" data-sku-id="{{item.sku_id}}" ext-class="cart-checkbox" label=""></mp-checkbox>
         </view>
-        <view class="goods-image-wrapper" bindtap="goToGoodsDetail" data-id="{{item.id}}">
-          <image class="goods-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="goods-image-wrapper" bindtap="goToGoodsDetail" data-id="{{item.product_id}}">
+          <image wx:if="{{item.image}}" class="goods-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view wx:else class="goods-placeholder">
+            <mp-icon icon="photo" color="#cccccc" size="48"></mp-icon>
+          </view>
         </view>
         <view class="goods-info">
-          <text class="goods-name" bindtap="goToGoodsDetail" data-id="{{item.id}}">{{item.name}}</text>
+          <text class="goods-name" bindtap="goToGoodsDetail" data-id="{{item.product_id}}">{{item.name}}</text>
           <view class="goods-price-row">
             <text class="goods-count-info">{{item.count}}</text>
-            <text class="goods-unit-info">{{item.unit}}</text>
+            <text class="goods-unit-info">{{item.sku_unit}}</text>
             <text class="goods-asterisk">*</text>
-            <text class="goods-price-info">{{item.price}}元/{{item.unit}}</text>
+            <text class="goods-price-info">{{item.sku_selling_price}}元/{{item.sku_unit}}</text>
             <text class="goods-equal">=</text>
-            <text class="goods-total">{{item.totalPrice}}元</text>
+            <text class="goods-total">{{item.count*item.sku_selling_price}}元</text>
           </view>
           <view class="goods-bottom">
             <view class="goods-actions">
-              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.id}}" data-sku-id="{{item.skuId}}">-</button>
+              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="decreaseCount" data-id="{{item.product_id}}" data-sku-id="{{item.sku_id}}">-</button>
               <text class="goods-count">{{item.count}}</text>
-              <text class="goods-unit">{{item.unit}}</text>
-              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.id}}" data-sku-id="{{item.skuId}}">+</button>
+              <text class="goods-unit">{{item.sku_unit}}</text>
+              <button class="weui-btn mini-btn action-btn" size="mini" bindtap="increaseCount" data-id="{{item.product_id}}" data-sku-id="{{item.sku_id}}">+</button>
             </view>
-            <button class="weui-btn mini-btn delete-btn" size="mini" bindtap="deleteItem" data-id="{{item.id}}" data-sku-id="{{item.skuId}}">删除</button>
+            <button class="weui-btn mini-btn delete-btn" size="mini" bindtap="deleteItem" data-id="{{item.product_id}}" data-sku-id="{{item.sku_id}}">删除</button>
           </view>
         </view>
       </view>

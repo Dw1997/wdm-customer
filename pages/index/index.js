@@ -19,7 +19,19 @@ Page({
     page: 1,
     limit: 10,
     hasMore: true,
-    isLoading: false
+    isLoading: false,
+    // 搜索相关
+    keyword: '',
+    showSearchModal: false,
+    searchResults: [],
+    searchLoading: false,
+    searchLoadingMore: false,
+    searchHasMore: true,
+    searchPage: 1,
+    searchLimit: 10,
+    searched: false,
+    errorMsg: '',
+    showError: false
   },
 
   onLoad() {
@@ -97,9 +109,9 @@ Page({
           
           // 加载购物车数据
           const cart = wx.getStorageSync('cart') || [];
-          // 更新商品的数量
+          // 更新商品的数量，基于当前SKU
           const goodsWithCount = recommendedGoods.map(goods => {
-            const cartItem = cart.find(item => item.id === goods.id);
+            const cartItem = cart.find(item => item.id === goods.id && item.sku_id === goods.skuId);
             return {
               ...goods,
               count: cartItem ? cartItem.count : 0
@@ -185,10 +197,14 @@ Page({
   updateGoodsCount(goodsId, change) {
     const recommendedGoods = this.data.recommendedGoods.map(goods => {
       if (goods.id === goodsId) {
-        const newCount = Math.max(0, (goods.count || 0) + change);
+        // 从购物车中获取当前SKU的数量
+        const cart = wx.getStorageSync('cart') || [];
+        const existingItem = cart.find(item => item.id === goodsId && item.sku_id === goods.skuId);
+        const currentCount = existingItem ? existingItem.count : 0;
+        const newCount = Math.max(0, currentCount + change);
         // 更新购物车
         this.updateCart(goodsId, newCount);
-        console.log('Updated count for goods', goodsId, 'to', newCount);
+        console.log('Updated count for goods', goodsId, 'SKU', goods.skuId, 'to', newCount);
         return { ...goods, count: newCount };
       }
       return goods;
@@ -200,20 +216,57 @@ Page({
 
   updateCart(goodsId, count) {
     let cart = wx.getStorageSync('cart') || [];
-    const existingItem = cart.find(item => item.id === goodsId);
+    const goods = this.data.recommendedGoods.find(item => item.id === goodsId);
+    const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
     
     if (count > 0) {
       if (existingItem) {
         existingItem.count = count;
+        existingItem.sku_id = goods.skuId;
+        existingItem.sku_selling_price = goods.price;
+        existingItem.sku_specification = goods.specs;
+        existingItem.sku_unit = goods.unit;
       } else {
-        const goods = this.data.recommendedGoods.find(item => item.id === goodsId);
-        cart.push({ ...goods, count });
+        cart.push({
+          product_id: goods.id,
+          code: goods.code,
+          name: goods.name,
+          image: goods.image,
+          sku_id: goods.skuId,
+          count: count,
+          sku_selling_price: goods.price,
+          sku_specification: goods.specs,
+          sku_unit: goods.unit
+        });
       }
+      // 上传到后端
+      this.uploadCartToBackend(goods.id, goods.skuId, count, goods.price);
     } else {
-      cart = cart.filter(item => item.id !== goodsId);
+      cart = cart.filter(item => !(item.product_id === goodsId && item.skuId === goods.skuId));
+      // 上传到后端（删除操作）
+      this.uploadCartToBackend(goods.id, goods.skuId, 0, goods.price);
     }
     
     wx.setStorageSync('cart', cart);
+  },
+
+  uploadCartToBackend(goodsId, skuId, count, price) {
+    wx.request({
+      url: getApp().globalData.apiBase + '/cart',
+      method: 'POST',
+      data: {
+        product_id: goodsId,
+        sku_id: skuId,
+        count: count,
+        sku_selling_price: price
+      },
+      success: (res) => {
+        console.log('Cart upload success:', res.data);
+      },
+      fail: (error) => {
+        console.error('Cart upload failed:', error);
+      }
+    });
   },
 
   changeUnit(e) {
@@ -248,23 +301,219 @@ Page({
     }
   },
 
-  // 搜索功能
-  onSearch(e) {
-    const keyword = e.detail.value;
-    if (!keyword.trim()) {
-      wx.showToast({
-        title: '请输入搜索关键词',
-        icon: 'none'
-      });
+  // 搜索相关函数
+  onInput(e) {
+    this.setData({
+      keyword: e.detail.value
+    });
+  },
+
+  onSearchFocus() {
+    // 可以在这里做一些聚焦时的处理
+  },
+
+  onSearch() {
+    const keyword = this.data.keyword.trim();
+    if (!keyword) {
+      this.showError('请输入搜索关键词');
       return;
     }
+
+    // 禁止页面滚动
+    wx.setPageStyle({
+      style: {
+        overflow: 'hidden'
+      }
+    });
+
+    this.setData({
+      showSearchModal: true,
+      searchLoading: true,
+      searchPage: 1,
+      searchResults: [],
+      searchHasMore: true,
+      searched: true
+    });
+
+    this.fetchSearchResults();
+  },
+
+  clearInput() {
+    this.setData({
+      keyword: ''
+    });
+  },
+
+  closeSearchModal() {
+    // 恢复页面滚动
+    wx.setPageStyle({
+      style: {
+        overflow: 'auto'
+      }
+    });
+
+    this.setData({
+      showSearchModal: false
+    });
+  },
+
+  fetchSearchResults() {
+    const { keyword, searchPage, searchLimit } = this.data;
+    const app = getApp();
     
-    wx.showToast({
-      title: '搜索: ' + keyword,
-      icon: 'none'
+    wx.request({
+      url: `${app.globalData.baseUrl}/goods/search`,
+      method: 'GET',
+      data: {
+        keyword: keyword,
+        page: searchPage,
+        limit: searchLimit
+      },
+      success: (res) => {
+        if (res.data.code === 200) {
+          const newResults = res.data.data || [];
+          // 为每个商品添加默认选中的SKU和数量
+          const processedResults = newResults.map(item => {
+            const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
+            return {
+              ...item,
+              selectedSku: defaultSku,
+              count: 0
+            };
+          });
+          const results = searchPage === 1 ? processedResults : [...this.data.searchResults, ...processedResults];
+          
+          this.setData({
+            searchResults: results,
+            searchHasMore: newResults.length >= searchLimit,
+            searchLoading: false,
+            searchLoadingMore: false
+          });
+        } else {
+          this.setData({
+            searchLoading: false,
+            searchLoadingMore: false
+          });
+          this.showError(res.data.message || '搜索失败');
+        }
+      },
+      fail: (err) => {
+        console.error('搜索失败:', err);
+        this.setData({
+          searchLoading: false,
+          searchLoadingMore: false
+        });
+        this.showError('网络错误，请稍后重试');
+      }
+    });
+  },
+
+  loadMoreSearch() {
+    if (!this.data.searchHasMore || this.data.searchLoadingMore) return;
+    
+    this.setData({
+      searchPage: this.data.searchPage + 1,
+      searchLoadingMore: true
+    }, () => {
+      this.fetchSearchResults();
+    });
+  },
+
+  // SKU选择点击事件
+  onSkuClick(e) {
+    const goodsId = e.currentTarget.dataset.goodsId;
+    const skuId = e.currentTarget.dataset.skuId;
+    
+    if (!skuId) return;
+    
+    // 直接修改对应索引的商品，避免遍历整个数组
+    const searchResults = [...this.data.searchResults];
+    const goodsIndex = searchResults.findIndex(item => item.id === goodsId);
+    
+    if (goodsIndex !== -1) {
+      const goodsItem = {...searchResults[goodsIndex]};
+      const selectedSku = goodsItem.skus.find(sku => sku.sku_id === skuId);
+      goodsItem.selectedSku = selectedSku || goodsItem.skus[0];
+      
+      // 检查购物车中是否已有该SKU的记录
+      const cart = wx.getStorageSync('cart') || [];
+      const existingItem = cart.find(item => item.id === goodsId && item.skuId === skuId);
+      // 如果有，使用购物车中的数量；如果没有，重置为0
+      goodsItem.count = existingItem ? existingItem.count : 0;
+      
+      searchResults[goodsIndex] = goodsItem;
+      
+      this.setData({ searchResults });
+    }
+  },
+
+  // 搜索商品数量操作
+  increaseSearchCount(e) {
+    const goodsId = e.currentTarget.dataset.id;
+    this.updateSearchGoodsCount(goodsId, 1);
+  },
+
+  decreaseSearchCount(e) {
+    const goodsId = e.currentTarget.dataset.id;
+    this.updateSearchGoodsCount(goodsId, -1);
+  },
+
+  updateSearchGoodsCount(goodsId, change) {
+    const searchResults = this.data.searchResults.map(item => {
+      if (item.id === goodsId) {
+        const newCount = Math.max(0, (item.count || 0) + change);
+        // 更新购物车
+        this.updateSearchCart(item, newCount);
+        return { ...item, count: newCount };
+      }
+      return item;
+    });
+    this.setData({ searchResults });
+  },
+
+  updateSearchCart(goodsItem, count) {
+    let cart = wx.getStorageSync('cart') || [];
+    const existingItemIndex = cart.findIndex(item => item.id === goodsItem.id && item.sku_id === goodsItem.selectedSku.sku_id);
+    
+    if (count > 0) {
+      if (existingItemIndex > -1) {
+        cart[existingItemIndex].count = count;
+        cart[existingItemIndex].sku_id = goodsItem.selectedSku.sku_id;
+        cart[existingItemIndex].sku_selling_price = goodsItem.selectedSku.sku_selling_price;
+        cart[existingItemIndex].sku_specification = goodsItem.selectedSku.sku_specification && goodsItem.selectedSku.sku_specification !== 'None' ? goodsItem.selectedSku.sku_specification : '';
+        cart[existingItemIndex].sku_unit = goodsItem.selectedSku.sku_unit;
+      } else {
+        cart.push({
+          id: goodsItem.id,
+          code: goodsItem.code,
+          name: goodsItem.name,
+          image: goodsItem.image,
+          sku_id: goodsItem.selectedSku.sku_id,
+          count: count,
+          sku_selling_price: goodsItem.selectedSku.sku_selling_price,
+          sku_specification: goodsItem.selectedSku.sku_specification && goodsItem.selectedSku.sku_specification !== 'None' ? goodsItem.selectedSku.sku_specification : '',
+          sku_unit: goodsItem.selectedSku.sku_unit
+        });
+      }
+      // 上传到后端
+      this.uploadCartToBackend(goodsItem.id, goodsItem.selectedSku.sku_id, count, goodsItem.selectedSku.sku_selling_price);
+    } else {
+      cart = cart.filter(item => !(item.id === goodsItem.id && item.skuId === goodsItem.selectedSku.sku_id));
+      // 上传到后端（删除操作）
+      this.uploadCartToBackend(goodsItem.id, goodsItem.selectedSku.sku_id, 0, goodsItem.selectedSku.sku_selling_price);
+    }
+    
+    wx.setStorageSync('cart', cart);
+  },
+
+  showError(msg) {
+    this.setData({
+      errorMsg: msg,
+      showError: true
     });
     
-    // 这里可以实现搜索逻辑
-    console.log('搜索关键词:', keyword);
+    setTimeout(() => {
+      this.setData({ showError: false });
+    }, 2000);
   }
 })
