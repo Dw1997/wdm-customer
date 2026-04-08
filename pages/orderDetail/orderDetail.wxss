@@ -1,0 +1,253 @@
+/* pages/orderDetail/orderDetail.wxss */
+.page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 0;
+}
+
+.loading-spinner {
+  width: 80rpx;
+  height: 80rpx;
+  border: 8rpx solid #f3f3f3;
+  border-top: 8rpx solid #003183;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 32rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 32rpx;
+  color: #666666;
+}
+
+/* 错误状态 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 0;
+}
+
+.error-text {
+  font-size: 32rpx;
+  color: #ff5722;
+  margin-bottom: 32rpx;
+}
+
+.retry-btn {
+  background-color: #003183;
+  color: #ffffff;
+  font-size: 28rpx;
+  padding: 16rpx 64rpx;
+  border-radius: 8rpx;
+  font-weight: 600;
+}
+
+/* 订单头部 */
+.order-header {
+  background-color: white;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.order-info {
+  margin-bottom: 16rpx;
+}
+
+.order-time {
+  display: block;
+  font-size: 28rpx;
+  color: #666666;
+  margin-bottom: 8rpx;
+}
+
+.order-type {
+  display: block;
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 600;
+}
+
+.order-status-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.order-status {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #003183;
+  padding: 8rpx 24rpx;
+  background-color: #e6f7ff;
+  border-radius: 8rpx;
+}
+
+/* 商品列表 */
+.order-items {
+  background-color: white;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+
+.order-table {
+  width: 100%;
+}
+
+.table-header {
+  display: flex;
+  background-color: #f5f5f5;
+  border-bottom: 1rpx solid #e0e0e0;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row-total {
+  background-color: #f9f9f9;
+  font-weight: 600;
+}
+
+.table-col {
+  padding: 16rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+}
+
+.table-col-name {
+  flex: 1.5;
+  color: #333333;
+  font-weight: 600;
+}
+
+.table-col-count {
+  flex: 0.8;
+  color: #333333;
+  text-align: center;
+}
+
+.table-col-unit {
+  flex: 0.8;
+  color: #666666;
+  text-align: center;
+}
+
+.table-col-total {
+  flex: 1.2;
+  color: #ff5722;
+  font-weight: 600;
+  text-align: right;
+}
+
+.table-header .table-col {
+  font-weight: 700;
+  color: #333333;
+  background-color: #f5f5f5;
+}
+
+.total-price {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ff5722;
+}
+
+/* 销售单图片 */
+.invoice-section {
+  background-color: white;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 20rpx;
+  padding: 24rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.invoice-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.invoice-container:active {
+  background-color: #f5f5f5;
+}
+
+.invoice-image {
+  width: 100%;
+  height: 600rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  margin-bottom: 0;
+  object-fit: cover;
+}
+
+.view-invoice-text {
+  font-size: 28rpx;
+  color: #003183;
+  font-weight: 600;
+  padding: 20rpx;
+  width: 100%;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-top: 1rpx solid #e0e0e0;
+  border-radius: 0 0 8rpx 8rpx;
+}
+
+/* 底部按钮 */
+.bottom-actions {
+  padding: 24rpx;
+  background-color: white;
+  border-top: 1rpx solid #f0f0f0;
+  margin-top: 20rpx;
+}
+
+.back-btn {
+  width: 100%;
+  background-color: #003183;
+  color: #ffffff;
+  font-size: 32rpx;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  font-weight: 600;
+}
+
+/* 通用样式 */
+.page__bd {
+  padding: 20rpx;
+}

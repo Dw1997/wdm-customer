@@ -84,19 +84,29 @@ Page({
   },
 
   loadStats() {
-    const orders = wx.getStorageSync('orders') || [];
-    
-    const totalOrders = orders.length;
-    const totalAmount = orders.reduce((sum, order) => sum + parseFloat(order.totalPrice || 0), 0);
-    const unsettledAmount = orders
-      .filter(order => order.status === '待处理' || order.status === '未送达' || order.status === '已送达未支付')
-      .reduce((sum, order) => sum + parseFloat(order.totalPrice || 0), 0);
-
-    this.setData({
-      stats: {
-        unsettledAmount: unsettledAmount.toFixed(1),
-        totalOrders,
-        totalAmount: totalAmount.toFixed(1)
+    const token = wx.getStorageSync('token');
+    wx.request({
+      url: getApp().globalData.apiBase + '/shop/stats',
+      method: 'GET',
+      header: {
+        'token': token
+      },
+      success: (res) => {
+        if (res.data.code === 200) {
+          const data = res.data.data;
+          this.setData({
+            stats: {
+              monthlyTotalOrders: data.monthly_total_orders,
+              monthlyTotalConsumption: data.monthly_total_consumption.toFixed(1),
+              unsettledAmount: data.unsettled_amount.toFixed(1)
+            }
+          });
+        } else {
+          console.error('获取统计数据失败:', res.data.message);
+        }
+      },
+      fail: (error) => {
+        console.error('网络请求失败:', error);
       }
     });
   },
@@ -167,35 +177,12 @@ Page({
     this.showTip('已是最新版本', 'success');
   },
 
-  logout() {
-    wx.showModal({
-      title: '确认退出',
-      content: '确定要退出登录吗？',
-      success: (res) => {
-        if (res.confirm) {
-          wx.removeStorageSync('token');
-          wx.removeStorageSync('userInfo');
-          wx.removeStorageSync('customerInfo');
-          wx.removeStorageSync('isLogin');
-          
-          // 退出登录后跳转到登录页面
-          wx.redirectTo({
-            url: '/pages/login/login?from=profile'
-          });
-        }
-      }
-    });
-  },
+
 
   goToOrders(e) {
-    if (!this.data.customerInfo.isBound) {
-      this.showTip('账号尚未与客户信息关联，请联系管理员', 'warn');
-      return;
-    }
-    
     const status = e.currentTarget.dataset.status;
     wx.switchTab({
-      url: '/pages/order/order'
+      url: `/pages/order/order?status=${status}`
     });
   },
 

@@ -24,6 +24,15 @@
   margin: 40rpx 0 60rpx;
 }
 
+.empty-state .weui-btn_primary {
+  background-color: #007aff !important;
+  color: #ffffff !important;
+  font-size: 32rpx !important;
+  padding: 20rpx 64rpx !important;
+  border-radius: 8rpx !important;
+  font-weight: 600 !important;
+}
+
 /* 购物车列表 */
 .cart-list {
   display: flex;

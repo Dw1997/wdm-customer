@@ -16,19 +16,19 @@
 
   <!-- 统计信息卡片 -->
   <view class="stats-card">
-    <view class="stat-item unsettled" bindtap="goToOrders" data-status="unsettled">
+    <view class="stat-item unsettled">
       <text class="stat-label">未结算</text>
       <text class="stat-value">{{stats.unsettledAmount}}</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item total-orders" bindtap="goToOrders" data-status="all">
-      <text class="stat-label">总订单</text>
-      <text class="stat-value">{{stats.totalOrders}}</text>
+    <view class="stat-item total-orders">
+      <text class="stat-label">本月总订单</text>
+      <text class="stat-value">{{stats.monthlyTotalOrders}}</text>
     </view>
     <view class="stat-divider"></view>
-    <view class="stat-item total-amount" bindtap="goToOrders" data-status="completed">
-      <text class="stat-label">总消费</text>
-      <text class="stat-value">{{stats.totalAmount}}</text>
+    <view class="stat-item total-amount">
+      <text class="stat-label">本月总消费</text>
+      <text class="stat-value">{{stats.monthlyTotalConsumption}}</text>
     </view>
   </view>
 
@@ -65,10 +65,7 @@
     </view>
   </view>
 
-  <!-- 退出登录按钮 -->
-  <view class="logout-section" wx:if="{{userInfo.isLogin}}">
-    <button class="weui-btn weui-btn_warn" bindtap="logout">退出登录</button>
-  </view>
+
 
   <!-- 顶部提示 -->
   <mp-toptips msg="{{tipMsg}}" type="{{tipType}}" show="{{showTip}}"></mp-toptips>

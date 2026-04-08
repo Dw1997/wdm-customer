@@ -1,0 +1,70 @@
+<!--pages/orderDetail/orderDetail.wxml-->
+<view class="page">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 错误状态 -->
+  <view wx:elif="{{error}}" class="error-container">
+    <text class="error-text">加载失败，请重试</text>
+    <button class="retry-btn" bindtap="loadOrderDetail">重新加载</button>
+  </view>
+
+  <!-- 订单详情 -->
+  <view wx:else class="page__bd">
+    <view wx:if="{{order}}">
+      <!-- 订单头部信息 -->
+      <view class="order-header">
+        <view class="order-info">
+          <text class="order-time">下单时间：{{order.createTime}}</text>
+          <text class="order-type">订单类型：{{order.orderType}}</text>
+        </view>
+        <view class="order-status-wrapper">
+          <text class="order-status">{{order.status}}</text>
+        </view>
+      </view>
+
+      <!-- 商品列表 -->
+      <view class="order-items">
+        <view class="order-table">
+          <view class="table-header">
+          <text class="table-col table-col-name">商品名称</text>
+          <text class="table-col table-col-count">数量</text>
+          <text class="table-col table-col-unit">单位</text>
+          <text class="table-col table-col-total">总价</text>
+        </view>
+          <view class="table-body">
+            <view class="table-row" wx:for="{{order.items}}" wx:key="product_id" bindtap="goToGoodsDetail" data-id="{{item.product_id}}">
+              <text class="table-col table-col-name">{{item.product_name}}</text>
+              <text class="table-col table-col-count">{{item.quantity}}</text>
+              <text class="table-col table-col-unit">{{item.sku_unit}}</text>
+              <text class="table-col table-col-total">{{item.totalPrice}}</text>
+            </view>
+            <view class="table-row table-row-total">
+              <text class="table-col table-col-name">订单总金额：</text>
+              <text class="table-col table-col-count"></text>
+              <text class="table-col table-col-unit"></text>
+              <text class="table-col table-col-total total-price">￥{{order.totalPrice}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 销售单图片 -->
+      <view wx:if="{{order.invoicePath}}" class="invoice-section">
+        <text class="section-title">销售单</text>
+        <view class="invoice-container" bindtap="viewInvoice">
+          <image class="invoice-image" src="{{order.invoicePath}}" mode="aspectFit"></image>
+          <text class="view-invoice-text">点击查看大图</text>
+        </view>
+      </view>
+
+      <!-- 底部按钮 -->
+      <view class="bottom-actions">
+        <button class="back-btn" bindtap="goBack">返回</button>
+      </view>
+    </view>
+  </view>
+</view>

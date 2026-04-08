@@ -309,9 +309,13 @@ Page({
   },
 
   uploadCartToBackend(goodsId, skuId, count, price) {
+    const token = wx.getStorageSync('token');
     wx.request({
       url: getApp().globalData.apiBase + '/cart',
       method: 'POST',
+      header: {
+        'token': token
+      },
       data: {
         product_id: goodsId,
         sku_id: skuId,

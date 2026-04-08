@@ -11,7 +11,7 @@
   <view wx:else class="page__bd">
     <view class="order-list">
       <view class="order-card" wx:for="{{orders}}" wx:key="id">
-        <view class="order-header">
+        <view class="order-header" bindtap="viewOrderDetail" data-id="{{item.id}}">
           <text class="order-time">下单时间：{{item.time}}</text>
           <view class="order-status-wrapper">
             <text class="header-status-text">{{item.status}}</text>
@@ -26,7 +26,7 @@
               <text class="table-col table-col-total">总价</text>
             </view>
             <view class="table-body">
-              <view class="table-row" wx:for="{{item.items}}" wx:key="id" bindtap="goToGoodsDetail" data-id="{{item.id}}">
+              <view class="table-row" wx:for="{{item.items}}" wx:key="id">
                 <text class="table-col table-col-name">{{item.name}}</text>
                 <text class="table-col table-col-count">{{item.count}}</text>
                 <text class="table-col table-col-unit">{{item.unit}}</text>
@@ -41,7 +41,7 @@
             </view>
           </view>
         </view>
-        <view class="order-actions">
+        <view class="order-actions" bindtap="viewOrderDetail" data-id="{{item.id}}">
           <button class="weui-btn weui-btn_primary mini-btn detail-btn" size="mini" bindtap="viewOrderDetail" data-id="{{item.id}}">查看详情</button>
           <button wx:if="{{item.status === '待处理' || item.status === '待支付' || item.status === '处理中'}}" class="weui-btn weui-btn_default mini-btn cancel-btn" size="mini" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
         </view>

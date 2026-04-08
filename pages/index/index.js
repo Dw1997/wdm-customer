@@ -251,9 +251,13 @@ Page({
   },
 
   uploadCartToBackend(goodsId, skuId, count, price) {
+    const token = wx.getStorageSync('token');
     wx.request({
       url: getApp().globalData.apiBase + '/cart',
       method: 'POST',
+      header: {
+        'token': token
+      },
       data: {
         product_id: goodsId,
         sku_id: skuId,
@@ -263,8 +267,8 @@ Page({
       success: (res) => {
         console.log('Cart upload success:', res.data);
       },
-      fail: (error) => {
-        console.error('Cart upload failed:', error);
+      fail: (err) => {
+        console.error('Cart upload failed:', err);
       }
     });
   },

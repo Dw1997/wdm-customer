@@ -2,10 +2,14 @@
 Page({
   data: {
     orders: [],
-    loading: false
+    loading: false,
+    status: ''
   },
 
-  onLoad() {
+  onLoad(options) {
+    if (options && options.status) {
+      this.setData({ status: options.status });
+    }
     this.checkLogin();
   },
 
@@ -31,8 +35,18 @@ Page({
     
     // 从后端获取订单数据
     const token = wx.getStorageSync('token');
+    const { status } = this.data;
+    
+    // 根据状态构建API地址
+    let apiUrl = getApp().globalData.apiBase + '/orders?page=1&limit=10';
+    if (status === 'month') {
+      apiUrl += '&type=month';
+    } else if (status === 'unsettled') {
+      apiUrl += '&status=unsettled';
+    }
+    
     wx.request({
-      url: getApp().globalData.apiBase + '/orders?page=1&limit=10',
+      url: apiUrl,
       method: 'GET',
       header: {
         'token': token,
@@ -176,14 +190,9 @@ Page({
   // 查看订单详情
   viewOrderDetail(e) {
     const orderId = e.currentTarget.dataset.id;
-    wx.showToast({
-      title: '查看订单详情',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/orderDetail/orderDetail?id=' + orderId
     });
-    // 这里可以跳转到订单详情页
-    // wx.navigateTo({
-    //   url: '/pages/orderDetail/orderDetail?id=' + orderId
-    // });
   },
 
   // 跳转到商品详情
