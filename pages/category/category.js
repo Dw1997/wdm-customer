@@ -1,125 +1,117 @@
 // category.js
 Page({
   data: {
-    categories: [],
-    activeCategory: 0,
-    currentCategoryName: '',
-    currentGoods: [],
-    page: 1,
-    limit: 10,
-    hasMore: true,
-    hasPrevMore: false,
-    isLoading: false,
-    scrollIntoCategoryId: '',
+    categories: [],          // 分类及商品数据
+    activeCategory: 0,      // 当前高亮的分类ID
+    activeMenuId: '',       // 左侧要滚动到的菜单项id（scroll-into-view）
+    loading: false,
+    loadingCategory: null,   // 当前正在加载的分类ID（用于防止重复加载）
+    noMore: false,
+    pageSize: 10,
+    // 辅助数据
+    sectionTopList: [],     // 存储每个分类区块距离右侧滚动容器顶部的距离
     // 保存每个分类的分页状态
     categoryPagination: {}
   },
 
+  // 节流函数（控制滚动事件频率）
+  throttle(fn, gapTime = 100) {
+    let lastTime = 0;
+    return function (...args) {
+      let now = Date.now();
+      if (now - lastTime > gapTime) {
+        fn.apply(this, args);
+        lastTime = now;
+      }
+    };
+  },
+
   onLoad() {
-    // 直接加载数据，后端会处理登录状态
-    this.loadCategories();
+    this.loadInitialData();
+    // 绑定滚动处理函数（节流）
+    this.onGoodsScroll = this.throttle(this.onGoodsScroll.bind(this), 100);
   },
 
   onShow() {
-    // 页面显示时刷新数据
-    if (this.data.categories.length === 0) {
-      this.loadCategories();
-    }
+    // 页面显示时刷新购物车数量
+    this.refreshCartCount();
   },
 
-  // 加载分类列表
-  loadCategories() {
-    wx.showLoading({
-      title: '加载中...',
-    });
+  // 加载初始化数据（从服务器获取分类和第一页商品）
+  loadInitialData() {
+    wx.showLoading({ title: '加载中' });
     
     const app = getApp();
     const token = wx.getStorageSync('token');
+    
     wx.request({
       url: app.globalData.baseUrl + '/categories',
       method: 'GET',
-      header: {
-        'token': token
-      },
+      header: { 'token': token },
       success: (res) => {
         wx.hideLoading();
         
         if (res.data.code === 200) {
           const categoriesData = res.data.data;
-          // 确保categories是数组
           const categories = Array.isArray(categoriesData) ? categoriesData : [];
-          this.setData({ 
-            categories,
-            activeCategory: categories.length > 0 ? categories[0].id : 0,
-            currentCategoryName: categories.length > 0 ? categories[0].name : ''
-          });
           
-          // 加载第一个分类的商品
-          if (categories.length > 0) {
-            this.setCurrentGoods(categories[0].id);
-          }
-        } else {
-          wx.showToast({
-            title: '加载分类失败',
-            icon: 'none'
+          // 为每个分类初始化商品数组
+          const categoriesWithGoods = categories.map(cat => ({
+            ...cat,
+            goods: []
+          }));
+          
+          this.setData({ categories: categoriesWithGoods }, () => {
+            // 加载第一个分类的商品
+            if (categories.length > 0) {
+              this.setData({ 
+                activeCategory: categories[0].id 
+              });
+              this.loadGoodsForCategory(categories[0].id);
+            }
           });
+        } else {
+          wx.showToast({ title: '加载分类失败', icon: 'none' });
         }
       },
       fail: (err) => {
         wx.hideLoading();
-        wx.showToast({
-          title: '网络错误',
-          icon: 'none'
-        });
+        wx.showToast({ title: '网络错误', icon: 'none' });
         console.error('Failed to load categories:', err);
       }
     });
   },
 
-  setCurrentGoods(categoryId, isLoadMore = false) {
-    if (this.data.isLoading) return;
+  // 加载指定分类的商品
+  loadGoodsForCategory(categoryId, isLoadMore = false) {
+    if (this.data.loading) return;
     
-    this.setData({ isLoading: true });
-    
-    if (!isLoadMore) {
-      wx.showLoading({
-        title: '加载商品中...',
-      });
-    }
+    this.setData({ loading: true });
     
     const app = getApp();
     const token = wx.getStorageSync('token');
+    // 获取该分类的当前页码
+    const pagination = this.data.categoryPagination[categoryId] || { page: 1, hasMore: true };
+    const page = isLoadMore ? pagination.page + 1 : 1;
+    
     wx.request({
       url: app.globalData.baseUrl + `/goods/category/${categoryId}`,
       method: 'GET',
-      header: {
-        'token': token
-      },
-      data: {
-        page: this.data.page,
-        limit: this.data.limit
-      },
+      header: { 'token': token },
+      data: { page, limit: this.data.pageSize },
       success: (res) => {
-        if (!isLoadMore) {
-          wx.hideLoading();
-        }
+        this.setData({ loading: false });
         
         if (res.data.code === 200) {
-          const goodsList = res.data.data;
-          
-          // 检查返回的数据是否为空数组或空对象
-          const isEmpty = !goodsList || (Array.isArray(goodsList) && goodsList.length === 0) || (typeof goodsList === 'object' && Object.keys(goodsList).length === 0);
-          const listLength = Array.isArray(goodsList) ? goodsList.length : 0;
-          
-          // 如果没有更多数据（商品数量小于limit）
-          if (isEmpty || listLength < this.data.limit) {
-            this.setData({ hasMore: false });
-          }
+          const responseData = res.data.data;
+          // 解析后端返回的数据结构：{ hasMore: boolean, list: [] }
+          const hasMore = responseData && responseData.hasMore !== undefined ? responseData.hasMore : false;
+          const goodsList = responseData && responseData.list && Array.isArray(responseData.list) ? responseData.list : [];
           
           // 转换数据格式
-          let recommendedGoods = [];
-          if (Array.isArray(goodsList) && goodsList.length > 0) {
-            recommendedGoods = goodsList.map(item => {
+          let processedGoods = [];
+          if (goodsList.length > 0) {
+            processedGoods = goodsList.map(item => {
               const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
               const units = item.skus.map(sku => sku.sku_unit);
               const prices = {};
@@ -151,94 +143,241 @@ Page({
           
           // 加载购物车数据
           const cart = wx.getStorageSync('cart') || [];
-          // 更新商品的数量，基于当前SKU
-          const goodsWithCount = recommendedGoods.map(goods => {
+          const goodsWithCount = processedGoods.map(goods => {
             const cartItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
-            return {
-              ...goods,
-              count: cartItem ? cartItem.count : 0
-            };
+            return { ...goods, count: cartItem ? cartItem.count : 0 };
           });
           
-          // 合并数据（加载更多时）或替换数据（首次加载）
-          const finalGoods = isLoadMore 
-            ? [...this.data.currentGoods, ...goodsWithCount]
-            : goodsWithCount;
+          // 更新分类商品数据
+          const categories = this.data.categories.map(cat => {
+            if (cat.id === categoryId) {
+              return {
+                ...cat,
+                goods: isLoadMore ? [...cat.goods, ...goodsWithCount] : goodsWithCount
+              };
+            }
+            return cat;
+          });
+          
+          // 更新分页状态（使用后端返回的hasMore）
+          this.data.categoryPagination[categoryId] = { page, hasMore };
           
           this.setData({ 
-            currentGoods: finalGoods,
-            isLoading: false
+            categories,
+            noMore: !hasMore && goodsList.length === 0
           });
+          
+          // 加载新数据后，重新计算区块位置
+          setTimeout(() => {
+            this.calcSectionsTop();
+          }, 100);
+          
+          // 如果当前分类没有更多商品，自动加载下一个分类的商品
+          if (!hasMore && goodsList.length > 0) {
+            this.loadNextCategory(categoryId);
+          }
         } else {
-          this.setData({ isLoading: false });
-          wx.showToast({
-            title: '加载商品失败',
-            icon: 'none'
-          });
+          wx.showToast({ title: '加载商品失败', icon: 'none' });
         }
       },
       fail: (err) => {
-        if (!isLoadMore) {
-          wx.hideLoading();
-        }
-        this.setData({ isLoading: false });
-        wx.showToast({
-          title: '网络错误',
-          icon: 'none'
-        });
+        this.setData({ loading: false });
+        wx.showToast({ title: '网络错误', icon: 'none' });
         console.error('Failed to load category goods:', err);
       }
     });
   },
 
-  // 下拉加载更多
-  onReachBottom() {
-    if (this.data.isLoading || !this.data.hasMore) return;
+  // 计算每个分类区块距离右侧滚动容器顶部的距离
+  calcSectionsTop() {
+    const query = wx.createSelectorQuery().in(this);
+    query.selectAll('.category-section').boundingClientRect();
+    query.select('.category-right').scrollOffset();
+    query.exec((res) => {
+      const sections = res[0];      // 各个区块的 rect
+      const scrollTop = res[1]?.scrollTop || 0;
+      if (sections && sections.length) {
+        const topList = sections.map(section => ({
+          id: section.id.replace('section-', ''), // 提取分类ID
+          top: section.top + scrollTop            // 绝对位置（相对于滚动内容）
+        }));
+        this.setData({ sectionTopList: topList });
+      }
+    });
+  },
+
+  // 右侧滚动时触发：根据滚动位置计算当前应该高亮的分类
+  onGoodsScroll(e) {
+    const scrollTop = e.detail.scrollTop;
+    const { sectionTopList, categories } = this.data;
+
+    // 找出第一个 top 大于 scrollTop 的分类索引（或最后一个）
+    let currentId = null;
+    if (sectionTopList.length > 0) {
+      for (let i = sectionTopList.length - 1; i >= 0; i--) {
+        if (sectionTopList[i].top <= scrollTop + 30) { // 加30偏移量更灵敏
+          currentId = sectionTopList[i].id;
+          break;
+        }
+      }
+    }
     
-    const newPage = this.data.page + 1;
-    this.setData({
-      page: newPage
-    }, () => {
-      this.setCurrentGoods(this.data.activeCategory, true);
-    });
+    // 如果通过区块位置无法确定当前分类，尝试通过滚动位置估算
+    if (!currentId && categories.length > 0) {
+      let accumulatedHeight = 0;
+      for (let i = 0; i < categories.length; i++) {
+        const cat = categories[i];
+        const estimatedHeight = 60 + (cat.goods && cat.goods.length ? cat.goods.length * 240 : 40);
+        if (scrollTop < accumulatedHeight + estimatedHeight) {
+          currentId = String(cat.id);
+          break;
+        }
+        accumulatedHeight += estimatedHeight;
+      }
+    }
+    
+    // 默认使用第一个分类
+    if (!currentId && categories.length > 0) {
+      currentId = String(categories[0].id);
+    }
+
+    // 更新当前分类高亮
+    if (currentId && Number(currentId) !== this.data.activeCategory) {
+      const categoryId = Number(currentId);
+      this.setData({ activeCategory: categoryId });
+      this.setData({ activeMenuId: `menu-${currentId}` });
+      
+      // 检查该分类是否有商品，如果没有则加载
+      const category = categories.find(cat => cat.id === categoryId);
+      if (category && (!category.goods || category.goods.length === 0)) {
+        this.loadGoodsForCategory(categoryId);
+      }
+    }
+    
+    // 预加载机制：检测即将滚动到的分类并提前加载
+    this.preloadCategories(scrollTop);
+  },
+  
+  // 预加载机制：提前加载即将滚动到的分类商品
+  preloadCategories(scrollTop) {
+    const { categories } = this.data;
+    const viewportHeight = 750; // 屏幕高度（rpx）
+    
+    let accumulatedHeight = 0;
+    for (let i = 0; i < categories.length; i++) {
+      const cat = categories[i];
+      // 预估每个分类区块的高度
+      const estimatedHeight = 60 + (cat.goods && cat.goods.length ? cat.goods.length * 240 : 40);
+      
+      // 检查该分类是否在当前可见区域或即将进入可见区域（提前200rpx预加载）
+      if (accumulatedHeight < scrollTop + viewportHeight + 200 && 
+          accumulatedHeight + estimatedHeight > scrollTop - 200) {
+        // 如果该分类没有商品，且尚未加载中，自动加载
+        if (!cat.goods || cat.goods.length === 0) {
+          // 检查是否正在加载该分类
+          const isLoading = this.data.loadingCategory === cat.id;
+          if (!isLoading) {
+            this.setData({ loadingCategory: cat.id });
+            this.loadGoodsForCategory(cat.id);
+          }
+        }
+      }
+      
+      accumulatedHeight += estimatedHeight;
+    }
+  },
+  
+  // 自动加载下一个分类的商品（当前分类hasMore=false时调用）
+  loadNextCategory(currentCategoryId) {
+    const { categories } = this.data;
+    const currentIndex = categories.findIndex(cat => cat.id === currentCategoryId);
+    
+    // 找到下一个没有商品的分类
+    for (let i = currentIndex + 1; i < categories.length; i++) {
+      const nextCat = categories[i];
+      // 如果下一个分类没有商品，且不在加载中，则加载
+      if ((!nextCat.goods || nextCat.goods.length === 0) && this.data.loadingCategory !== nextCat.id) {
+        this.setData({ loadingCategory: nextCat.id });
+        this.loadGoodsForCategory(nextCat.id);
+        break; // 只加载第一个未加载的分类
+      }
+    }
   },
 
-  // 下拉刷新
-  onPullDownRefresh() {
-    this.setData({
-      page: 1,
-      hasMore: true,
-      currentGoods: []
-    });
-    this.loadCategories();
-    wx.stopPullDownRefresh();
-  },
-
-  // 切换分类时重置分页
+  // 点击左侧菜单：右侧滚动到对应分类区块
   switchCategory(e) {
-    const categoryId = e.currentTarget.dataset.id;
+    const categoryId = Number(e.currentTarget.dataset.id);
     const category = this.data.categories.find(cat => cat.id === categoryId);
     
     if (!category || categoryId === this.data.activeCategory) return;
     
     this.setData({ 
       activeCategory: categoryId,
-      currentCategoryName: category ? category.name : '',
-      page: 1,
-      hasMore: true,
-      currentGoods: [],
-      scrollIntoCategoryId: 'category-' + categoryId
+      activeMenuId: `menu-${categoryId}`
     });
     
-    // 加载新分类的商品
-    this.setCurrentGoods(categoryId);
+    // 如果该分类没有商品，先加载商品
+    if (!category.goods || category.goods.length === 0) {
+      this.loadGoodsForCategory(categoryId);
+      return;
+    }
     
-    // 延迟清空scrollIntoCategoryId
-    setTimeout(() => {
-      this.setData({
-        scrollIntoCategoryId: ''
+    // 滚动右侧到指定区块
+    wx.createSelectorQuery().in(this)
+      .select(`#section-${categoryId}`)
+      .boundingClientRect()
+      .select('.category-right')
+      .scrollOffset()
+      .exec((res) => {
+        if (res[0]) {
+          const sectionTop = res[0].top;
+          const currentScrollTop = res[1]?.scrollTop || 0;
+          // 滚动到目标位置
+          wx.pageScrollTo({
+            scrollTop: currentScrollTop + sectionTop - 10, // 减去偏移让标题不完全贴边
+            duration: 300
+          });
+        }
       });
-    }, 300);
+  },
+
+  // 下拉加载更多
+  onReachBottom() {
+    if (this.data.loading || this.data.noMore) return;
+    
+    const currentCategory = this.data.categories.find(cat => cat.id === this.data.activeCategory);
+    if (!currentCategory) return;
+    
+    const pagination = this.data.categoryPagination[this.data.activeCategory] || { hasMore: true };
+    if (!pagination.hasMore) {
+      this.setData({ noMore: true });
+      return;
+    }
+    
+    this.loadGoodsForCategory(this.data.activeCategory, true);
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.setData({
+      categoryPagination: {},
+      noMore: false
+    });
+    this.loadInitialData();
+    wx.stopPullDownRefresh();
+  },
+
+  // 刷新购物车数量
+  refreshCartCount() {
+    const cart = wx.getStorageSync('cart') || [];
+    const categories = this.data.categories.map(cat => ({
+      ...cat,
+      goods: cat.goods?.map(goods => {
+        const cartItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
+        return { ...goods, count: cartItem ? cartItem.count : 0 };
+      }) || []
+    }));
+    this.setData({ categories });
   },
 
   goToGoodsDetail(e) {
@@ -250,52 +389,61 @@ Page({
 
   increaseCount(e) {
     const goodsId = e.currentTarget.dataset.id;
-    this.updateGoodsCount(goodsId, 1);
+    const categoryId = e.currentTarget.dataset.categoryId;
+    this.updateGoodsCount(goodsId, categoryId, 1);
   },
 
   decreaseCount(e) {
     const goodsId = e.currentTarget.dataset.id;
-    this.updateGoodsCount(goodsId, -1);
+    const categoryId = e.currentTarget.dataset.categoryId;
+    this.updateGoodsCount(goodsId, categoryId, -1);
   },
 
-  updateGoodsCount(goodsId, change) {
-    const currentGoods = this.data.currentGoods.map(goods => {
-      if (goods.id === goodsId) {
-        const cart = wx.getStorageSync('cart') || [];
-        const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
-        const currentCount = existingItem ? existingItem.count : 0;
-        
-        let newCount;
-        if (change > 0) {
-          // 增加数量：按照递增规则
-          const increments = [1, 2, 5, 10, 20];
-          const currentIndex = increments.findIndex(v => v > currentCount);
-          if (currentIndex === -1) {
-            // 超过20后，每次+10
-            newCount = currentCount + 10;
-          } else if (currentIndex === 0) {
-            // 当前为0，直接到1
-            newCount = 1;
-          } else {
-            // 取下一个递增值
-            newCount = increments[currentIndex];
-          }
-        } else {
-          // 减少数量：每次减1
-          newCount = Math.max(0, currentCount + change);
-        }
-        
-        this.updateCart(goodsId, goods.skuId, newCount);
-        return { ...goods, count: newCount };
+  updateGoodsCount(goodsId, categoryId, change) {
+    const categories = this.data.categories.map(cat => {
+      if (cat.id === Number(categoryId)) {
+        return {
+          ...cat,
+          goods: cat.goods?.map(goods => {
+            if (goods.id === goodsId) {
+              const cart = wx.getStorageSync('cart') || [];
+              const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
+              const currentCount = existingItem ? existingItem.count : 0;
+              
+              let newCount;
+              if (change > 0) {
+                // 增加数量：按照递增规则
+                const increments = [1, 2, 5, 10, 20];
+                const currentIndex = increments.findIndex(v => v > currentCount);
+                if (currentIndex === -1) {
+                  // 超过20后，每次+10
+                  newCount = currentCount + 10;
+                } else if (currentIndex === 0) {
+                  // 当前为0，直接到1
+                  newCount = 1;
+                } else {
+                  // 取下一个递增值
+                  newCount = increments[currentIndex];
+                }
+              } else {
+                // 减少数量：每次减1
+                newCount = Math.max(0, currentCount + change);
+              }
+              
+              this.updateCart(goodsId, goods.skuId, newCount, goods);
+              return { ...goods, count: newCount };
+            }
+            return goods;
+          }) || []
+        };
       }
-      return goods;
+      return cat;
     });
-    this.setData({ currentGoods });
+    this.setData({ categories });
   },
 
-  updateCart(goodsId, skuId, count) {
+  updateCart(goodsId, skuId, count, goods) {
     let cart = wx.getStorageSync('cart') || [];
-    const goods = this.data.currentGoods.find(item => item.id === goodsId && item.skuId === skuId);
     const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === skuId);
     
     if (count > 0) {
@@ -321,7 +469,7 @@ Page({
       // 上传到后端
       this.uploadCartToBackend(goods.id, goods.skuId, count, goods.price);
     } else {
-      cart = cart.filter(item => !(item.product_id === goodsId && item.sku_id === goods.skuId));
+      cart = cart.filter(item => !(item.product_id === goodsId && item.sku_id === skuId));
       // 上传到后端（删除操作）
       this.uploadCartToBackend(goods.id, goods.skuId, 0, goods.price);
     }
@@ -334,9 +482,7 @@ Page({
     wx.request({
       url: getApp().globalData.baseUrl + '/cart',
       method: 'POST',
-      header: {
-        'token': token
-      },
+      header: { 'token': token },
       data: {
         product_id: goodsId,
         sku_id: skuId,
@@ -354,17 +500,27 @@ Page({
 
   changeUnit(e) {
     const goodsId = e.currentTarget.dataset.id;
+    const categoryId = e.currentTarget.dataset.categoryId;
     const unitIndex = e.detail.value;
-    const currentGoods = this.data.currentGoods.map(goods => {
-      if (goods.id === goodsId) {
-        const unit = goods.units[unitIndex];
-        const newPrice = goods.prices[unit];
-        const newSpecs = goods.specsMap && goods.specsMap[unit] ? goods.specsMap[unit] : '';
-        const newSkuId = goods.skuIdMap && goods.skuIdMap[unit] ? goods.skuIdMap[unit] : goods.skuId;
-        return { ...goods, unit, price: newPrice, specs: newSpecs, skuId: newSkuId, count: 0 };
+    
+    const categories = this.data.categories.map(cat => {
+      if (cat.id === Number(categoryId)) {
+        return {
+          ...cat,
+          goods: cat.goods?.map(goods => {
+            if (goods.id === goodsId) {
+              const unit = goods.units[unitIndex];
+              const newPrice = goods.prices[unit];
+              const newSpecs = goods.specsMap && goods.specsMap[unit] ? goods.specsMap[unit] : '';
+              const newSkuId = goods.skuIdMap && goods.skuIdMap[unit] ? goods.skuIdMap[unit] : goods.skuId;
+              return { ...goods, unit, price: newPrice, specs: newSpecs, skuId: newSkuId, count: 0 };
+            }
+            return goods;
+          }) || []
+        };
       }
-      return goods;
+      return cat;
     });
-    this.setData({ currentGoods });
+    this.setData({ categories });
   }
 });
