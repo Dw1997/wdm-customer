@@ -240,7 +240,20 @@ Page({
     const { id, skuId } = e.currentTarget.dataset;
     const cart = this.data.cart.map(item => {
       if (item.product_id === id && item.sku_id === skuId) {
-        const newCount = item.count + 1;
+        // 增加数量：按照递增规则
+        const increments = [1, 2, 5, 10, 20];
+        const currentIndex = increments.findIndex(v => v > item.count);
+        let newCount;
+        if (currentIndex === -1) {
+          // 超过20后，每次+10
+          newCount = item.count + 10;
+        } else if (currentIndex === 0) {
+          // 当前为0，直接到1
+          newCount = 1;
+        } else {
+          // 取下一个递增值
+          newCount = increments[currentIndex];
+        }
         return { 
           ...item, 
           count: newCount,

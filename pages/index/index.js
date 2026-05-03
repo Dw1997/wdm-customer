@@ -258,7 +258,27 @@ Page({
         const cart = wx.getStorageSync('cart') || [];
         const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
         const currentCount = existingItem ? existingItem.count : 0;
-        const newCount = Math.max(0, currentCount + change);
+        
+        let newCount;
+        if (change > 0) {
+          // 增加数量：按照递增规则
+          const increments = [1, 2, 5, 10, 20];
+          const currentIndex = increments.findIndex(v => v > currentCount);
+          if (currentIndex === -1) {
+            // 超过20后，每次+10
+            newCount = currentCount + 10;
+          } else if (currentIndex === 0) {
+            // 当前为0，直接到1
+            newCount = 1;
+          } else {
+            // 取下一个递增值
+            newCount = increments[currentIndex];
+          }
+        } else {
+          // 减少数量：每次减1
+          newCount = Math.max(0, currentCount + change);
+        }
+        
         // 更新购物车
         this.updateCart(goodsId, newCount);
         console.log('Updated count for goods', goodsId, 'SKU', goods.skuId, 'to', newCount);
@@ -436,7 +456,9 @@ Page({
       },
       success: (res) => {
         if (res.data.code === 200) {
-          const newResults = res.data.data || [];
+          const searchData = res.data.data;
+          // 确保newResults是数组，如果不是数组（包括空对象）则转换为空数组
+          const newResults = Array.isArray(searchData) ? searchData : [];
           // 为每个商品添加默认选中的SKU和数量
           const processedResults = newResults.map(item => {
             const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
@@ -526,7 +548,28 @@ Page({
   updateSearchGoodsCount(goodsId, change) {
     const searchResults = this.data.searchResults.map(item => {
       if (item.id === goodsId) {
-        const newCount = Math.max(0, (item.count || 0) + change);
+        const currentCount = item.count || 0;
+        
+        let newCount;
+        if (change > 0) {
+          // 增加数量：按照递增规则
+          const increments = [1, 2, 5, 10, 20];
+          const currentIndex = increments.findIndex(v => v > currentCount);
+          if (currentIndex === -1) {
+            // 超过20后，每次+10
+            newCount = currentCount + 10;
+          } else if (currentIndex === 0) {
+            // 当前为0，直接到1
+            newCount = 1;
+          } else {
+            // 取下一个递增值
+            newCount = increments[currentIndex];
+          }
+        } else {
+          // 减少数量：每次减1
+          newCount = Math.max(0, currentCount + change);
+        }
+        
         // 更新购物车
         this.updateSearchCart(item, newCount);
         return { ...item, count: newCount };
