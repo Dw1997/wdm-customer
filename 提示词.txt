@@ -955,3 +955,311 @@ curl -X GET "http://192.168.100.108:5001/miniapi/orders?page=1&limit=10" \
 优化订单里面所有商品显示，要求 在同一条垂直线上 
 商品 数量单位 总价 要在一条线上
 就是所有商品 是个二维表格
+
+订单界面列表显示优化:
+首行:左侧显示下单时间 右侧:订单支付状态
+然后是商品(这部分不用修改)
+第三行显示总金额，金额数字和上面二位列表同一列
+删除查看详情按钮，点击订单卡片自然进入订单详情页
+
+
+bug修复:
+sku加入购物车只能+1,怎么点数量都是1
+
+
+## 添加订单详情界面
+数据来源:
+curl -X GET "app.basehost/orders/123" \
+  -H "Content-Type: application/json" \
+  -H "token: your_token_here"
+返回数据示例
+{
+  "code": 200,
+  "message": "获取成功",
+  "data": {
+    "ordder_id": 123,
+    "total_amount": 39.8,
+    "status": "pending_delivery",
+    "create_at": "2026-04-06 15:30:45",
+    "order_type": "pending_delivery",
+    "invoice_path": "https://oss.example.com/invoices/ORD20260406123456.png",
+    "items_count": 1,
+    "items": [
+      {
+        "product_id": 1001,
+        "product_name": "红豆蔻",
+        "sku_unit": "斤",
+        "sku_specification": "",
+        "sku_selling_price": 19.9,
+        "quantity": 2,
+        "image": "https://example.com/image.jpg"
+      }
+    ]
+  }
+}
+
+返回字段解释
+{
+  'ordder_id':订单id,
+  'total_amount':订单金额,
+  'status':'订单状态',
+  'create_at':'创建时间',
+  'order_type':'订单类型 delivered:已送订单, pending_delivery:预送订单',
+  'invoice_path':'销售单图片地址'
+  'items_count':'订单商品数量'
+  'items':[
+    { 
+      'product_id':'商品id'
+      'product_name':'商品名称',
+      'sku_unit':'sku的单位',
+      'sku_specification':'sku规格'
+      'sku_selling_price':'sku下单时价格'
+      'quantity':'数量'
+      'image':'商品图片'
+    }
+  ]
+}
+
+## 订单详情界面优化
+商品模块总价列左移一点，有些金额4位数可能超出范围
+
+
+## 订单界面优化
+点击点单卡片时间栏  下部分栏跳转到详情，点击卡片内商品不跳转
+
+
+## 订单详情界面优化
+销售单图片模块放大，图片占满模块宽度
+
+
+## 购物车界面优化
+把"去逛逛"按钮底色改为蓝色
+
+
+## bug修复
+商品点击加并没有向后端发送请求，打断点查看直接跳转到fail处理了
+
+
+## 功能修改：
+删除个人中心的退出登录按钮
+
+## 功能修改：个人中心
+显示本月总订单，本月总消费金额，账户未结算金额
+请求路径：/shop/stats
+curl -X GET "basehost/shop/stats" \
+  -H "Content-Type: application/json" \
+  -H "token: your_token_here"
+返回数据:
+{
+  "code": 200,
+  "message": "获取成功",
+  "data": {
+    "monthly_total_consumption": 1288.5,
+    "monthly_total_orders": 15,
+    "unsettled_amount": 456.8
+  }
+}
+
+点击本月总订单、本月总消费金额，跳转到本月订单列表界面
+点击账户未结算金额，跳转到未结算订单列表界面
+
+点击本月总订单、本月总消费金额、账户未结算金额，仅展示，不跳转
+
+
+添加功能:打开应用时发送请求，获取当前登录客户的购物车内容，对比本地购物车内容，合并本地和接口返回的购物车商品，并且上传接口没有的商品到后端
+请求curl是:curl -X GET "http://host/cart" \
+  -H "Token: your-token-here" \
+  -H "Content-Type: application/json"
+返回数据示例是：
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "code": "PROD001",
+      "count": 2,
+      "product_id": 1,
+      "image": "https://example.com/image.jpg",
+      "name": "商品名称",
+      "sku_id": 1,
+      "sku_selling_price": 100.0,
+      "sku_specification": "规格描述",
+      "sku_unit": "件",
+      "source": "mini_app"
+    }
+  ]
+}
+
+
+
+存在问题，首次打开应用是，在静默登录之前就请求推荐商品了，应该是静默登录之后，首页接口才开始请求
+
+完成banner图请求接口
+路径/banners
+返回数据示例是：
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id":1,
+      "image":"http://........"
+    }
+  ]
+}
+
+
+
+修改逻辑，打开app时，请求后端购物车列表，然后合并接口列表里的商品到本地，本地有，接口没有，则上传本地购物车的商品到后端，后端有本地没有，则添加到本地
+
+
+购物车添加刷新功能，下拉刷新，加载后端购物车有本地没有的商品到本地购物车，接口没有的则把本地有的则上传
+
+
+修改购物删除商品，发送请求，把后端的也删除，以下是后端接口方法curl
+
+删除购物车的curl是
+curl -X DELETE 'http://basehost/cart/{sku_id}' \
+  -H 'Token: YOUR_JWT_TOKEN' \
+  -H 'Content-Type: application/json'
+返回结果：
+{
+  "code": 200,
+  "message": "success",
+  "data": { "success": true }
+}
+
+
+修改订单列表界面，添加配送状态和支付状态，对应字段是
+payment_status = db.Column(db.String(20), default='unpaid')  # 支付状态：unpaid(未支付), partial_paid(部分支付), paid(已支付),cancelled(取消订单)
+delivery_status = db.Column(db.String(20), default='pending_delivery')  # 配送状态：pending_delivery(待配送), delivering(配送中), delivered(已送达),cancelled(取消配送)
+
+
+修改订单详情界面，添加字段，后端接口返回添加了
+payment_status = db.Column(db.String(20), default='unpaid')  # 支付状态：unpaid(未支付), partial_paid(部分支付), paid(已支付),cancelled(取消订单)
+delivery_status = db.Column(db.String(20), default='pending_delivery')  # 配送状态：pending_delivery(待配送), delivering(配送中), delivered(已送达),cancelled(取消配送)
+需要在界面显示
+
+订单列表界面，如果订单的配送状态时待配送，则在下方操作栏添加取消订单按钮
+后端取消订单的curl是
+curl -X DELETE 'http://basehost/orders/<int:id>/cancel' \
+  -H 'Token: YOUR_JWT_TOKEN' \
+  -H 'Content-Type: application/json'
+返回结果：
+{
+  "code": 200,
+  "message": "success",
+  "data": { "success": true }
+}
+
+在订单详情界面也添加这个按钮，如果订单配送状态是待配送
+
+优化:
+取消订单后，订单内的商品可以重新放回用户的购物车
+
+
+bug修复：
+1.点击取消订单会进入页面详情，应该是点击区域问题
+2.取消订单的url是http://basehost/orders/{订单id}/cancel
+
+界面优化，订单列表和订单详情界面，如果配送状态是已取消，则支付状态显示为无需支付
+
+
+存在bug
+搜索模态框商品加入购物和和推荐、分类列表商品加入购物车存储的数据不一致，请求改为和推荐、分类列表商品加入购物车一样的数据存储到本地cart
+
+优化商品分类界面显示: 
+上下滑动，切换了分类需要无感知，右侧已滑到的分类左侧分类类别需要尽量高度居中显示，就是无极滑动的感觉
+
+存在严重bug:怎么划左侧都是第一个分类，右侧的商品怎么划都是第一第二个分类的商品
+
+
+在微信小程序中，实现“分类商品无极滑动”通常指的是横向滚动浏览分类或商品列表。实现这一效果最核心、最推荐的方式是使用小程序官方提供的 scroll-view 组件。
+
+以下是实现该效果的完整方案与核心要点：
+
+🛠️ 核心实现步骤（横向滑动）
+
+要实现横向滑动，需要 WXML 结构和 WXSS 样式紧密配合：
+
+1. WXML 结构：
+使用  组件，并开启 scroll-x 属性。
+
+  
+    
+      {{item.name}}
+    
+  
+
+2. WXSS 样式（关键避坑点）：
+很多同学发现开启了 scroll-x 却无法滑动，通常是因为忽略了以下两个核心 CSS 属性：
+white-space: nowrap;：加在 scroll-view 上，强制内部元素不换行。
+display: inline-block;：加在子元素（如 .category-item）上，让它们水平排列。注意：子元素不能使用 float: left，否则会导致滑动失效。
+
+/* 滚动容器 */
+.category-scroll {
+  width: 100%;
+  white-space: nowrap; /* 核心：禁止换行 */
+}
+
+/* 内部子元素 */
+.category-item {
+  display: inline-block; /* 核心：行内块布局 */
+  padding: 0 20rpx;
+  /* 其他样式... */
+}
+
+💡 进阶场景：仿淘宝/京东的双侧联动滑动
+
+如果你指的“无极滑动”是类似淘宝分类页那种左侧一级分类竖向滑动，点击后右侧二级商品自动滑动并吸顶的效果，实现逻辑如下：
+
+整体布局：外层使用 Flex 布局，左侧固定宽度（如 25%），右侧占满剩余宽度（75%）。
+左侧分类：使用  实现一级分类的竖向滚动。点击某个分类时，记录下标。
+右侧商品：同样使用 。利用 scroll-into-view 属性，当左侧点击时，动态改变右侧 scroll-into-view 绑定的 ID，让右侧自动滚动到对应的分类区域。
+
+⚠️ 为什么不推荐用 Swiper 组件？
+
+虽然 swiper 组件也能实现滑动，但它并不适合做长列表的分类滑动，原因如下：
+布局限制：swiper 的 display-multiple-items 属性在动态数据加载时容易出 Bug（例如传入的商品数量少于设置显示的数量时，页面可能会空白）。
+性能与体验：swiper 设计初衷是整屏或整块的轮播切换，用来做密集的商品列表滑动显得非常臃肿，且难以精细控制无缝衔接的效果。
+
+🚀 性能优化建议
+
+如果分类或商品列表的数据量非常大（成百上千条），直接渲染会导致页面卡顿。此时建议引入虚拟列表（Virtual List）技术：只渲染屏幕可视区域及附近的一小部分商品节点，随着用户滑动动态替换数据，从而极大降低内存占用，保证滑动的丝滑流畅。
+
+
+使用这个方案实现分类界面商品无极滑动
+
+
+bug修复：
+订单列表界面的订单都来自于后端，本地剋缓存，但是在打开应用时删除本地缓存，订单列表从后端获取
+
+功能优化:
+对应界面文件夹:pages\order
+优化点:订单从后端获取，本地缓存在退出小程序时删除，在打开小程序时从后端服务加载到本地。
+
+
+bug修复:
+订单列表界面，当后端返回{code: 200,data: {},message: "success"}时。会一直显示加载中
+
+bug修复：
+商品分类界面:商品卡片点击+ -操作，不会加入 减少购物车内此sku
+
+
+
+优化：商品详情页
+内容区域挡住了主图下半部分，要求内容区域不遮挡主图
+
+优化：
+如果没有banner图，则使用images\waitupload_banner.png
+如果商品没有主图，则使用images\waitupload_main.png
+如果商品没有详情图，则使用images\waitupload_detail.png
+
+banner接口返回的{
+  "code": 200,
+  "data": {},
+  "message": "success"
+},却没有使用默认图，请修复
+
+
+美化购物车的”去逛逛“按钮，使用和订单列界面一样的样式

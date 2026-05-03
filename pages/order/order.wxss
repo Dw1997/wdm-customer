@@ -23,6 +23,32 @@
   margin: 40rpx 0 60rpx;
 }
 
+/* 去逛逛按钮 */
+.go-shopping-btn {
+  background: linear-gradient(135deg, #003183 0%, #0056b3 100%) !important;
+  color: #ffffff !important;
+  font-size: 32rpx !important;
+  font-weight: 600 !important;
+  padding: 24rpx 80rpx !important;
+  border-radius: 48rpx !important;
+  border: none !important;
+  box-shadow: 0 8rpx 24rpx rgba(0, 49, 131, 0.35);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.go-shopping-btn::after {
+  border: none !important;
+}
+
+.go-shopping-btn:active {
+  background: linear-gradient(135deg, #002868 0%, #004494 100%) !important;
+  box-shadow: 0 4rpx 12rpx rgba(0, 49, 131, 0.4);
+  transform: scale(0.96);
+}
+
 /* 订单列表 */
 .order-list {
   display: flex;
@@ -60,6 +86,50 @@
   font-size: 28rpx;
   font-weight: 600;
   color: #003183;
+}
+
+/* 订单状态行 */
+.order-status-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16rpx 24rpx;
+  background-color: #fafafa;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+}
+
+.status-label {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.status-value {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.payment-status {
+  color: #ff6b6b;
+}
+
+.payment-status.paid {
+  color: #4caf50;
+}
+
+.payment-status.partial-paid {
+  color: #ff9800;
+}
+
+.delivery-status {
+  color: #ff9800;
+}
+
+.delivery-status.delivered {
+  color: #4caf50;
 }
 
 /* 订单主体 */

@@ -4,7 +4,7 @@
   <view wx:if="{{orders.length === 0}}" class="empty-state">
     <mp-icon icon="info" color="#999999" size="80"></mp-icon>
     <text class="empty-text">暂无订单</text>
-    <button class="weui-btn weui-btn_primary" bindtap="goToIndex">去逛逛</button>
+    <button class="go-shopping-btn" bindtap="goToIndex">去逛逛</button>
   </view>
 
   <!-- 订单列表 -->
@@ -15,6 +15,18 @@
           <text class="order-time">下单时间：{{item.time}}</text>
           <view class="order-status-wrapper">
             <text class="header-status-text">{{item.status}}</text>
+          </view>
+        </view>
+        <view class="order-status-row">
+          <view class="status-item">
+            <text class="status-label">支付状态：</text>
+            <text class="status-value payment-status {{item.paymentStatus}}" wx:if="{{item.paymentStatus}}">{{item.paymentStatusText}}</text>
+            <text class="status-value payment-status" wx:else>{{item.paymentStatusText}}</text>
+          </view>
+          <view class="status-item">
+            <text class="status-label">配送状态：</text>
+            <text class="status-value delivery-status {{item.deliveryStatus}}" wx:if="{{item.deliveryStatus}}">{{item.deliveryStatusText}}</text>
+            <text class="status-value delivery-status" wx:else>{{item.deliveryStatusText}}</text>
           </view>
         </view>
         <view class="order-body">
@@ -41,9 +53,9 @@
             </view>
           </view>
         </view>
-        <view class="order-actions" bindtap="viewOrderDetail" data-id="{{item.id}}">
+        <view class="order-actions">
           <button class="weui-btn weui-btn_primary mini-btn detail-btn" size="mini" bindtap="viewOrderDetail" data-id="{{item.id}}">查看详情</button>
-          <button wx:if="{{item.status === '待处理' || item.status === '待支付' || item.status === '处理中'}}" class="weui-btn weui-btn_default mini-btn cancel-btn" size="mini" bindtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
+          <button wx:if="{{item.deliveryStatus === 'pending_delivery'}}" class="weui-btn weui-btn_default mini-btn cancel-btn" size="mini" catchtap="cancelOrder" data-id="{{item.id}}">取消订单</button>
         </view>
       </view>
     </view>

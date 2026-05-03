@@ -5,31 +5,107 @@ App({
     const cart = wx.getStorageSync('cart');
     if (!cart || cart.length === 0) {
       wx.setStorageSync('cart', []);
-      // 从后端获取购物车数据
-      this.getCartFromBackend();
     }
+    
+    // 删除订单本地缓存（小程序打开时清空，重新从后端获取）
+    wx.removeStorageSync('orders');
     
     // 执行静默登录
     this.silentLogin();
   },
   
-  // 从后端获取购物车数据
+  // 从后端获取购物车数据并合并本地购物车
   getCartFromBackend() {
+    const token = wx.getStorageSync('token');
     wx.request({
       url: this.globalData.apiBase + '/cart',
       method: 'GET',
+      header: {
+        'token': token
+      },
       success: (res) => {
         if (res.data.code === 200) {
-          const cartData = res.data.data;
-          if (cartData && cartData.length > 0) {
-            // 保存到本地存储
-            wx.setStorageSync('cart', cartData);
-            console.log('从后端获取购物车数据成功:', cartData);
-          }
+          // 确保backendCart是数组，如果不是数组则转换为空数组
+          const backendData = res.data.data;
+          const backendCart = Array.isArray(backendData) ? backendData : [];
+          const localCart = wx.getStorageSync('cart') || [];
+          
+          // 合并购物车数据
+          const mergedCart = this.mergeCarts(backendCart, localCart);
+          
+          // 保存合并后的购物车数据到本地存储
+          wx.setStorageSync('cart', mergedCart);
+          console.log('从后端获取购物车数据成功并合并:', mergedCart);
         }
       },
       fail: (error) => {
         console.error('从后端获取购物车数据失败:', error);
+      }
+    });
+  },
+  
+  // 合并后端和本地购物车数据
+  mergeCarts(backendCart, localCart) {
+    // 创建本地购物车的映射，用于快速查找
+    const localCartMap = {};
+    localCart.forEach(item => {
+      const key = `${item.product_id}_${item.sku_id}`;
+      localCartMap[key] = item;
+    });
+    
+    // 创建后端购物车的映射，用于快速查找
+    const backendCartMap = {};
+    backendCart.forEach(item => {
+      const key = `${item.product_id}_${item.sku_id}`;
+      backendCartMap[key] = item;
+    });
+    
+    // 合并结果数组
+    const mergedCart = [];
+    
+    // 遍历本地购物车
+    localCart.forEach(localItem => {
+      const key = `${localItem.product_id}_${localItem.sku_id}`;
+      if (!backendCartMap[key]) {
+        // 本地有但后端没有的商品，上传到后端
+        this.uploadCartItemToBackend(localItem);
+      }
+      // 添加到合并结果中
+      mergedCart.push(localItem);
+    });
+    
+    // 遍历后端购物车，添加本地没有的商品
+    backendCart.forEach(backendItem => {
+      const key = `${backendItem.product_id}_${backendItem.sku_id}`;
+      if (!localCartMap[key]) {
+        // 后端有但本地没有的商品，添加到合并结果中
+        mergedCart.push(backendItem);
+      }
+    });
+    
+    return mergedCart;
+  },
+  
+  // 上传购物车商品到后端
+  uploadCartItemToBackend(item) {
+    const token = wx.getStorageSync('token');
+    wx.request({
+      url: this.globalData.apiBase + '/cart',
+      method: 'POST',
+      header: {
+        'token': token
+      },
+      data: {
+        product_id: item.product_id,
+        sku_id: item.sku_id,
+        count: item.count,
+        sku_selling_price: item.sku_selling_price
+      },
+      success: (res) => {
+        console.log('上传购物车商品成功:', res.data);
+      },
+      fail: (error) => {
+        console.error('上传购物车商品失败:', error);
       }
     });
   },
@@ -72,6 +148,12 @@ App({
             wx.setStorageSync('isLogin', true);
             wx.setStorageSync('userInfo', data.userInfo || {});
             wx.setStorageSync('customerInfo', data.customerInfo || {});
+            
+            // 登录成功后，获取后端购物车数据并合并本地购物车
+            this.getCartFromBackend();
+            
+            // 触发登录完成回调，通知页面加载数据
+            this.triggerLoginCallback();
           } else {
             // 未绑定，标记为未登录状态
             wx.setStorageSync('isLogin', false);
@@ -82,15 +164,39 @@ App({
     });
   },
   
+  onHide() {
+    // 小程序退出时删除订单本地缓存
+    wx.removeStorageSync('orders');
+  },
+  
+  onUnload() {
+    // 小程序卸载时删除订单本地缓存
+    wx.removeStorageSync('orders');
+  },
+  
   globalData: {
     userInfo: null,
-    apiBase: 'http://192.168.100.108:5001/miniapi', // 后端API地址
-    baseUrl: 'http://192.168.100.108:5001/miniapi', // 后端API地址（兼容旧代码）
+    apiBase: 'http://127.0.0.1:5001/miniapi', // 后端API地址
+    baseUrl: 'http://127.0.0.1:5001/miniapi', // 后端API地址（兼容旧代码）
     colors: {
       primary: '#003183',
       secondary: '#f5f5f5',
       text: '#333333',
       lightText: '#666666'
+    },
+    loginCallback: null // 登录完成回调函数
+  },
+  
+  // 设置登录完成回调
+  setLoginCallback(callback) {
+    this.globalData.loginCallback = callback;
+  },
+  
+  // 触发登录完成回调
+  triggerLoginCallback() {
+    if (this.globalData.loginCallback) {
+      this.globalData.loginCallback();
+      this.globalData.loginCallback = null; // 只触发一次
     }
   }
 })

@@ -54,9 +54,16 @@ Page({
       title: '加载中...'
     });
     
+    const token = wx.getStorageSync('token');
+    const defaultMainImage = '/images/waitupload_main.png';
+    const defaultDetailImage = '/images/waitupload_detail.png';
+    
     wx.request({
       url: `${getApp().globalData.apiBase}/goods/${goodsId}`,
       method: 'GET',
+      header: {
+        'token': token
+      },
       success: (res) => {
         if (res.data.code === 200) {
           const goodsData = res.data.data;
@@ -65,8 +72,8 @@ Page({
             id: goodsData.id,
             name: goodsData.name,
             description: goodsData.description || '',
-            images: goodsData.images || [],
-            detailImages: goodsData.sub_images || [],
+            images: goodsData.images && goodsData.images.length > 0 ? goodsData.images : [defaultMainImage],
+            detailImages: goodsData.sub_images && goodsData.sub_images.length > 0 ? goodsData.sub_images : [defaultDetailImage],
             tags: goodsData.tags && goodsData.tags.length > 0 ? goodsData.tags : ['热销', '品质保证', '批发价'],
             skus: goodsData.skus || []
           };

@@ -28,6 +28,157 @@ Page({
   onShow() {
     this.loadCart();
   },
+  
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.syncCartFromBackend();
+  },
+  
+  // 从后端同步购物车数据
+  syncCartFromBackend() {
+    const token = wx.getStorageSync('token');
+    wx.request({
+      url: getApp().globalData.apiBase + '/cart',
+      method: 'GET',
+      header: {
+        'token': token
+      },
+      success: (res) => {
+        if (res.data.code === 200) {
+          // 确保backendCart是数组，如果不是数组则转换为空数组
+          const backendData = res.data.data;
+          const backendCart = Array.isArray(backendData) ? backendData : [];
+          const localCart = wx.getStorageSync('cart') || [];
+          
+          // 创建本地购物车的映射
+          const localCartMap = {};
+          localCart.forEach(item => {
+            const key = `${item.product_id}_${item.sku_id}`;
+            localCartMap[key] = item;
+          });
+          
+          // 创建后端购物车的映射
+          const backendCartMap = {};
+          backendCart.forEach(item => {
+            const key = `${item.product_id}_${item.sku_id}`;
+            backendCartMap[key] = item;
+          });
+          
+          // 找出后端有但本地没有的商品
+          const newItems = [];
+          backendCart.forEach(backendItem => {
+            const key = `${backendItem.product_id}_${backendItem.sku_id}`;
+            if (!localCartMap[key]) {
+              newItems.push(backendItem);
+            }
+          });
+          
+          // 找出本地有但后端没有的商品，上传到后端
+          const uploadItems = [];
+          localCart.forEach(localItem => {
+            const key = `${localItem.product_id}_${localItem.sku_id}`;
+            if (!backendCartMap[key]) {
+              uploadItems.push(localItem);
+            }
+          });
+          
+          // 上传本地有但后端没有的商品
+          uploadItems.forEach(item => {
+            this.uploadCartItem(item);
+          });
+          
+          if (newItems.length > 0 && uploadItems.length > 0) {
+            // 将新商品添加到本地购物车
+            const mergedCart = [...localCart, ...newItems];
+            wx.setStorageSync('cart', mergedCart);
+            wx.showToast({
+              title: `同步${newItems.length}件，上传${uploadItems.length}件`,
+              icon: 'success'
+            });
+          } else if (newItems.length > 0) {
+            // 将新商品添加到本地购物车
+            const mergedCart = [...localCart, ...newItems];
+            wx.setStorageSync('cart', mergedCart);
+            wx.showToast({
+              title: `成功同步${newItems.length}件商品`,
+              icon: 'success'
+            });
+          } else if (uploadItems.length > 0) {
+            wx.showToast({
+              title: `成功上传${uploadItems.length}件商品`,
+              icon: 'success'
+            });
+          } else {
+            wx.showToast({
+              title: '购物车已是最新',
+              icon: 'none'
+            });
+          }
+          
+          // 刷新页面显示
+          this.loadCart();
+        } else {
+          wx.showToast({
+            title: '同步失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (error) => {
+        console.error('同步购物车失败:', error);
+        wx.showToast({
+          title: '网络错误',
+          icon: 'none'
+        });
+      },
+      complete: () => {
+        // 停止下拉刷新
+        wx.stopPullDownRefresh();
+      }
+    });
+  },
+  
+  // 上传购物车商品到后端
+  uploadCartItem(item) {
+    const token = wx.getStorageSync('token');
+    wx.request({
+      url: getApp().globalData.apiBase + '/cart',
+      method: 'POST',
+      header: {
+        'token': token
+      },
+      data: {
+        product_id: item.product_id,
+        sku_id: item.sku_id,
+        count: item.count,
+        sku_selling_price: item.sku_selling_price
+      },
+      success: (res) => {
+        console.log('上传购物车商品成功:', res.data);
+      },
+      fail: (error) => {
+        console.error('上传购物车商品失败:', error);
+      }
+    });
+  },
+  
+  // 从后端删除购物车商品
+  deleteCartItemFromBackend(productId, skuId) {
+    const token = wx.getStorageSync('token');
+    wx.request({
+      url: `${getApp().globalData.apiBase}/cart/${skuId}`,
+      method: 'DELETE',
+      header: {
+        'token': token
+      },
+      success: (res) => {
+        console.log('删除后端购物车商品成功:', res.data);
+      },
+      fail: (error) => {
+        console.error('删除后端购物车商品失败:', error);
+      }
+    });
+  },
 
   loadCart() {
     let cart = wx.getStorageSync('cart') || [];
@@ -128,11 +279,16 @@ Page({
       content: '确定要删除这个商品吗？',
       success: (res) => {
         if (res.confirm) {
+          // 删除本地购物车
           const cart = this.data.cart.filter(item => !(item.product_id === id && item.sku_id === skuId));
           this.setData({ cart });
           wx.setStorageSync('cart', cart);
           this.calculateTotal();
           this.checkAllStatus();
+          
+          // 删除后端购物车商品
+          this.deleteCartItemFromBackend(id, skuId);
+          
           wx.showToast({
             title: '删除成功',
             icon: 'success'

@@ -4,7 +4,7 @@
   <view wx:if="{{cart.length === 0}}" class="empty-state">
     <mp-icon icon="info" color="#999999" size="80"></mp-icon>
     <text class="empty-text">购物车空空如也</text>
-    <button class="weui-btn weui-btn_primary" bindtap="goToIndex">去逛逛</button>
+    <button class="go-shopping-btn" bindtap="goToIndex">去逛逛</button>
   </view>
 
   <!-- 购物车商品列表 -->
@@ -57,7 +57,7 @@
         <text class="total-price">¥{{totalPrice}}</text>
       </view>
       <button class="weui-btn weui-btn_primary checkout-btn" bindtap="submitOrder">
-        结算({{selectedCount}})
+        配送({{selectedCount}})
       </button>
     </view>
   </view>

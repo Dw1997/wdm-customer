@@ -99,6 +99,52 @@
   border-radius: 8rpx;
 }
 
+/* 订单状态行 */
+.order-status-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  background-color: white;
+  margin-bottom: 20rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+}
+
+.status-label {
+  font-size: 28rpx;
+  color: #999999;
+}
+
+.status-value {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.payment-status {
+  color: #ff6b6b;
+}
+
+.payment-status.paid {
+  color: #4caf50;
+}
+
+.payment-status.partial_paid {
+  color: #ff9800;
+}
+
+.delivery-status {
+  color: #ff9800;
+}
+
+.delivery-status.delivered {
+  color: #4caf50;
+}
+
 /* 商品列表 */
 .order-items {
   background-color: white;

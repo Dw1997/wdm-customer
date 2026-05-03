@@ -1,18 +1,19 @@
 // index.js
 Page({
   data: {
-    banners: [
+    banners: [],
+    defaultBanners: [
       {
         id: 1,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=spice%20shop%20banner%20with%20herbs%20and%20spices%20display&image_size=landscape_16_9'
+        image: '/images/waitupload_banner.png'
       },
       {
         id: 2,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=dried%20food%20products%20banner%20for%20wholesale&image_size=landscape_16_9'
+        image: '/images/waitupload_banner.png'
       },
       {
         id: 3,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=soy%20products%20display%20banner%20in%20market&image_size=landscape_16_9'
+        image: '/images/waitupload_banner.png'
       }
     ],
     recommendedGoods: [],
@@ -35,8 +36,60 @@ Page({
   },
 
   onLoad() {
-    // 加载推荐商品
-    this.loadRecommendedGoods();
+    // 检查是否已经登录
+    const isLogin = wx.getStorageSync('isLogin');
+    if (isLogin) {
+      // 已登录，直接加载数据
+      this.loadBanners();
+      this.loadRecommendedGoods();
+    } else {
+      // 未登录，设置登录完成回调
+      const app = getApp();
+      app.setLoginCallback(() => {
+        this.loadBanners();
+        this.loadRecommendedGoods();
+      });
+    }
+  },
+  
+  // 加载banner图
+  loadBanners() {
+    const token = wx.getStorageSync('token');
+    const app = getApp();
+    const defaultBannerImage = '/images/waitupload_banner.png';
+    
+    wx.request({
+      url: app.globalData.baseUrl + '/banners',
+      method: 'GET',
+      header: {
+        'token': token
+      },
+      success: (res) => {
+        if (res.data.code === 200) {
+          const banners = res.data.data;
+          // 检查是否是有效的数组
+          if (Array.isArray(banners) && banners.length > 0) {
+            // 为每个banner设置默认图片
+            const processedBanners = banners.map(banner => ({
+              ...banner,
+              image: banner.image || defaultBannerImage
+            }));
+            this.setData({ banners: processedBanners });
+          } else {
+            // 如果后端没有返回有效的banner数据（空对象、空数组等），使用默认数据
+            this.setData({ banners: this.data.defaultBanners });
+          }
+        } else {
+          // 请求失败，使用默认banner数据
+          this.setData({ banners: this.data.defaultBanners });
+        }
+      },
+      fail: (error) => {
+        console.error('加载banner失败:', error);
+        // 网络请求失败，使用默认banner数据
+        this.setData({ banners: this.data.defaultBanners });
+      }
+    });
   },
 
   // 加载推荐商品
@@ -52,9 +105,13 @@ Page({
     }
     
     const app = getApp();
+    const token = wx.getStorageSync('token');
     wx.request({
       url: app.globalData.baseUrl + '/goods/recommended',
       method: 'GET',
+      header: {
+        'token': token
+      },
       data: {
         page: this.data.page,
         limit: this.data.limit
@@ -102,7 +159,7 @@ Page({
               units: units,
               specsMap: specsMap,
               skuIdMap: skuIdMap,
-              image: item.image || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=star%20anise%20spice%20in%20package&image_size=square',
+              image: item.image || '/images/waitupload_main.png',
               count: 0
             };
           });
@@ -364,10 +421,14 @@ Page({
   fetchSearchResults() {
     const { keyword, searchPage, searchLimit } = this.data;
     const app = getApp();
+    const token = wx.getStorageSync('token');
     
     wx.request({
       url: `${app.globalData.baseUrl}/goods/search`,
       method: 'GET',
+      header: {
+        'token': token
+      },
       data: {
         keyword: keyword,
         page: searchPage,
@@ -441,7 +502,7 @@ Page({
       
       // 检查购物车中是否已有该SKU的记录
       const cart = wx.getStorageSync('cart') || [];
-      const existingItem = cart.find(item => item.id === goodsId && item.skuId === skuId);
+      const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === skuId);
       // 如果有，使用购物车中的数量；如果没有，重置为0
       goodsItem.count = existingItem ? existingItem.count : 0;
       
@@ -477,7 +538,7 @@ Page({
 
   updateSearchCart(goodsItem, count) {
     let cart = wx.getStorageSync('cart') || [];
-    const existingItemIndex = cart.findIndex(item => item.id === goodsItem.id && item.sku_id === goodsItem.selectedSku.sku_id);
+    const existingItemIndex = cart.findIndex(item => item.product_id === goodsItem.id && item.sku_id === goodsItem.selectedSku.sku_id);
     
     if (count > 0) {
       if (existingItemIndex > -1) {
@@ -488,7 +549,7 @@ Page({
         cart[existingItemIndex].sku_unit = goodsItem.selectedSku.sku_unit;
       } else {
         cart.push({
-          id: goodsItem.id,
+          product_id: goodsItem.id,
           code: goodsItem.code,
           name: goodsItem.name,
           image: goodsItem.image,
@@ -502,7 +563,7 @@ Page({
       // 上传到后端
       this.uploadCartToBackend(goodsItem.id, goodsItem.selectedSku.sku_id, count, goodsItem.selectedSku.sku_selling_price);
     } else {
-      cart = cart.filter(item => !(item.id === goodsItem.id && item.skuId === goodsItem.selectedSku.sku_id));
+      cart = cart.filter(item => !(item.product_id === goodsItem.id && item.sku_id === goodsItem.selectedSku.sku_id));
       // 上传到后端（删除操作）
       this.uploadCartToBackend(goodsItem.id, goodsItem.selectedSku.sku_id, 0, goodsItem.selectedSku.sku_selling_price);
     }
