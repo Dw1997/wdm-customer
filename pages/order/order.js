@@ -38,7 +38,7 @@ Page({
     const { status } = this.data;
     
     // 根据状态构建API地址
-    let apiUrl = getApp().globalData.apiBase + '/orders?page=1&limit=10';
+    let apiUrl = getApp().globalData.baseUrl + '/orders?page=1&limit=10';
     if (status === 'month') {
       apiUrl += '&type=month';
     } else if (status === 'unsettled') {
@@ -197,7 +197,7 @@ Page({
         if (res.confirm) {
           const token = wx.getStorageSync('token');
           wx.request({
-            url: `${getApp().globalData.apiBase}/orders/${orderId}/cancel`,
+            url: `${getApp().globalData.baseUrl}/orders/${orderId}/cancel`,
             method: 'POST',
             header: {
               'token': token,

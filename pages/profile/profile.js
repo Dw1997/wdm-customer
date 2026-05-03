@@ -86,7 +86,7 @@ Page({
   loadStats() {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + '/shop/stats',
+      url: getApp().globalData.baseUrl + '/shop/stats',
       method: 'GET',
       header: {
         'token': token

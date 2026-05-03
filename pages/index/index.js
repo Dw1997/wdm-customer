@@ -5,15 +5,15 @@ Page({
     defaultBanners: [
       {
         id: 1,
-        image: '/images/waitupload_banner.png'
+        image: 'https://wdm-1258000354.cos.ap-guangzhou.myqcloud.com/defaults/banner/2026/05/03/2c7d2461-0f7d-4870-b1ab-fb5b8b1c6f0c-waitupload_banner.png'
       },
       {
         id: 2,
-        image: '/images/waitupload_banner.png'
+        image: 'https://wdm-1258000354.cos.ap-guangzhou.myqcloud.com/defaults/banner/2026/05/03/2c7d2461-0f7d-4870-b1ab-fb5b8b1c6f0c-waitupload_banner.png'
       },
       {
         id: 3,
-        image: '/images/waitupload_banner.png'
+        image: 'https://wdm-1258000354.cos.ap-guangzhou.myqcloud.com/defaults/banner/2026/05/03/2c7d2461-0f7d-4870-b1ab-fb5b8b1c6f0c-waitupload_banner.png'
       }
     ],
     recommendedGoods: [],
@@ -36,27 +36,25 @@ Page({
   },
 
   onLoad() {
-    // 检查是否已经登录
-    const isLogin = wx.getStorageSync('isLogin');
-    if (isLogin) {
-      // 已登录，直接加载数据
-      this.loadBanners();
-      this.loadRecommendedGoods();
-    } else {
-      // 未登录，设置登录完成回调
-      const app = getApp();
-      app.setLoginCallback(() => {
-        this.loadBanners();
-        this.loadRecommendedGoods();
-      });
-    }
+    console.log('首页 onLoad 执行');
+    // 直接加载数据，后端会处理登录状态
+    console.log('调用 loadBanners');
+    this.loadBanners();
+    console.log('调用 loadRecommendedGoods');
+    this.loadRecommendedGoods();
+  },
+  
+  onShow() {
+    console.log('首页 onShow 执行');
   },
   
   // 加载banner图
   loadBanners() {
+    console.log('loadBanners 方法执行');
     const token = wx.getStorageSync('token');
     const app = getApp();
-    const defaultBannerImage = '/images/waitupload_banner.png';
+    console.log('token:', token ? '存在' : '不存在');
+    console.log('baseUrl:', app.globalData.baseUrl);
     
     wx.request({
       url: app.globalData.baseUrl + '/banners',
@@ -69,12 +67,7 @@ Page({
           const banners = res.data.data;
           // 检查是否是有效的数组
           if (Array.isArray(banners) && banners.length > 0) {
-            // 为每个banner设置默认图片
-            const processedBanners = banners.map(banner => ({
-              ...banner,
-              image: banner.image || defaultBannerImage
-            }));
-            this.setData({ banners: processedBanners });
+            this.setData({ banners: banners });
           } else {
             // 如果后端没有返回有效的banner数据（空对象、空数组等），使用默认数据
             this.setData({ banners: this.data.defaultBanners });
@@ -94,9 +87,13 @@ Page({
 
   // 加载推荐商品
   loadRecommendedGoods(isLoadMore = false) {
-    if (this.data.isLoading) return;
+    if (this.data.isLoading) {
+      console.log('正在加载中，跳过请求');
+      return;
+    }
     
     this.setData({ isLoading: true });
+    console.log('开始加载推荐商品，页码:', this.data.page);
     
     if (!isLoadMore) {
       wx.showLoading({
@@ -122,9 +119,11 @@ Page({
         }
         
         if (res.data.code === 200) {
-          const goodsList = res.data.data;
+          const goodsData = res.data.data;
+          // 确保goodsList是数组
+          const goodsList = Array.isArray(goodsData) ? goodsData : [];
           
-          // 如果没有更多数据
+          // 如果没有更多数据（商品数量小于limit）
           if (goodsList.length < this.data.limit) {
             this.setData({ hasMore: false });
           }
@@ -159,7 +158,7 @@ Page({
               units: units,
               specsMap: specsMap,
               skuIdMap: skuIdMap,
-              image: item.image || '/images/waitupload_main.png',
+              image: item.image,
               count: 0
             };
           });
@@ -223,6 +222,7 @@ Page({
       hasMore: true,
       recommendedGoods: []
     });
+    this.loadBanners();
     this.loadRecommendedGoods();
     wx.stopPullDownRefresh();
   },
@@ -310,7 +310,7 @@ Page({
   uploadCartToBackend(goodsId, skuId, count, price) {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + '/cart',
+      url: getApp().globalData.baseUrl + '/cart',
       method: 'POST',
       header: {
         'token': token

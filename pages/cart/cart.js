@@ -38,7 +38,7 @@ Page({
   syncCartFromBackend() {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + '/cart',
+      url: getApp().globalData.baseUrl + '/cart',
       method: 'GET',
       header: {
         'token': token
@@ -142,7 +142,7 @@ Page({
   uploadCartItem(item) {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + '/cart',
+      url: getApp().globalData.baseUrl + '/cart',
       method: 'POST',
       header: {
         'token': token
@@ -166,7 +166,7 @@ Page({
   deleteCartItemFromBackend(productId, skuId) {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: `${getApp().globalData.apiBase}/cart/${skuId}`,
+      url: `${getApp().globalData.baseUrl}/cart/${skuId}`,
       method: 'DELETE',
       header: {
         'token': token
@@ -382,7 +382,7 @@ Page({
     // 发送请求到后端
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + '/submitOrder',
+      url: getApp().globalData.baseUrl + '/submitOrder',
       method: 'POST',
       header: {
         'token': token,

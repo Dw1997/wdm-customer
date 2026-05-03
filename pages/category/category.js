@@ -16,8 +16,15 @@ Page({
   },
 
   onLoad() {
-    // 加载分类列表
+    // 直接加载数据，后端会处理登录状态
     this.loadCategories();
+  },
+
+  onShow() {
+    // 页面显示时刷新数据
+    if (this.data.categories.length === 0) {
+      this.loadCategories();
+    }
   },
 
   // 加载分类列表
@@ -38,7 +45,9 @@ Page({
         wx.hideLoading();
         
         if (res.data.code === 200) {
-          const categories = res.data.data;
+          const categoriesData = res.data.data;
+          // 确保categories是数组
+          const categories = Array.isArray(categoriesData) ? categoriesData : [];
           this.setData({ 
             categories,
             activeCategory: categories.length > 0 ? categories[0].id : 0,
@@ -134,7 +143,7 @@ Page({
                 units: units,
                 specsMap: specsMap,
                 skuIdMap: skuIdMap,
-                image: item.image || '/images/waitupload_main.png',
+                image: item.image,
                 count: 0
               };
             });
@@ -192,6 +201,17 @@ Page({
     }, () => {
       this.setCurrentGoods(this.data.activeCategory, true);
     });
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.setData({
+      page: 1,
+      hasMore: true,
+      currentGoods: []
+    });
+    this.loadCategories();
+    wx.stopPullDownRefresh();
   },
 
   // 切换分类时重置分页
@@ -292,7 +312,7 @@ Page({
   uploadCartToBackend(goodsId, skuId, count, price) {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + '/cart',
+      url: getApp().globalData.baseUrl + '/cart',
       method: 'POST',
       header: {
         'token': token

@@ -27,7 +27,7 @@ Page({
     // 从后端获取订单详情
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + `/orders/${id}`,
+      url: getApp().globalData.baseUrl + `/orders/${id}`,
       method: 'GET',
       header: {
         'token': token,
@@ -142,7 +142,7 @@ Page({
         if (res.confirm) {
           const token = wx.getStorageSync('token');
           wx.request({
-            url: `${getApp().globalData.apiBase}/orders/${orderId}/cancel`,
+            url: `${getApp().globalData.baseUrl}/orders/${orderId}/cancel`,
             method: 'POST',
             header: {
               'token': token,

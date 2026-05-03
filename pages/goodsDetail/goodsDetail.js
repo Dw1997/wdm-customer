@@ -55,11 +55,9 @@ Page({
     });
     
     const token = wx.getStorageSync('token');
-    const defaultMainImage = '/images/waitupload_main.png';
-    const defaultDetailImage = '/images/waitupload_detail.png';
     
     wx.request({
-      url: `${getApp().globalData.apiBase}/goods/${goodsId}`,
+      url: `${getApp().globalData.baseUrl}/goods/${goodsId}`,
       method: 'GET',
       header: {
         'token': token
@@ -72,8 +70,8 @@ Page({
             id: goodsData.id,
             name: goodsData.name,
             description: goodsData.description || '',
-            images: goodsData.images && goodsData.images.length > 0 ? goodsData.images : [defaultMainImage],
-            detailImages: goodsData.sub_images && goodsData.sub_images.length > 0 ? goodsData.sub_images : [defaultDetailImage],
+            images: goodsData.images || [],
+            detailImages: goodsData.sub_images || [],
             tags: goodsData.tags && goodsData.tags.length > 0 ? goodsData.tags : ['热销', '品质保证', '批发价'],
             skus: goodsData.skus || []
           };
@@ -313,7 +311,7 @@ Page({
   uploadCartToBackend(goodsId, skuId, count, price) {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: getApp().globalData.apiBase + '/cart',
+      url: getApp().globalData.baseUrl + '/cart',
       method: 'POST',
       header: {
         'token': token
@@ -339,7 +337,7 @@ Page({
 
     // 上传到后端
     wx.request({
-      url: getApp().globalData.apiBase + '/order/buynow',
+      url: getApp().globalData.baseUrl + '/order/buynow',
       method: 'POST',
       data: {
         product_id: goods.id,

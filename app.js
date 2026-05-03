@@ -1,6 +1,25 @@
 // app.js
 App({
   onLaunch() {
+    // 获取当前小程序的账号信息
+    const accountInfo = wx.getAccountInfoSync();
+    // 获取当前环境：develop(开发版), trial(体验版), release(正式版)
+    const envVersion = accountInfo.miniProgram.envVersion;
+    
+    // 根据环境设置 baseUrl
+    let baseUrl = '';
+    if (envVersion === 'release') {
+      baseUrl = 'https://pwdm.dwhhh.cn/miniapi';
+    } else if (envVersion === 'trial') {
+      baseUrl = 'https://twdm.dwhhh.cn/miniapi';
+    } else {
+      baseUrl = 'http://192.168.100.108:5001/miniapi';
+    }
+    
+    // 设置全局 baseUrl
+    this.globalData.baseUrl = baseUrl;
+    console.log('当前环境:', envVersion, 'baseUrl:', baseUrl);
+    
     // 初始化购物车
     const cart = wx.getStorageSync('cart');
     if (!cart || cart.length === 0) {
@@ -18,7 +37,7 @@ App({
   getCartFromBackend() {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: this.globalData.apiBase + '/cart',
+      url: this.globalData.baseUrl + '/cart',
       method: 'GET',
       header: {
         'token': token
@@ -90,7 +109,7 @@ App({
   uploadCartItemToBackend(item) {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: this.globalData.apiBase + '/cart',
+      url: this.globalData.baseUrl + '/cart',
       method: 'POST',
       header: {
         'token': token
@@ -130,7 +149,7 @@ App({
   
   sendCodeToServer: function (code) {
     wx.request({
-      url: this.globalData.apiBase + '/silentLogin',
+      url: this.globalData.baseUrl + '/silentLogin',
       method: 'POST',
       data: { code: code },
       success: (res) => {
@@ -176,8 +195,7 @@ App({
   
   globalData: {
     userInfo: null,
-    apiBase: 'http://127.0.0.1:5001/miniapi', // 后端API地址
-    baseUrl: 'http://127.0.0.1:5001/miniapi', // 后端API地址（兼容旧代码）
+    baseUrl: '', // 后端API地址，动态设置
     colors: {
       primary: '#003183',
       secondary: '#f5f5f5',

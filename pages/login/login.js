@@ -35,7 +35,7 @@ Page({
     wx.showLoading({ title: '登录中...' });
     
     wx.request({
-      url: getApp().globalData.apiBase + '/bindPhone',
+      url: getApp().globalData.baseUrl + '/bindPhone',
       method: 'POST',
       header: { 'token': token }, // 携带登录态
       data: {
