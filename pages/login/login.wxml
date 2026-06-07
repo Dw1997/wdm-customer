@@ -26,9 +26,4 @@
       <text>微信一键授权手机号</text>
     </button>
   </view>
-
-  <!-- 提示信息 -->
-  <view wx:if="{{showTip}}" class="tip-container tip-{{tipType}}">
-    <text class="tip-text">{{tipMsg}}</text>
-  </view>
 </view>

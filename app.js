@@ -179,6 +179,11 @@ App({
             console.log('需要绑定手机号');
           }
         }
+      },
+      fail: (err) => {
+        console.error('静默登录请求失败:', err);
+        // 静默登录失败不阻塞使用，标记为未登录状态
+        wx.setStorageSync('isLogin', false);
       }
     });
   },

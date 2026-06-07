@@ -37,6 +37,7 @@ Page({
     dialogUnitIndex: 0,
     dialogUnit: '斤',
     currentAction: '',
+    skuCounts: {},
     tipMsg: '',
     tipType: 'success',
     showTip: false
@@ -136,11 +137,16 @@ Page({
 
   // 显示数量选择模态框
   showQuantityDialog() {
+    const cart = wx.getStorageSync('cart') || [];
+    const currentSkuId = this.data.goods.skuId;
+    const existingItem = cart.find(item => item.product_id === this.data.goods.id && item.sku_id === currentSkuId);
+    const initialCount = existingItem ? existingItem.count : 0;
+    
     this.setData({
       showQuantityDialog: true,
-      dialogCount: this.data.count,
-      dialogUnitIndex: this.data.units.indexOf(this.data.goods.unit),
-      dialogUnit: this.data.goods.unit
+      dialogCount: initialCount,
+      dialogUnit: this.data.goods.unit,
+      skuCounts: { [currentSkuId]: initialCount }
     });
   },
 
@@ -162,21 +168,27 @@ Page({
 
   // 模态框内增加数量
   dialogIncreaseCount() {
+    const newCount = this.data.dialogCount + 1;
+    const skuCounts = { ...this.data.skuCounts };
+    skuCounts[this.data.goods.skuId] = newCount;
     this.setData({
-      dialogCount: this.data.dialogCount + 1
+      dialogCount: newCount,
+      skuCounts: skuCounts
     });
   },
 
   // 模态框内减少数量
   dialogDecreaseCount() {
-    if (this.data.dialogCount > 1) {
+    if (this.data.dialogCount > 0) {
+      const newCount = this.data.dialogCount - 1;
+      const skuCounts = { ...this.data.skuCounts };
+      skuCounts[this.data.goods.skuId] = newCount;
       this.setData({
-        dialogCount: this.data.dialogCount - 1
+        dialogCount: newCount,
+        skuCounts: skuCounts
       });
     }
   },
-
-  // 模态框内选择单位
   dialogChangeUnit(e) {
     const unitIndex = e.detail.value;
     const unit = this.data.units[unitIndex];
@@ -200,26 +212,42 @@ Page({
   // 模态框内选择SKU
   dialogChangeSku(e) {
     const unit = e.currentTarget.dataset.unit;
-    const skuId = parseInt(e.currentTarget.dataset.skuId);
+    const newSkuId = parseInt(e.currentTarget.dataset.skuId);
     const price = parseFloat(e.currentTarget.dataset.price);
+    const currentSkuId = this.data.goods.skuId;
     
-    // 从购物车中获取当前SKU的数量
-    const cart = wx.getStorageSync('cart') || [];
-    const existingItem = cart.find(item => item.id === this.data.goods.id && item.sku_id === skuId);
-    const count = existingItem ? existingItem.count : 0;
+    // 保存当前SKU的对话框数量
+    const skuCounts = { ...this.data.skuCounts };
+    skuCounts[currentSkuId] = this.data.dialogCount;
+    
+    // 加载新SKU的数量：优先用已缓存的对话框数量，其次查购物车，最后为0
+    let newCount = 0;
+    if (skuCounts[newSkuId] !== undefined) {
+      newCount = skuCounts[newSkuId];
+    } else {
+      const cart = wx.getStorageSync('cart') || [];
+      const existingItem = cart.find(item => item.product_id === this.data.goods.id && item.sku_id === newSkuId);
+      newCount = existingItem ? existingItem.count : 0;
+      skuCounts[newSkuId] = newCount;
+    }
     
     this.setData({
       dialogUnit: unit,
       'goods.unit': unit,
       'goods.price': price,
-      'goods.skuId': skuId,
-      dialogCount: count
+      'goods.skuId': newSkuId,
+      dialogCount: newCount,
+      skuCounts: skuCounts
     });
   },
 
   // 模态框按钮点击
   confirmQuantityDialog() {
-    // 点击确定按钮
+    if (this.data.dialogCount <= 0) {
+      wx.showToast({ title: '请选择数量', icon: 'none' });
+      return;
+    }
+    
     this.setData({
       count: this.data.dialogCount,
       showQuantityDialog: false
@@ -279,12 +307,11 @@ Page({
     const existingItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
 
     if (existingItem) {
-      existingItem.count += count;
-      existingItem.sku_id = goods.skuId;
+      existingItem.count = count;
       existingItem.sku_selling_price = goods.price;
       existingItem.sku_specification = goods.specs;
       existingItem.sku_unit = goods.unit;
-      existingItem.totalPrice = (goods.price * existingItem.count).toFixed(1);
+      existingItem.totalPrice = (goods.price * count).toFixed(1);
     } else {
       cart.push({
         product_id: goods.id,
@@ -305,7 +332,7 @@ Page({
     this.showTipMsg('已加入购物车');
     
     // 上传到后端
-    this.uploadCartToBackend(goods.id, goods.skuId, existingItem ? existingItem.count : count, goods.price);
+    this.uploadCartToBackend(goods.id, goods.skuId, count, goods.price);
   },
 
   uploadCartToBackend(goodsId, skuId, count, price) {

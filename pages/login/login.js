@@ -1,10 +1,7 @@
 // pages/login/login.js
 Page({
   data: {
-    loading: false,
-    tipMsg: '',
-    tipType: '',
-    showTip: false
+    loading: false
   },
 
   onLoad(options) {
@@ -14,30 +11,30 @@ Page({
 
   onGetPhoneNumber(e) {
     if (e.detail.errMsg === 'getPhoneNumber:ok') {
-      // 用户同意授权，拿到加密数据
       const { encryptedData, iv } = e.detail;
       this.setData({ loading: true });
-      
-      console.log('用户同意授权', e.detail);
-      
-      // 将加密数据 + 本地存储的 token 发送给后端
       this.bindPhone(encryptedData, iv);
     } else {
-      // 用户拒绝授权
-      console.log('用户拒绝授权', e.detail);
-      this.showTip('授权失败', 'warn');
+      wx.showToast({ title: '授权已取消', icon: 'none' });
     }
   },
 
   bindPhone(encryptedData, iv) {
     const token = wx.getStorageSync('token');
     
-    wx.showLoading({ title: '登录中...' });
+    if (!token) {
+      const app = getApp();
+      app.silentLogin();
+      wx.showToast({ title: '网络未就绪，请稍后再试', icon: 'none' });
+      return;
+    }
+    
+    wx.showLoading({ title: '登录中...', mask: true });
     
     wx.request({
       url: getApp().globalData.baseUrl + '/bindPhone',
       method: 'POST',
-      header: { 'token': token }, // 携带登录态
+      header: { 'token': token },
       data: {
         encryptedData: encryptedData,
         iv: iv
@@ -47,7 +44,6 @@ Page({
         this.setData({ loading: false });
         
         if (res.data.code === 200) {
-          // 登录成功，保存 token 和用户信息
           const { token, userInfo, customerInfo } = res.data.data;
           
           wx.setStorageSync('token', token);
@@ -55,46 +51,39 @@ Page({
           wx.setStorageSync('customerInfo', customerInfo);
           wx.setStorageSync('isLogin', true);
 
-          this.showTip('登录成功', 'success');
+          wx.showToast({
+            title: '登录成功',
+            icon: 'success',
+            duration: 1500
+          });
 
           setTimeout(() => {
-            if (this.data.from === 'cart') {
-              wx.navigateBack();
-            } else if (this.data.from === 'order') {
-              wx.switchTab({
-                url: '/pages/order/order'
-              });
-            } else if (this.data.from === 'profile') {
-              wx.switchTab({
-                url: '/pages/profile/profile'
-              });
-            } else {
-              wx.switchTab({
-                url: '/pages/profile/profile'
-              });
-            }
+            this.navigateAfterLogin();
           }, 1500);
         } else {
-          this.showTip(res.data.message || '登录失败', 'warn');
+          wx.showToast({
+            title: res.data.message || '登录失败，请重试',
+            icon: 'none',
+            duration: 2000
+          });
         }
       },
       fail: () => {
         wx.hideLoading();
         this.setData({ loading: false });
-        this.showTip('网络请求失败', 'error');
+        wx.showToast({ title: '网络请求失败，请检查网络', icon: 'none', duration: 2000 });
       }
     });
   },
 
-  showTip(msg, type) {
-    this.setData({
-      tipMsg: msg,
-      tipType: type,
-      showTip: true
-    });
+  navigateAfterLogin() {
+    if (this.data.from === 'cart') {
+      wx.navigateBack();
+    } else if (this.data.from === 'order') {
+      wx.switchTab({ url: '/pages/order/order' });
+    } else {
+      wx.switchTab({ url: '/pages/profile/profile' });
+    }
+  },
 
-    setTimeout(() => {
-      this.setData({ showTip: false });
-    }, 2000);
-  }
 });
