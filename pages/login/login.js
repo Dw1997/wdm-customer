@@ -15,7 +15,7 @@ Page({
       this.setData({ loading: true });
       this.bindPhone(encryptedData, iv);
     } else {
-      wx.showToast({ title: '授权已取消', icon: 'none' });
+      wx.showToast({ title: '您取消了手机号授权，登录后可体验完整功能', icon: 'none' });
     }
   },
 
@@ -25,11 +25,11 @@ Page({
     if (!token) {
       const app = getApp();
       app.silentLogin();
-      wx.showToast({ title: '网络未就绪，请稍后再试', icon: 'none' });
+      wx.showToast({ title: '网络尚未就绪，请稍后再试', icon: 'none' });
       return;
     }
     
-    wx.showLoading({ title: '登录中...', mask: true });
+    wx.showLoading({ title: '正在登录...', mask: true });
     
     wx.request({
       url: getApp().globalData.baseUrl + '/bindPhone',
@@ -62,7 +62,7 @@ Page({
           }, 1500);
         } else {
           wx.showToast({
-            title: res.data.message || '登录失败，请重试',
+            title: res.data.message || '登录失败，请检查网络后重试',
             icon: 'none',
             duration: 2000
           });
@@ -71,7 +71,7 @@ Page({
       fail: () => {
         wx.hideLoading();
         this.setData({ loading: false });
-        wx.showToast({ title: '网络请求失败，请检查网络', icon: 'none', duration: 2000 });
+        wx.showToast({ title: '网络连接失败，请检查网络后重试', icon: 'none', duration: 2000 });
       }
     });
   },

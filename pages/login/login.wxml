@@ -2,7 +2,7 @@
   <!-- 登录头部 -->
   <view class="login-header">
     <view class="logo-wrapper">
-      <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+      <text class="logo-text">味都美</text>
     </view>
     <text class="app-name">味都美副食商城</text>
     <text class="welcome-text">欢迎回来</text>
@@ -22,7 +22,6 @@
       bindgetphonenumber="onGetPhoneNumber" 
       loading="{{loading}}"
     >
-      <mp-icon icon="phone" color="#ffffff" size="24"></mp-icon>
       <text>微信一键授权手机号</text>
     </button>
   </view>

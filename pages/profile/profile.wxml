@@ -9,7 +9,7 @@
         <text class="profile-phone">{{userInfo.phone || '138****8888'}}</text>
       </view>
       <view class="profile-edit" bindtap="editProfile">
-        <mp-icon icon="editor" color="#ffffff" size="32"></mp-icon>
+        <text class="edit-text">编辑</text>
       </view>
     </view>
   </view>
@@ -38,7 +38,7 @@
     <view class="service-grid">
       <view class="service-item" bindtap="contactService">
         <view class="service-icon" style="background-color: #fff7e6;">
-          <mp-icon icon="service" color="#ff9800" size="48"></mp-icon>
+          <text class="icon-char">联</text>
         </view>
         <text class="service-label">联系我们</text>
       </view>
@@ -57,7 +57,7 @@
     <view class="settings-list">
       <view class="setting-item" bindtap="goToAddress">
         <view class="setting-icon" style="background-color: #e6f7ff;">
-          <mp-icon icon="location" color="#003183" size="32"></mp-icon>
+          <text class="icon-char">址</text>
         </view>
         <text class="setting-label">收货地址</text>
         <mp-icon icon="arrow" color="#c8c8cd" size="24"></mp-icon>
@@ -67,6 +67,4 @@
 
 
 
-  <!-- 顶部提示 -->
-  <mp-toptips msg="{{tipMsg}}" type="{{tipType}}" show="{{showTip}}"></mp-toptips>
 </view>

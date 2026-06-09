@@ -57,6 +57,11 @@
   justify-content: center;
 }
 
+.edit-text {
+  font-size: 24rpx;
+  color: #ffffff;
+}
+
 /* 统计信息卡片 */
 .stats-card {
   margin: -20rpx 30rpx 30rpx;
@@ -173,6 +178,11 @@
   font-weight: 600;
   color: #333333;
   text-align: center;
+}
+
+.icon-char {
+  font-size: 40rpx;
+  font-weight: 700;
 }
 
 /* 设置板块 */

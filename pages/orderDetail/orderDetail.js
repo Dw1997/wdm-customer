@@ -162,14 +162,14 @@ Page({
                 }, 1500);
               } else {
                 wx.showToast({
-                  title: res.data.message || '取消失败',
+                  title: res.data.message || '取消失败，请稍后重试',
                   icon: 'none'
                 });
               }
             },
             fail: () => {
               wx.showToast({
-                title: '取消失败',
+                title: '取消失败，请检查网络后重试',
                 icon: 'none'
               });
             }

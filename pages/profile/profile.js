@@ -18,9 +18,6 @@ Page({
       totalOrders: 0,
       totalAmount: '0.0'
     },
-    tipMsg: '',
-    tipType: '',
-    showTip: false
   },
 
   onLoad(options) {
@@ -113,24 +110,32 @@ Page({
 
   editProfile() {
     if (!this.data.customerInfo.isBound) {
-      this.showTip('账号尚未与客户信息关联，请联系管理员', 'warn');
+      wx.showToast({
+        title: '暂无关联店铺，请联系管理员绑定',
+        icon: 'none',
+        duration: 2500
+      });
       return;
     }
     
     wx.showToast({
-      title: '编辑个人资料',
+      title: '个人资料编辑功能开发中',
       icon: 'none'
     });
   },
 
   goToAddress() {
     if (!this.data.customerInfo.isBound) {
-      this.showTip('账号尚未与客户信息关联，请联系管理员', 'warn');
+      wx.showToast({
+        title: '暂无关联店铺，请联系管理员绑定',
+        icon: 'none',
+        duration: 2500
+      });
       return;
     }
     
     wx.showToast({
-      title: '收货地址',
+      title: '收货地址功能开发中',
       icon: 'none'
     });
   },
@@ -144,7 +149,7 @@ Page({
       fail: (err) => {
         console.error('拨号失败', err);
         wx.showToast({
-          title: '拨号失败，请检查权限',
+          title: '拨号失败，请在系统设置中开启电话权限',
           icon: 'none'
         });
       }
@@ -153,7 +158,7 @@ Page({
 
   goToAbout() {
     wx.showToast({
-      title: '关于我们',
+      title: '味都美副食商城 v1.0',
       icon: 'none'
     });
   },
@@ -167,14 +172,20 @@ Page({
           wx.clearStorageSync();
           this.loadUserInfo();
           this.loadStats();
-          this.showTip('缓存已清除', 'success');
+          wx.showToast({
+            title: '缓存已清理完毕',
+            icon: 'success'
+          });
         }
       }
     });
   },
 
   checkUpdate() {
-    this.showTip('已是最新版本', 'success');
+    wx.showToast({
+      title: '当前已是最新版本',
+      icon: 'success'
+    });
   },
 
 
@@ -186,15 +197,4 @@ Page({
     });
   },
 
-  showTip(msg, type) {
-    this.setData({
-      tipMsg: msg,
-      tipType: type,
-      showTip: true
-    });
-
-    setTimeout(() => {
-      this.setData({ showTip: false });
-    }, 2000);
-  }
 })

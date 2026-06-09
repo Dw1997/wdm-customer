@@ -91,7 +91,7 @@ Page({
             loading: false
           });
           wx.showToast({
-            title: '获取订单失败',
+            title: '订单加载失败，请下拉刷新重试',
             icon: 'none'
           });
         }
@@ -103,7 +103,7 @@ Page({
           loading: false
         });
         wx.showToast({
-          title: '网络异常，无法获取订单',
+          title: '网络连接失败，请检查网络后重试',
           icon: 'none'
         });
       }
@@ -214,14 +214,14 @@ Page({
                 });
               } else {
                 wx.showToast({
-                  title: res.data.message || '取消失败',
+                  title: res.data.message || '取消失败，请稍后重试',
                   icon: 'none'
                 });
               }
             },
             fail: () => {
               wx.showToast({
-                title: '取消失败',
+                title: '取消失败，请检查网络后重试',
                 icon: 'none'
               });
             }

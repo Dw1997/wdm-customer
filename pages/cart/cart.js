@@ -110,7 +110,7 @@ Page({
             });
           } else {
             wx.showToast({
-              title: '购物车已是最新',
+              title: '购物车已是最新状态',
               icon: 'none'
             });
           }
@@ -119,7 +119,7 @@ Page({
           this.loadCart();
         } else {
           wx.showToast({
-            title: '同步失败',
+            title: '同步失败，请下拉刷新重试',
             icon: 'none'
           });
         }
@@ -127,7 +127,7 @@ Page({
       fail: (error) => {
         console.error('同步购物车失败:', error);
         wx.showToast({
-          title: '网络错误',
+          title: '网络连接失败，请检查网络后重试',
           icon: 'none'
         });
       },
@@ -366,14 +366,14 @@ Page({
     const checkedItems = this.data.cart.filter(item => item.checked);
     if (checkedItems.length === 0) {
       wx.showToast({
-        title: '请选择要结算的商品',
+        title: '请勾选需要结算的商品',
         icon: 'none'
       });
       return;
     }
 
     this.setData({ submitting: true });
-    wx.showLoading({ title: '提交订单中...' });
+    wx.showLoading({ title: '正在提交订单，请稍候...' });
 
     // 生成订单数据
     const now = new Date();
@@ -430,7 +430,7 @@ Page({
           });
 
           wx.showToast({
-            title: '订单提交成功',
+            title: '订单已提交，我们会尽快为您配送',
             icon: 'success'
           });
         } else if (res.data.code === 401 || res.data.code === 402 || res.data.code === 403) {
@@ -451,7 +451,7 @@ Page({
           });
         } else {
           wx.showToast({
-            title: res.data.message || '订单提交失败',
+            title: res.data.message || '订单提交失败，请稍后重试',
             icon: 'none'
           });
         }
@@ -460,7 +460,7 @@ Page({
         wx.hideLoading();
         this.setData({ submitting: false });
         wx.showToast({
-          title: '网络请求失败',
+          title: '网络连接失败，请检查网络后重试',
           icon: 'none'
         });
       }

@@ -38,9 +38,7 @@ Page({
     dialogUnit: '斤',
     currentAction: '',
     skuCounts: {},
-    tipMsg: '',
-    tipType: 'success',
-    showTip: false
+
   },
 
   onLoad(options) {
@@ -66,7 +64,11 @@ Page({
       success: (res) => {
         if (res.data.code === 200) {
           const goodsData = res.data.data;
-          // 处理数据结构
+          // 处理数据结构，统一 SKU ID 为 Number 类型
+          const skus = (goodsData.skus || []).map(sku => ({
+            ...sku,
+            sku_id: Number(sku.sku_id)
+          }));
           const goods = {
             id: goodsData.id,
             name: goodsData.name,
@@ -74,7 +76,7 @@ Page({
             images: goodsData.images || [],
             detailImages: goodsData.sub_images || [],
             tags: goodsData.tags && goodsData.tags.length > 0 ? goodsData.tags : ['热销', '品质保证', '批发价'],
-            skus: goodsData.skus || []
+            skus: skus
           };
           
           // 设置默认SKU
@@ -96,7 +98,7 @@ Page({
       },
       fail: (error) => {
         console.error('获取商品详情失败:', error);
-        this.showTipMsg('网络错误', 'error');
+        this.showTipMsg('网络连接失败，请检查网络后重试', 'error');
       },
       complete: () => {
         wx.hideLoading();
@@ -138,15 +140,36 @@ Page({
   // 显示数量选择模态框
   showQuantityDialog() {
     const cart = wx.getStorageSync('cart') || [];
+    const goodsId = this.data.goods.id;
+    
+    console.log('[showQuantityDialog] goods.id=', goodsId, 'type=', typeof goodsId);
+    console.log('[showQuantityDialog] goods.skus=', JSON.stringify(this.data.goods.skus));
+    console.log('[showQuantityDialog] cart=', JSON.stringify(cart));
+    
+    // 预初始化所有SKU的计数（从购物车中读取）
+    const skuCounts = {};
+    if (this.data.goods.skus && this.data.goods.skus.length > 0) {
+      this.data.goods.skus.forEach(sku => {
+        const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === sku.sku_id);
+        console.log('[showQuantityDialog] sku_id=', sku.sku_id, 'type=', typeof sku.sku_id, 'existingItem=', existingItem ? existingItem.count : null);
+        skuCounts[sku.sku_id] = existingItem ? existingItem.count : 0;
+      });
+    } else {
+      console.warn('[showQuantityDialog] goods.skus 为空或未定义！');
+    }
+    
     const currentSkuId = this.data.goods.skuId;
-    const existingItem = cart.find(item => item.product_id === this.data.goods.id && item.sku_id === currentSkuId);
-    const initialCount = existingItem ? existingItem.count : 0;
+    const initialCount = skuCounts[currentSkuId] !== undefined ? skuCounts[currentSkuId] : 0;
+    
+    console.log('[showQuantityDialog] currentSkuId=', currentSkuId, 'type=', typeof currentSkuId);
+    console.log('[showQuantityDialog] skuCounts=', JSON.stringify(skuCounts));
+    console.log('[showQuantityDialog] initialCount=', initialCount);
     
     this.setData({
       showQuantityDialog: true,
       dialogCount: initialCount,
       dialogUnit: this.data.goods.unit,
-      skuCounts: { [currentSkuId]: initialCount }
+      skuCounts: skuCounts
     });
   },
 
@@ -211,25 +234,36 @@ Page({
 
   // 模态框内选择SKU
   dialogChangeSku(e) {
+    console.log('[dialogChangeSku] ===== 触发 =====');
+    console.log('[dialogChangeSku] e.currentTarget.dataset=', JSON.stringify(e.currentTarget.dataset));
+    
     const unit = e.currentTarget.dataset.unit;
-    const newSkuId = parseInt(e.currentTarget.dataset.skuId);
+    // dataset 中属性均为字符串，统一转为 Number 保持类型一致
+    const rawSkuId = e.currentTarget.dataset.skuId;
+    const newSkuId = Number(rawSkuId);
     const price = parseFloat(e.currentTarget.dataset.price);
     const currentSkuId = this.data.goods.skuId;
     
-    // 保存当前SKU的对话框数量
+    console.log('[dialogChangeSku] rawSkuId=', rawSkuId, 'type=', typeof rawSkuId);
+    console.log('[dialogChangeSku] newSkuId=', newSkuId, 'type=', typeof newSkuId);
+    console.log('[dialogChangeSku] currentSkuId=', currentSkuId, 'type=', typeof currentSkuId);
+    console.log('[dialogChangeSku] dialogCount before=', this.data.dialogCount);
+    console.log('[dialogChangeSku] skuCounts before=', JSON.stringify(this.data.skuCounts));
+    
+    if (newSkuId === currentSkuId) {
+      console.log('[dialogChangeSku] 同一个SKU，跳过切换');
+      return;
+    }
+    
+    // 保存当前SKU的对话框数量到 skuCounts
     const skuCounts = { ...this.data.skuCounts };
     skuCounts[currentSkuId] = this.data.dialogCount;
     
-    // 加载新SKU的数量：优先用已缓存的对话框数量，其次查购物车，最后为0
-    let newCount = 0;
-    if (skuCounts[newSkuId] !== undefined) {
-      newCount = skuCounts[newSkuId];
-    } else {
-      const cart = wx.getStorageSync('cart') || [];
-      const existingItem = cart.find(item => item.product_id === this.data.goods.id && item.sku_id === newSkuId);
-      newCount = existingItem ? existingItem.count : 0;
-      skuCounts[newSkuId] = newCount;
-    }
+    // 加载新SKU的数量（skuCounts 已在打开对话框时预填充所有SKU）
+    const newCount = skuCounts[newSkuId] !== undefined ? skuCounts[newSkuId] : 0;
+    
+    console.log('[dialogChangeSku] newCount=', newCount);
+    console.log('[dialogChangeSku] skuCounts after=', JSON.stringify(skuCounts));
     
     this.setData({
       dialogUnit: unit,
@@ -244,7 +278,7 @@ Page({
   // 模态框按钮点击
   confirmQuantityDialog() {
     if (this.data.dialogCount <= 0) {
-      wx.showToast({ title: '请选择数量', icon: 'none' });
+      wx.showToast({ title: '请先选择购买数量', icon: 'none' });
       return;
     }
     
@@ -289,14 +323,11 @@ Page({
 
   // 显示提示
   showTipMsg(msg, type = 'success') {
-    this.setData({
-      tipMsg: msg,
-      tipType: type,
-      showTip: true
+    wx.showToast({
+      title: msg,
+      icon: type === 'error' ? 'none' : 'success',
+      duration: 2000
     });
-    setTimeout(() => {
-      this.setData({ showTip: false });
-    }, 2000);
   },
 
   addCart() {

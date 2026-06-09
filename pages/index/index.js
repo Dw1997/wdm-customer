@@ -31,8 +31,7 @@ Page({
     searchPage: 1,
     searchLimit: 10,
     searched: false,
-    errorMsg: '',
-    showError: false
+
   },
 
   onLoad() {
@@ -143,7 +142,7 @@ Page({
             item.skus.forEach(sku => {
               prices[sku.sku_unit] = sku.sku_selling_price;
               specsMap[sku.sku_unit] = sku.sku_specification && sku.sku_specification !== 'None' ? sku.sku_specification : '';
-              skuIdMap[sku.sku_unit] = sku.sku_id;
+              skuIdMap[sku.sku_unit] = Number(sku.sku_id);
             });
             
             return {
@@ -152,7 +151,7 @@ Page({
               name: item.name,
               price: defaultSku.sku_selling_price,
               unit: defaultSku.sku_unit,
-              skuId: defaultSku.sku_id,
+              skuId: Number(defaultSku.sku_id),
               specs: defaultSku.sku_specification && defaultSku.sku_specification !== 'None' ? defaultSku.sku_specification : '',
               prices: prices,
               units: units,
@@ -167,7 +166,7 @@ Page({
           const cart = wx.getStorageSync('cart') || [];
           // 更新商品的数量，基于当前SKU
           const goodsWithCount = recommendedGoods.map(goods => {
-            const cartItem = cart.find(item => item.id === goods.id && item.sku_id === goods.skuId);
+            const cartItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
             return {
               ...goods,
               count: cartItem ? cartItem.count : 0
@@ -186,7 +185,7 @@ Page({
         } else {
           this.setData({ isLoading: false });
           wx.showToast({
-            title: '加载失败',
+            title: '商品加载失败，请下拉刷新重试',
             icon: 'none'
           });
         }
@@ -197,7 +196,7 @@ Page({
         }
         this.setData({ isLoading: false });
         wx.showToast({
-          title: '网络错误',
+          title: '网络连接失败，请检查网络后重试',
           icon: 'none'
         });
         console.error('Failed to load recommended goods:', err);
@@ -319,7 +318,7 @@ Page({
       // 上传到后端
       this.uploadCartToBackend(goods.id, goods.skuId, count, goods.price);
     } else {
-      cart = cart.filter(item => !(item.product_id === goodsId && item.skuId === goods.skuId));
+      cart = cart.filter(item => !(item.product_id === goodsId && item.sku_id === goods.skuId));
       // 上传到后端（删除操作）
       this.uploadCartToBackend(goods.id, goods.skuId, 0, goods.price);
     }
@@ -353,33 +352,26 @@ Page({
   changeUnit(e) {
     const goodsId = e.currentTarget.dataset.id;
     const unitIndex = e.detail.value;
+    let unit, newPrice, newSpecs, newSkuId, newCount;
     const recommendedGoods = this.data.recommendedGoods.map(goods => {
       if (goods.id === goodsId) {
-        const unit = goods.units[unitIndex];
-        const newPrice = goods.prices[unit];
-        const newSpecs = goods.specsMap && goods.specsMap[unit] ? goods.specsMap[unit] : '';
-        return { ...goods, unit, price: newPrice, specs: newSpecs };
+        unit = goods.units[unitIndex];
+        newPrice = goods.prices[unit];
+        newSpecs = goods.specsMap && goods.specsMap[unit] ? goods.specsMap[unit] : '';
+        newSkuId = goods.skuIdMap[unit];
+        
+        // 从购物车中获取新SKU的数量
+        const cart = wx.getStorageSync('cart') || [];
+        const cartItem = cart.find(item => item.product_id === goodsId && item.sku_id === newSkuId);
+        newCount = cartItem ? cartItem.count : 0;
+        
+        return { ...goods, unit, price: newPrice, specs: newSpecs, skuId: newSkuId, count: newCount };
       }
       return goods;
     });
     this.setData({ recommendedGoods });
     
-    // 更新购物车中的商品信息
-    this.updateCartItem(goodsId, unit, newPrice, newSpecs);
-    
-    console.log('Change unit for goods', goodsId, 'to', recommendedGoods.find(g => g.id === goodsId)?.unit);
-  },
-  
-  updateCartItem(goodsId, unit, price, specs) {
-    let cart = wx.getStorageSync('cart') || [];
-    const cartItem = cart.find(item => item.id === goodsId);
-    if (cartItem) {
-      cartItem.unit = unit;
-      cartItem.price = price;
-      cartItem.specs = specs;
-      cartItem.totalPrice = (price * cartItem.count).toFixed(2);
-      wx.setStorageSync('cart', cart);
-    }
+    console.log('Change unit for goods', goodsId, 'to', unit, 'skuId:', newSkuId, 'count:', newCount);
   },
 
   // 搜索相关函数
@@ -462,10 +454,13 @@ Page({
           // 为每个商品添加默认选中的SKU和数量
           const processedResults = newResults.map(item => {
             const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
+            // 从购物车中获取该SKU的数量
+            const cart = wx.getStorageSync('cart') || [];
+            const cartItem = cart.find(c => c.product_id === item.id && c.sku_id === defaultSku.sku_id);
             return {
               ...item,
               selectedSku: defaultSku,
-              count: 0
+              count: cartItem ? cartItem.count : 0
             };
           });
           const results = searchPage === 1 ? processedResults : [...this.data.searchResults, ...processedResults];
@@ -490,7 +485,7 @@ Page({
           searchLoading: false,
           searchLoadingMore: false
         });
-        this.showError('网络错误，请稍后重试');
+        this.showError('网络连接失败，请检查网络后重试');
       }
     });
   },
@@ -615,13 +610,10 @@ Page({
   },
 
   showError(msg) {
-    this.setData({
-      errorMsg: msg,
-      showError: true
+    wx.showToast({
+      title: msg,
+      icon: 'none',
+      duration: 2000
     });
-    
-    setTimeout(() => {
-      this.setData({ showError: false });
-    }, 2000);
   }
 })

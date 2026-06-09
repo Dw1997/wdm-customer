@@ -71,12 +71,12 @@ Page({
             }
           });
         } else {
-          wx.showToast({ title: '加载分类失败', icon: 'none' });
+          wx.showToast({ title: '分类加载失败，请下拉刷新重试', icon: 'none' });
         }
       },
       fail: (err) => {
         wx.hideLoading();
-        wx.showToast({ title: '网络错误', icon: 'none' });
+        wx.showToast({ title: '网络连接失败，请检查网络后重试', icon: 'none' });
         console.error('Failed to load categories:', err);
       }
     });
@@ -177,12 +177,12 @@ Page({
             this.loadNextCategory(categoryId);
           }
         } else {
-          wx.showToast({ title: '加载商品失败', icon: 'none' });
+          wx.showToast({ title: '商品加载失败，请下拉刷新重试', icon: 'none' });
         }
       },
       fail: (err) => {
         this.setData({ loading: false });
-        wx.showToast({ title: '网络错误', icon: 'none' });
+        wx.showToast({ title: '网络连接失败，请检查网络后重试', icon: 'none' });
         console.error('Failed to load category goods:', err);
       }
     });

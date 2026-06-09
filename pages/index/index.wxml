@@ -159,5 +159,4 @@
       </scroll-view>
     </view>
   </view>
-  <mp-toptips msg="{{errorMsg}}" type="error" show="{{showError}}"></mp-toptips>
 </view>

@@ -169,9 +169,6 @@
     </view>
   </view>
 
-  <!-- 顶部提示 -->
-  <mp-toptips msg="{{tipMsg}}" type="{{tipType}}" show="{{showTip}}"></mp-toptips>
-
   <!-- 分享弹窗 -->
   <mp-half-screen-dialog show="{{showShareDialog}}" bindclose="closeShareDialog" title="分享给好友">
     <view class="share-options">
