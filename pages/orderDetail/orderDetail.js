@@ -151,9 +151,7 @@ Page({
             },
             success: (res) => {
               if (res.data.code === 200) {
-                // 将订单商品放回购物车（同SKU合并数量）
-                this.addOrderItemsToCart(order);
-                // 同步到后端
+                // 后端已将商品放回购物车，同步即可
                 getApp().getCartFromBackend();
                 wx.showModal({
                   title: '已取消',

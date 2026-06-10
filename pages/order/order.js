@@ -205,8 +205,20 @@ Page({
             },
             success: (res) => {
               if (res.data.code === 200) {
-                // 从详情接口获取完整订单数据（含 sku_id），再放回购物车
-                this.fetchOrderAndRestoreCart(orderId);
+                // 后端已将商品放回购物车，同步即可
+                getApp().getCartFromBackend();
+                this.loadOrders();
+                wx.showModal({
+                  title: '已取消',
+                  content: '订单已取消，商品已放回购物车',
+                  confirmText: '前往购物车',
+                  cancelText: '知道了',
+                  success: (modalRes) => {
+                    if (modalRes.confirm) {
+                      wx.switchTab({ url: '/pages/cart/cart' });
+                    }
+                  }
+                });
               } else {
                 wx.showToast({
                   title: res.data.message || '取消失败，请稍后重试',
@@ -226,64 +238,6 @@ Page({
     });
   },
   
-  // 从详情接口获取完整订单数据后放回购物车
-  fetchOrderAndRestoreCart(orderId) {
-    const token = wx.getStorageSync('token');
-    wx.request({
-      url: `${getApp().globalData.baseUrl}/orders/${orderId}`,
-      method: 'GET',
-      header: { 'token': token },
-      success: (res) => {
-        if (res.data.code === 200) {
-          const detail = res.data.data;
-          // 构建完整的订单对象，确保 sku_id 存在
-          const order = {
-            items: (detail.items || []).map(item => ({
-              product_id: item.product_id,
-              sku_id: item.sku_id,
-              product_name: item.product_name,
-              sku_unit: item.sku_unit,
-              sku_specification: item.sku_specification,
-              sku_selling_price: item.sku_selling_price,
-              quantity: item.quantity,
-              image: item.image
-            }))
-          };
-          this.addOrderItemsToCart(order);
-        }
-        // 无论详情是否成功，都同步并刷新
-        getApp().getCartFromBackend();
-        this.loadOrders();
-        wx.showModal({
-          title: '已取消',
-          content: '订单已取消，商品已放回购物车',
-          confirmText: '前往购物车',
-          cancelText: '知道了',
-          success: (modalRes) => {
-            if (modalRes.confirm) {
-              wx.switchTab({ url: '/pages/cart/cart' });
-            }
-          }
-        });
-      },
-      fail: () => {
-        getApp().getCartFromBackend();
-        this.loadOrders();
-        wx.showModal({
-          title: '已取消',
-          content: '订单已取消，商品已放回购物车',
-          confirmText: '前往购物车',
-          cancelText: '知道了',
-          success: (modalRes) => {
-            if (modalRes.confirm) {
-              wx.switchTab({ url: '/pages/cart/cart' });
-            }
-          }
-        });
-      }
-    });
-  },
-
   // 将订单商品添加到购物车
   addOrderItemsToCart(order) {
     if (!order || !order.items) return;
@@ -291,12 +245,12 @@ Page({
     let cart = wx.getStorageSync('cart') || [];
     
     order.items.forEach(item => {
-      // 跳过缺失 product_id 或 sku_id 的条目（订单列表接口可能不返回这两个字段）
+      // 跳过缺失 product_id 或 sku_id 的条目
       if (!item.product_id || !item.sku_id) {
         console.warn('[addOrderItemsToCart] 跳过缺少 ID 的条目:', JSON.stringify(item));
         return;
       }
-      // 用字符串 key 匹配，彻底避免类型不一致
+      // 用字符串 key 匹配
       const itemKey = String(item.product_id) + '_' + String(item.sku_id);
       const existingItem = cart.find(cartItem => 
         String(cartItem.product_id) + '_' + String(cartItem.sku_id) === itemKey
@@ -306,7 +260,6 @@ Page({
         // 如果购物车中已有该商品，增加数量
         existingItem.count = (existingItem.count || 0) + (item.count || item.quantity || 0);
       } else {
-        // 如果购物车中没有该商品，添加新商品
         cart.push({
           product_id: item.product_id,
           sku_id: item.sku_id,
