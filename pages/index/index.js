@@ -45,6 +45,24 @@ Page({
   
   onShow() {
     console.log('首页 onShow 执行');
+    this.refreshCartCounts();
+  },
+  
+  // 刷新所有商品卡片上显示的购物车数量
+  refreshCartCounts() {
+    const cart = wx.getStorageSync('cart') || [];
+    if (this.data.recommendedGoods.length === 0) return;
+    
+    const updatedGoods = this.data.recommendedGoods.map(goods => {
+      const cartItem = cart.find(item => 
+        item.product_id == goods.id && item.sku_id == goods.skuId
+      );
+      return {
+        ...goods,
+        count: cartItem ? cartItem.count : 0
+      };
+    });
+    this.setData({ recommendedGoods: updatedGoods });
   },
   
   // 加载banner图
@@ -166,7 +184,7 @@ Page({
           const cart = wx.getStorageSync('cart') || [];
           // 更新商品的数量，基于当前SKU
           const goodsWithCount = recommendedGoods.map(goods => {
-            const cartItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
+            const cartItem = cart.find(item => item.product_id == goods.id && item.sku_id == goods.skuId);
             return {
               ...goods,
               count: cartItem ? cartItem.count : 0
@@ -255,7 +273,7 @@ Page({
       if (goods.id === goodsId) {
         // 从购物车中获取当前SKU的数量
         const cart = wx.getStorageSync('cart') || [];
-        const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
+    const existingItem = cart.find(item => item.product_id == goodsId && item.sku_id == goods.skuId);
         const currentCount = existingItem ? existingItem.count : 0;
         
         let newCount;
@@ -318,7 +336,7 @@ Page({
       // 上传到后端
       this.uploadCartToBackend(goods.id, goods.skuId, count, goods.price);
     } else {
-      cart = cart.filter(item => !(item.product_id === goodsId && item.sku_id === goods.skuId));
+      cart = cart.filter(item => !(item.product_id == goodsId && item.sku_id == goods.skuId));
       // 上传到后端（删除操作）
       this.uploadCartToBackend(goods.id, goods.skuId, 0, goods.price);
     }
@@ -362,7 +380,7 @@ Page({
         
         // 从购物车中获取新SKU的数量
         const cart = wx.getStorageSync('cart') || [];
-        const cartItem = cart.find(item => item.product_id === goodsId && item.sku_id === newSkuId);
+        const cartItem = cart.find(item => item.product_id == goodsId && item.sku_id == newSkuId);
         newCount = cartItem ? cartItem.count : 0;
         
         return { ...goods, unit, price: newPrice, specs: newSpecs, skuId: newSkuId, count: newCount };
@@ -456,7 +474,7 @@ Page({
             const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
             // 从购物车中获取该SKU的数量
             const cart = wx.getStorageSync('cart') || [];
-            const cartItem = cart.find(c => c.product_id === item.id && c.sku_id === defaultSku.sku_id);
+            const cartItem = cart.find(c => c.product_id == item.id && c.sku_id == defaultSku.sku_id);
             return {
               ...item,
               selectedSku: defaultSku,
@@ -519,7 +537,7 @@ Page({
       
       // 检查购物车中是否已有该SKU的记录
       const cart = wx.getStorageSync('cart') || [];
-      const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === skuId);
+      const existingItem = cart.find(item => item.product_id == goodsId && item.sku_id == skuId);
       // 如果有，使用购物车中的数量；如果没有，重置为0
       goodsItem.count = existingItem ? existingItem.count : 0;
       
@@ -576,7 +594,7 @@ Page({
 
   updateSearchCart(goodsItem, count) {
     let cart = wx.getStorageSync('cart') || [];
-    const existingItemIndex = cart.findIndex(item => item.product_id === goodsItem.id && item.sku_id === goodsItem.selectedSku.sku_id);
+    const existingItemIndex = cart.findIndex(item => item.product_id == goodsItem.id && item.sku_id == goodsItem.selectedSku.sku_id);
     
     if (count > 0) {
       if (existingItemIndex > -1) {
@@ -601,7 +619,7 @@ Page({
       // 上传到后端
       this.uploadCartToBackend(goodsItem.id, goodsItem.selectedSku.sku_id, count, goodsItem.selectedSku.sku_selling_price);
     } else {
-      cart = cart.filter(item => !(item.product_id === goodsItem.id && item.sku_id === goodsItem.selectedSku.sku_id));
+      cart = cart.filter(item => !(item.product_id == goodsItem.id && item.sku_id == goodsItem.selectedSku.sku_id));
       // 上传到后端（删除操作）
       this.uploadCartToBackend(goodsItem.id, goodsItem.selectedSku.sku_id, 0, goodsItem.selectedSku.sku_selling_price);
     }

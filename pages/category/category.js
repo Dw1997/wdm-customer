@@ -144,7 +144,7 @@ Page({
           // 加载购物车数据
           const cart = wx.getStorageSync('cart') || [];
           const goodsWithCount = processedGoods.map(goods => {
-            const cartItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
+            const cartItem = cart.find(item => item.product_id == goods.id && item.sku_id == goods.skuId);
             return { ...goods, count: cartItem ? cartItem.count : 0 };
           });
           
@@ -373,7 +373,7 @@ Page({
     const categories = this.data.categories.map(cat => ({
       ...cat,
       goods: cat.goods?.map(goods => {
-        const cartItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
+        const cartItem = cart.find(item => item.product_id == goods.id && item.sku_id == goods.skuId);
         return { ...goods, count: cartItem ? cartItem.count : 0 };
       }) || []
     }));
@@ -407,7 +407,7 @@ Page({
           goods: cat.goods?.map(goods => {
             if (goods.id === goodsId) {
               const cart = wx.getStorageSync('cart') || [];
-              const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === goods.skuId);
+              const existingItem = cart.find(item => item.product_id == goodsId && item.sku_id == goods.skuId);
               const currentCount = existingItem ? existingItem.count : 0;
               
               let newCount;
@@ -444,7 +444,7 @@ Page({
 
   updateCart(goodsId, skuId, count, goods) {
     let cart = wx.getStorageSync('cart') || [];
-    const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === skuId);
+    const existingItem = cart.find(item => item.product_id == goodsId && item.sku_id == skuId);
     
     if (count > 0) {
       if (existingItem) {
@@ -469,7 +469,7 @@ Page({
       // 上传到后端
       this.uploadCartToBackend(goods.id, goods.skuId, count, goods.price);
     } else {
-      cart = cart.filter(item => !(item.product_id === goodsId && item.sku_id === skuId));
+      cart = cart.filter(item => !(item.product_id == goodsId && item.sku_id == skuId));
       // 上传到后端（删除操作）
       this.uploadCartToBackend(goods.id, goods.skuId, 0, goods.price);
     }

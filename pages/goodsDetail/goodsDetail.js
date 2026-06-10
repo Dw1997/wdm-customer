@@ -150,7 +150,7 @@ Page({
     const skuCounts = {};
     if (this.data.goods.skus && this.data.goods.skus.length > 0) {
       this.data.goods.skus.forEach(sku => {
-        const existingItem = cart.find(item => item.product_id === goodsId && item.sku_id === sku.sku_id);
+        const existingItem = cart.find(item => item.product_id == goodsId && item.sku_id == sku.sku_id);
         console.log('[showQuantityDialog] sku_id=', sku.sku_id, 'type=', typeof sku.sku_id, 'existingItem=', existingItem ? existingItem.count : null);
         skuCounts[sku.sku_id] = existingItem ? existingItem.count : 0;
       });
@@ -335,7 +335,7 @@ Page({
     const count = this.data.count;
 
     let cart = wx.getStorageSync('cart') || [];
-    const existingItem = cart.find(item => item.product_id === goods.id && item.sku_id === goods.skuId);
+    const existingItem = cart.find(item => item.product_id == goods.id && item.sku_id == goods.skuId);
 
     if (existingItem) {
       existingItem.count = count;

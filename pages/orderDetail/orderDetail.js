@@ -51,6 +51,7 @@ Page({
             itemsCount: orderData.items_count,
             items: orderData.items.map(item => ({
               product_id: item.product_id,
+              sku_id: item.sku_id,
               product_name: item.product_name,
               sku_unit: item.sku_unit,
               sku_specification: item.sku_specification,
@@ -150,16 +151,23 @@ Page({
             },
             success: (res) => {
               if (res.data.code === 200) {
-                // 将订单商品放回购物车
+                // 将订单商品放回购物车（同SKU合并数量）
                 this.addOrderItemsToCart(order);
-                wx.showToast({
-                  title: '订单已取消，商品已放回购物车',
-                  icon: 'success'
+                // 同步到后端
+                getApp().getCartFromBackend();
+                wx.showModal({
+                  title: '已取消',
+                  content: '订单已取消，商品已放回购物车',
+                  confirmText: '前往购物车',
+                  cancelText: '返回',
+                  success: (modalRes) => {
+                    if (modalRes.confirm) {
+                      wx.switchTab({ url: '/pages/cart/cart' });
+                    } else {
+                      wx.navigateBack();
+                    }
+                  }
                 });
-                // 返回上一页并刷新订单列表
-                setTimeout(() => {
-                  wx.navigateBack();
-                }, 1500);
               } else {
                 wx.showToast({
                   title: res.data.message || '取消失败，请稍后重试',
@@ -186,8 +194,15 @@ Page({
     let cart = wx.getStorageSync('cart') || [];
     
     order.items.forEach(item => {
+      // 跳过缺失 product_id 或 sku_id 的条目
+      if (!item.product_id || !item.sku_id) {
+        console.warn('[addOrderItemsToCart] 跳过缺少 ID 的条目:', JSON.stringify(item));
+        return;
+      }
+      // 用字符串 key 匹配，彻底避免类型不一致
+      const itemKey = String(item.product_id) + '_' + String(item.sku_id);
       const existingItem = cart.find(cartItem => 
-        cartItem.product_id === item.product_id && cartItem.sku_id === item.sku_id
+        String(cartItem.product_id) + '_' + String(cartItem.sku_id) === itemKey
       );
       
       if (existingItem) {

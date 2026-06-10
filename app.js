@@ -34,8 +34,12 @@ App({
   },
   
   // 从后端获取购物车数据并合并本地购物车
-  getCartFromBackend() {
+  getCartFromBackend(callback) {
     const token = wx.getStorageSync('token');
+    if (!token) {
+      if (callback) callback();
+      return;
+    }
     wx.request({
       url: this.globalData.baseUrl + '/cart',
       method: 'GET',
@@ -56,53 +60,61 @@ App({
           wx.setStorageSync('cart', mergedCart);
           console.log('从后端获取购物车数据成功并合并:', mergedCart);
         }
+        if (callback) callback();
       },
       fail: (error) => {
         console.error('从后端获取购物车数据失败:', error);
+        if (callback) callback();
       }
     });
   },
   
-  // 合并后端和本地购物车数据
+  // 合并后端和本地购物车数据（以本地数据为准）
   mergeCarts(backendCart, localCart) {
-    // 创建本地购物车的映射，用于快速查找
-    const localCartMap = {};
-    localCart.forEach(item => {
-      const key = `${item.product_id}_${item.sku_id}`;
-      localCartMap[key] = item;
+    // 统一规范化函数
+    const normalize = item => ({
+      product_id: Number(item.product_id),
+      sku_id: Number(item.sku_id),
+      code: item.code || '',
+      name: item.name || '',
+      image: item.image || '',
+      count: item.count || 0,
+      sku_selling_price: item.sku_selling_price || 0,
+      sku_specification: item.sku_specification || '',
+      sku_unit: item.sku_unit || ''
     });
-    
-    // 创建后端购物车的映射，用于快速查找
-    const backendCartMap = {};
-    backendCart.forEach(item => {
-      const key = `${item.product_id}_${item.sku_id}`;
-      backendCartMap[key] = item;
-    });
-    
-    // 合并结果数组
-    const mergedCart = [];
-    
-    // 遍历本地购物车
-    localCart.forEach(localItem => {
-      const key = `${localItem.product_id}_${localItem.sku_id}`;
-      if (!backendCartMap[key]) {
-        // 本地有但后端没有的商品，上传到后端
-        this.uploadCartItemToBackend(localItem);
+    const getKey = item => String(item.product_id) + '_' + String(item.sku_id);
+
+    // 规范化两端数据
+    const normLocal = localCart.map(normalize);
+    const normBackend = backendCart.map(normalize);
+
+    // 以本地数据为权威，构建本地映射
+    const localMap = {};
+    normLocal.forEach(item => { localMap[getKey(item)] = item; });
+
+    // 构建后端映射，用于判断是否需要上传
+    const backendMap = {};
+    normBackend.forEach(item => { backendMap[getKey(item)] = item; });
+
+    // 结果以本地数据为准
+    const merged = [...normLocal];
+
+    // 本地有但后端没有的 → 上传到后端
+    normLocal.forEach(item => {
+      if (!backendMap[getKey(item)]) {
+        this.uploadCartItemToBackend(item);
       }
-      // 添加到合并结果中
-      mergedCart.push(localItem);
     });
-    
-    // 遍历后端购物车，添加本地没有的商品
-    backendCart.forEach(backendItem => {
-      const key = `${backendItem.product_id}_${backendItem.sku_id}`;
-      if (!localCartMap[key]) {
-        // 后端有但本地没有的商品，添加到合并结果中
-        mergedCart.push(backendItem);
+
+    // 后端有但本地没有的 → 添加到结果
+    normBackend.forEach(item => {
+      if (!localMap[getKey(item)]) {
+        merged.push(item);
       }
     });
-    
-    return mergedCart;
+
+    return merged;
   },
   
   // 上传购物车商品到后端
