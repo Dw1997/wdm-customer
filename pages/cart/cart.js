@@ -181,6 +181,11 @@ Page({
     this.setData({ cart });
     wx.setStorageSync('cart', cart);
     this.calculateTotal();
+    // 上传到后端
+    const changedItem = cart.find(item => item.product_id == id && item.sku_id == skuId);
+    if (changedItem) {
+      this.uploadCartItem({ product_id: id, sku_id: skuId, count: changedItem.count, sku_selling_price: changedItem.sku_selling_price });
+    }
   },
 
   decreaseCount(e) {
@@ -199,6 +204,11 @@ Page({
     this.setData({ cart });
     wx.setStorageSync('cart', cart);
     this.calculateTotal();
+    // 上传到后端
+    const changedItem = cart.find(item => item.product_id == id && item.sku_id == skuId);
+    if (changedItem) {
+      this.uploadCartItem({ product_id: id, sku_id: skuId, count: changedItem.count, sku_selling_price: changedItem.sku_selling_price });
+    }
   },
 
   deleteItem(e) {
@@ -238,11 +248,13 @@ Page({
     if (index === 1) {
       // 点击确定按钮
       const { deleteGoodsId, deleteGoodsSkuId } = this.data;
-      const cart = this.data.cart.filter(item => !(item.id === deleteGoodsId && item.sku_id === deleteGoodsSkuId));
+      const cart = this.data.cart.filter(item => !(item.product_id == deleteGoodsId && item.sku_id == deleteGoodsSkuId));
       this.setData({ cart, showDeleteDialog: false });
       wx.setStorageSync('cart', cart);
       this.calculateTotal();
       this.checkAllStatus();
+      // 同步删除到后端
+      this.deleteCartItemFromBackend(deleteGoodsId, deleteGoodsSkuId);
       wx.showToast({
         title: '删除成功',
         icon: 'success'

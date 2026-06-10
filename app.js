@@ -69,9 +69,8 @@ App({
     });
   },
   
-  // 合并后端和本地购物车数据（以本地数据为准）
+  // 合并购物车：取并集，同SKU取数量更大的一方
   mergeCarts(backendCart, localCart) {
-    // 统一规范化函数
     const normalize = item => ({
       product_id: Number(item.product_id),
       sku_id: Number(item.sku_id),
@@ -85,35 +84,38 @@ App({
     });
     const getKey = item => String(item.product_id) + '_' + String(item.sku_id);
 
-    // 规范化两端数据
     const normLocal = localCart.map(normalize);
     const normBackend = backendCart.map(normalize);
 
-    // 以本地数据为权威，构建本地映射
-    const localMap = {};
-    normLocal.forEach(item => { localMap[getKey(item)] = item; });
-
-    // 构建后端映射，用于判断是否需要上传
     const backendMap = {};
     normBackend.forEach(item => { backendMap[getKey(item)] = item; });
 
-    // 结果以本地数据为准
-    const merged = [...normLocal];
-
-    // 本地有但后端没有的 → 上传到后端
+    // 结果：以本地为基础，同SKU取数量更大的
+    const resultMap = {};
     normLocal.forEach(item => {
-      if (!backendMap[getKey(item)]) {
-        this.uploadCartItemToBackend(item);
+      const key = getKey(item);
+      const backendItem = backendMap[key];
+      if (backendItem && backendItem.count > item.count) {
+        resultMap[key] = backendItem;
+      } else {
+        resultMap[key] = item;
+        if (!backendItem) {
+          this.uploadCartItemToBackend(item);
+        }
       }
     });
 
-    // 后端有但本地没有的 → 添加到结果
+    // 后端有但本地没有的 → 加入
     normBackend.forEach(item => {
-      if (!localMap[getKey(item)]) {
-        merged.push(item);
+      const key = getKey(item);
+      if (!resultMap[key]) {
+        resultMap[key] = item;
       }
     });
 
+    // 转为数组返回
+    const merged = [];
+    Object.keys(resultMap).forEach(key => merged.push(resultMap[key]));
     return merged;
   },
   
