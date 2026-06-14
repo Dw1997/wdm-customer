@@ -8,6 +8,7 @@ Page({
     loadingCategory: null,   // 当前正在加载的分类ID（用于防止重复加载）
     noMore: false,
     pageSize: 10,
+    scrollToSection: '',    // 右侧 scroll-view 的 scroll-into-view 目标
     // 辅助数据
     sectionTopList: [],     // 存储每个分类区块距离右侧滚动容器顶部的距离
     // 保存每个分类的分页状态
@@ -170,7 +171,15 @@ Page({
           // 加载新数据后，重新计算区块位置
           setTimeout(() => {
             this.calcSectionsTop();
-          }, 100);
+            // 如果是从左侧菜单点击触发的加载，加载完成后自动滚动到目标区块
+            if (this._pendingScrollTo === categoryId) {
+              this._pendingScrollTo = null;
+              const targetId = `section-${categoryId}`;
+              this.setData({ scrollToSection: '' }, () => {
+                this.setData({ scrollToSection: targetId });
+              });
+            }
+          }, 150);
           
           // 如果当前分类没有更多商品，自动加载下一个分类的商品
           if (!hasMore && goodsList.length > 0) {
@@ -311,34 +320,24 @@ Page({
     
     if (!category || categoryId === this.data.activeCategory) return;
     
+    const targetId = `section-${categoryId}`;
+    
     this.setData({ 
       activeCategory: categoryId,
       activeMenuId: `menu-${categoryId}`
     });
     
-    // 如果该分类没有商品，先加载商品
+    // 如果该分类没有商品，先加载商品，加载完成后自动滚动
     if (!category.goods || category.goods.length === 0) {
+      this._pendingScrollTo = categoryId;
       this.loadGoodsForCategory(categoryId);
       return;
     }
     
-    // 滚动右侧到指定区块
-    wx.createSelectorQuery().in(this)
-      .select(`#section-${categoryId}`)
-      .boundingClientRect()
-      .select('.category-right')
-      .scrollOffset()
-      .exec((res) => {
-        if (res[0]) {
-          const sectionTop = res[0].top;
-          const currentScrollTop = res[1]?.scrollTop || 0;
-          // 滚动到目标位置
-          wx.pageScrollTo({
-            scrollTop: currentScrollTop + sectionTop - 10, // 减去偏移让标题不完全贴边
-            duration: 300
-          });
-        }
-      });
+    // 先清空再设置目标，确保 scroll-into-view 每次都能检测到变化
+    this.setData({ scrollToSection: '' }, () => {
+      this.setData({ scrollToSection: targetId });
+    });
   },
 
   // 下拉加载更多

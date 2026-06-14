@@ -72,7 +72,8 @@
       
       <scroll-view 
         class="result-list" 
-        scroll-y="true" 
+        scroll-y="true"
+        lower-threshold="300"
         bindscrolltolower="loadMoreSearch"
         style="-webkit-overflow-scrolling: touch; overflow-y: auto;"
       >

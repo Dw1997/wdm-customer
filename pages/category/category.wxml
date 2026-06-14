@@ -25,10 +25,11 @@
     <!-- 右侧商品列表 -->
     <scroll-view 
       class="category-right" 
-      scroll-y="true" 
+      scroll-y="true"
+      scroll-into-view="{{scrollToSection}}"
       bindscroll="onGoodsScroll"
       bindscrolltolower="onReachBottom"
-      lower-threshold="100"
+      lower-threshold="500"
       enhanced 
       show-scrollbar="{{false}}"
     >
