@@ -59,8 +59,8 @@
 
   <!-- 顶部提示 -->
 
-  <!-- 搜索结果模态框 -->
-  <view class="search-modal {{showSearchModal ? 'show' : ''}}" catchtouchmove="true">
+  <!-- 搜索结果模态框（wx:if 确保隐藏时彻底移出DOM，避免 catchtouchmove 拦截页面滚动） -->
+  <view wx:if="{{showSearchModal}}" class="search-modal show" catchtouchmove="true">
     <view class="modal-mask" bindtap="closeSearchModal" catchtouchmove="true"></view>
     <view class="modal-content" catchtouchmove="true">
       <view class="modal-header">

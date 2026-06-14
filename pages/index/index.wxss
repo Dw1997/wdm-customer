@@ -201,7 +201,7 @@
   margin-top: 40rpx;
 }
 
-/* 搜索结果模态框 */
+/* 搜索结果模态框（显示/隐藏由 wx:if 控制，无需 visibility/opacity 过渡） */
 .search-modal {
   position: fixed;
   top: 0;
@@ -209,11 +209,9 @@
   right: 0;
   bottom: 0;
   z-index: 1000;
-  visibility: hidden;
-  opacity: 0;
-  transition: all 0.3s ease;
 }
 
+/* 保留 .show 以兼容 wx:if 渲染时的初始状态 */
 .search-modal.show {
   visibility: visible;
   opacity: 1;

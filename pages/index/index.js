@@ -137,11 +137,26 @@ Page({
         
         if (res.data.code === 200) {
           const goodsData = res.data.data;
-          // 确保goodsList是数组
-          const goodsList = Array.isArray(goodsData) ? goodsData : [];
+          // 兼容两种后端返回格式：
+          // 格式1（旧版）：纯数组 [...] 
+          // 格式2（新版分页）：{ hasMore: boolean, list: [...] }
+          let goodsList;
+          let responseHasMore;
+          if (Array.isArray(goodsData)) {
+            // 纯数组格式
+            goodsList = goodsData;
+            responseHasMore = goodsList.length >= this.data.limit;
+          } else if (goodsData && typeof goodsData === 'object') {
+            // 分页对象格式
+            goodsList = Array.isArray(goodsData.list) ? goodsData.list : [];
+            responseHasMore = goodsData.hasMore !== undefined ? goodsData.hasMore : (goodsList.length >= this.data.limit);
+          } else {
+            goodsList = [];
+            responseHasMore = false;
+          }
           
-          // 如果没有更多数据（商品数量小于limit）
-          if (goodsList.length < this.data.limit) {
+          // 根据后端返回更新 hasMore
+          if (!responseHasMore || goodsList.length < this.data.limit) {
             this.setData({ hasMore: false });
           }
           
@@ -467,8 +482,19 @@ Page({
       success: (res) => {
         if (res.data.code === 200) {
           const searchData = res.data.data;
-          // 确保newResults是数组，如果不是数组（包括空对象）则转换为空数组
-          const newResults = Array.isArray(searchData) ? searchData : [];
+          // 兼容两种后端返回格式：纯数组 或 { hasMore, list }
+          let newResults;
+          let responseHasMore;
+          if (Array.isArray(searchData)) {
+            newResults = searchData;
+            responseHasMore = newResults.length >= searchLimit;
+          } else if (searchData && typeof searchData === 'object') {
+            newResults = Array.isArray(searchData.list) ? searchData.list : [];
+            responseHasMore = searchData.hasMore !== undefined ? searchData.hasMore : (newResults.length >= searchLimit);
+          } else {
+            newResults = [];
+            responseHasMore = false;
+          }
           // 为每个商品添加默认选中的SKU和数量
           const processedResults = newResults.map(item => {
             const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
@@ -485,7 +511,7 @@ Page({
           
           this.setData({
             searchResults: results,
-            searchHasMore: newResults.length >= searchLimit,
+            searchHasMore: responseHasMore,
             searchLoading: false,
             searchLoadingMore: false
           });
