@@ -22,7 +22,7 @@
       bindgetphonenumber="onGetPhoneNumber" 
       loading="{{loading}}"
     >
-      <text>微信一键授权手机号</text>
+      <text>手机号快捷登录</text>
     </button>
   </view>
 </view>

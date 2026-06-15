@@ -174,9 +174,9 @@
     <view class="share-options">
       <view class="share-option" bindtap="shareToFriend">
         <view class="share-icon wechat-icon">
-          <text class="share-icon-text">微</text>
+          <text class="share-icon-text">友</text>
         </view>
-        <text>微信好友</text>
+        <text>分享给好友</text>
       </view>
       <view class="share-option" bindtap="shareToTimeline">
         <view class="share-icon moments-icon">
