@@ -14,6 +14,23 @@
   padding: 20rpx 30rpx;
 }
 
+/* 浮动搜索栏 */
+.fixed-search {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: #003183;
+  padding: 12rpx 30rpx;
+  transform: translateY(-100%);
+  transition: transform 0.25s ease;
+}
+
+.fixed-search.visible {
+  transform: translateY(0);
+}
+
 .search-box {
   display: flex;
   align-items: center;

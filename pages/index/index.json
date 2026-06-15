@@ -2,5 +2,5 @@
   "usingComponents": {},
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark",
-  "onReachBottomDistance": 500
+  "onReachBottomDistance": 50
 }

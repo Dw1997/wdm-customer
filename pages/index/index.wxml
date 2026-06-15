@@ -18,6 +18,24 @@
     </view>
   </view>
 
+  <!-- 浮动搜索栏（滑过banner后固定在顶部） -->
+  <view class="fixed-search {{showFixedSearch ? 'visible' : ''}}">
+    <view class="search-box">
+      <input 
+        class="search-input" 
+        type="text" 
+        placeholder="输入你想搜索的物品" 
+        value="{{keyword}}"
+        bindinput="onInput"
+        bindfocus="onSearchFocus"
+        bindconfirm="onSearch"
+      />
+      <view class="search-clear" wx:if="{{keyword}}" bindtap="clearInput">
+        <mp-icon icon="close" color="#999999" size="28"></mp-icon>
+      </view>
+    </view>
+  </view>
+
   <!-- 轮播图 -->
   <swiper class="swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500">
     <swiper-item class="swiper-item" wx:for="{{banners}}" wx:key="id">

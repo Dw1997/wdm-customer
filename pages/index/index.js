@@ -31,7 +31,7 @@ Page({
     searchPage: 1,
     searchLimit: 10,
     searched: false,
-
+    showFixedSearch: false
   },
 
   onLoad() {
@@ -46,6 +46,14 @@ Page({
   onShow() {
     console.log('首页 onShow 执行');
     this.refreshCartCounts();
+  },
+
+  // 页面滚动时检测是否显示浮动搜索框
+  onPageScroll(e) {
+    const show = e.scrollTop > 150;
+    if (show !== this.data.showFixedSearch) {
+      this.setData({ showFixedSearch: show });
+    }
   },
   
   // 刷新所有商品卡片上显示的购物车数量
@@ -109,35 +117,90 @@ Page({
       return;
     }
     
+    // 如果预加载了当前页，直接使用
+    if (isLoadMore && this._preloaded && this._preloaded.page === this.data.page) {
+      this.usePreloadedData(this._preloaded);
+      return;
+    }
+    
     this.setData({ isLoading: true });
     console.log('开始加载推荐商品，页码:', this.data.page);
     
     if (!isLoadMore) {
-      wx.showLoading({
-        title: '加载中...',
-      });
+      wx.showLoading({ title: '加载中...' });
     }
     
+    this.fetchGoodsPage(this.data.page, (goodsList) => {
+      if (!isLoadMore) wx.hideLoading();
+      
+      if (!goodsList) {
+        this.setData({ isLoading: false });
+        return;
+      }
+      
+      if (goodsList.length < this.data.limit) {
+        this.setData({ hasMore: false });
+      }
+      
+      const processed = this.transformGoods(goodsList);
+      const finalGoods = isLoadMore 
+        ? [...this.data.recommendedGoods, ...processed]
+        : processed;
+      
+      this.setData({ 
+        recommendedGoods: finalGoods,
+        isLoading: false
+      });
+      
+      // 预加载下一页
+      this.preloadNextPage();
+    });
+  },
+  
+  // 预加载下一页
+  preloadNextPage() {
+    if (!this.data.hasMore || this._preloading) return;
+    const nextPage = this.data.page + 1;
+    this._preloading = true;
+    this.fetchGoodsPage(nextPage, (goodsList) => {
+      this._preloading = false;
+      if (goodsList) {
+        const processed = this.transformGoods(goodsList);
+        this._preloaded = {
+          page: nextPage,
+          goods: processed,
+          hasMore: goodsList.length >= this.data.limit
+        };
+        console.log('[预加载] 页码=' + nextPage + ' 数量=' + goodsList.length);
+      }
+    });
+  },
+  
+  // 使用预加载数据
+  usePreloadedData(data) {
+    console.log('[使用预加载] 页码=' + data.page + ' 数量=' + data.goods.length);
+    const finalGoods = [...this.data.recommendedGoods, ...data.goods];
+    this.setData({ 
+      recommendedGoods: finalGoods,
+      hasMore: data.hasMore,
+      isLoading: false
+    });
+    this._preloaded = null;
+    this.preloadNextPage();
+  },
+  
+  // 通用请求函数
+  fetchGoodsPage(page, callback) {
     const app = getApp();
     const token = wx.getStorageSync('token');
     wx.request({
       url: app.globalData.baseUrl + '/goods/recommended',
       method: 'GET',
-      header: {
-        'token': token
-      },
-      data: {
-        page: this.data.page,
-        limit: this.data.limit
-      },
+      header: { 'token': token },
+      data: { page: page, limit: this.data.limit },
       success: (res) => {
-        if (!isLoadMore) {
-          wx.hideLoading();
-        }
-        
         if (res.data.code === 200) {
           const goodsData = res.data.data;
-          // 兼容两种后端返回格式：纯数组 [...] 或 { hasMore, list: [...] }
           let goodsList;
           if (Array.isArray(goodsData)) {
             goodsList = goodsData;
@@ -146,93 +209,46 @@ Page({
           } else {
             goodsList = [];
           }
-          
-          console.log('加载推荐商品 页码=' + this.data.page + ' 数量=' + goodsList.length);
-          
-          // 返回数量不足一页时，标记没有更多
-          if (goodsList.length < this.data.limit) {
-            this.setData({ hasMore: false });
-          }
-          
-          // 转换数据格式
-          const recommendedGoods = goodsList.map(item => {
-            // 找到默认sku
-            const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
-            // 提取所有单位
-            const units = item.skus.map(sku => sku.sku_unit);
-            // 构建价格对象
-            const prices = {};
-            // 构建规格对象
-            const specsMap = {};
-            // 构建sku_id映射
-            const skuIdMap = {};
-            item.skus.forEach(sku => {
-              prices[sku.sku_unit] = sku.sku_selling_price;
-              specsMap[sku.sku_unit] = sku.sku_specification && sku.sku_specification !== 'None' ? sku.sku_specification : '';
-              skuIdMap[sku.sku_unit] = Number(sku.sku_id);
-            });
-            
-            return {
-              id: item.id,
-              code: item.code,
-              name: item.name,
-              price: defaultSku.sku_selling_price,
-              unit: defaultSku.sku_unit,
-              skuId: Number(defaultSku.sku_id),
-              specs: defaultSku.sku_specification && defaultSku.sku_specification !== 'None' ? defaultSku.sku_specification : '',
-              prices: prices,
-              units: units,
-              specsMap: specsMap,
-              skuIdMap: skuIdMap,
-              image: item.image,
-              count: 0
-            };
-          });
-          
-          // 加载购物车数据
-          const cart = wx.getStorageSync('cart') || [];
-          // 更新商品的数量，基于当前SKU
-          const goodsWithCount = recommendedGoods.map(goods => {
-            const cartItem = cart.find(item => item.product_id == goods.id && item.sku_id == goods.skuId);
-            return {
-              ...goods,
-              count: cartItem ? cartItem.count : 0
-            };
-          });
-          
-          // 合并数据（加载更多时）或替换数据（首次加载）
-          const finalGoods = isLoadMore 
-            ? [...this.data.recommendedGoods, ...goodsWithCount]
-            : goodsWithCount;
-          
-          this.setData({ 
-            recommendedGoods: finalGoods,
-            isLoading: false
-          });
+          console.log('加载推荐商品 页码=' + page + ' 数量=' + goodsList.length);
+          callback(goodsList);
         } else {
-          this.setData({ isLoading: false });
-          wx.showToast({
-            title: '商品加载失败，请下拉刷新重试',
-            icon: 'none'
-          });
+          callback(null);
         }
       },
-      fail: (err) => {
-        if (!isLoadMore) {
-          wx.hideLoading();
-        }
-        this.setData({ isLoading: false });
-        wx.showToast({
-          title: '网络连接失败，请检查网络后重试',
-          icon: 'none'
-        });
-        console.error('Failed to load recommended goods:', err);
+      fail: () => {
+        callback(null);
       }
+    });
+  },
+  
+  // 转换商品数据格式
+  transformGoods(goodsList) {
+    return goodsList.map(item => {
+      const defaultSku = item.skus.find(sku => sku.sku_is_default) || item.skus[0];
+      const units = item.skus.map(sku => sku.sku_unit);
+      const prices = {};
+      const specsMap = {};
+      const skuIdMap = {};
+      item.skus.forEach(sku => {
+        prices[sku.sku_unit] = sku.sku_selling_price;
+        specsMap[sku.sku_unit] = sku.sku_specification && sku.sku_specification !== 'None' ? sku.sku_specification : '';
+        skuIdMap[sku.sku_unit] = Number(sku.sku_id);
+      });
+      return {
+        id: item.id, code: item.code, name: item.name,
+        price: defaultSku.sku_selling_price,
+        unit: defaultSku.sku_unit,
+        skuId: Number(defaultSku.sku_id),
+        specs: defaultSku.sku_specification && defaultSku.sku_specification !== 'None' ? defaultSku.sku_specification : '',
+        prices, units, specsMap, skuIdMap,
+        image: item.image, count: 0
+      };
     });
   },
 
   // 下拉加载更多
   onReachBottom() {
+    console.log('[onReachBottom] hasMore=' + this.data.hasMore + ' isLoading=' + this.data.isLoading + ' page=' + this.data.page);
     if (this.data.hasMore && !this.data.isLoading) {
       this.setData({
         page: this.data.page + 1
@@ -243,6 +259,8 @@ Page({
 
   // 下拉刷新
   onPullDownRefresh() {
+    this._preloaded = null;
+    this._preloading = false;
     this.setData({
       page: 1,
       hasMore: true,
