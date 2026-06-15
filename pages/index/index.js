@@ -137,26 +137,20 @@ Page({
         
         if (res.data.code === 200) {
           const goodsData = res.data.data;
-          // 兼容两种后端返回格式：
-          // 格式1（旧版）：纯数组 [...] 
-          // 格式2（新版分页）：{ hasMore: boolean, list: [...] }
+          // 兼容两种后端返回格式：纯数组 [...] 或 { hasMore, list: [...] }
           let goodsList;
-          let responseHasMore;
           if (Array.isArray(goodsData)) {
-            // 纯数组格式
             goodsList = goodsData;
-            responseHasMore = goodsList.length >= this.data.limit;
-          } else if (goodsData && typeof goodsData === 'object') {
-            // 分页对象格式
-            goodsList = Array.isArray(goodsData.list) ? goodsData.list : [];
-            responseHasMore = goodsData.hasMore !== undefined ? goodsData.hasMore : (goodsList.length >= this.data.limit);
+          } else if (goodsData && Array.isArray(goodsData.list)) {
+            goodsList = goodsData.list;
           } else {
             goodsList = [];
-            responseHasMore = false;
           }
           
-          // 根据后端返回更新 hasMore
-          if (!responseHasMore || goodsList.length < this.data.limit) {
+          console.log('加载推荐商品 页码=' + this.data.page + ' 数量=' + goodsList.length);
+          
+          // 返回数量不足一页时，标记没有更多
+          if (goodsList.length < this.data.limit) {
             this.setData({ hasMore: false });
           }
           
