@@ -1,0 +1,90 @@
+<view class="page-root detail-page {{fontClass}}">
+  <!-- 顶部状态横幅 -->
+  <view class="hero hero-{{order.status}}">
+    <view class="hero-big">{{statusLabel}}</view>
+    <view wx:if="{{order.status === 'pending_approval'}}" class="hero-sub">
+      由于额度受限，您的订单正在审批；直接微信支付本单可免审批立即发货
+    </view>
+    <view wx:elif="{{order.status === 'rejected'}}" class="hero-sub">
+      未通过原因：{{order.reject_reason || '请联系业务员了解详情'}}
+    </view>
+    <view wx:else class="hero-sub">{{statusDesc}}</view>
+
+    <view wx:if="{{order.status === 'pending_approval'}}" class="appr-stage">
+      当前进度：{{order.approval_stage || '业务员审批中'}}
+    </view>
+  </view>
+
+  <view class="wrap">
+    <!-- 配送与收货 -->
+    <view class="card">
+      <view class="card-hd"><text class="card-title">配送与收货信息</text><text class="card-sub">只读</text></view>
+      <view class="kv"><text class="k">配送方式</text><text class="v">{{order.delivery_mode_label}}</text></view>
+      <view class="kv"><text class="k">配送日期</text><text class="v">{{order.delivery_date}}</text></view>
+      <view class="kv"><text class="k">收货门店</text><text class="v">{{customer.name}}</text></view>
+      <view class="kv"><text class="k">送货地点</text><text class="v">{{customer.address}}</text></view>
+    </view>
+
+    <!-- 商品明细 -->
+    <view class="card">
+      <view class="card-hd"><text class="card-title">商品明细</text><text class="card-sub">共 {{order.items.length}} 种</text></view>
+      <view wx:for="{{order.items}}" wx:key="sku_id" class="g-item">
+        <view class="g-thumb">
+          <image wx:if="{{item.image_url}}" class="g-img" src="{{item.image_url}}" mode="aspectFill" lazy-load webp />
+          <text wx:else class="g-placeholder">{{item.shortTitle}}</text>
+        </view>
+        <view class="g-main">
+          <view class="g-top">
+            <text class="g-nm">{{item.name}}（{{item.spec}}）</text>
+            <text class="g-amt">¥{{item.amountText}}</text>
+          </view>
+          <view class="g-sub">
+            <text>¥{{item.priceText}}/{{item.unit}}</text>
+            <text>下单 {{item.quantity}} {{item.unit}}</text>
+          </view>
+          <view wx:if="{{item.delivered_quantity !== null && item.delivered_quantity !== undefined && item.delivered_quantity !== item.quantity}}" class="diff-tag">
+            ⚠️ 实送数量调整：下单 {{item.quantity}} → 实送 {{item.delivered_quantity}} {{item.unit}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 退货情况（有退货时显示） -->
+    <view wx:if="{{order.returns && order.returns.length}}" class="card ret-card">
+      <view class="card-hd"><text class="card-title" style="color:#B82A14;">退货情况</text></view>
+      <view wx:for="{{order.returns}}" wx:key="index" class="ret-row">
+        <view>• {{item.name}} × {{item.quantity}}{{item.unit}}</view>
+        <view>退款金额：<text class="price-text">¥{{item.refundText}}</text>（{{item.refund_method}}）</view>
+      </view>
+    </view>
+
+    <!-- 费用与付款 -->
+    <view class="card">
+      <view class="card-hd"><text class="card-title">费用与付款</text></view>
+      <view class="kv"><text class="k">商品总额</text><text class="v">¥{{totalAmountText}}</text></view>
+      <view wx:if="{{couponAmount > 0}}" class="kv"><text class="k">优惠券抵扣{{couponName ? '（' + couponName + '）' : ''}}</text><text class="v green">-¥{{couponAmountText}}</text></view>
+      <view wx:if="{{discountAmount > 0}}" class="kv"><text class="k">抹零金额</text><text class="v green">-¥{{discountAmountText}}</text></view>
+      <view class="kv"><text class="k">本单应付</text><text class="v price-text">¥{{payableAmountText}}</text></view>
+      <view class="kv"><text class="k">付款状态</text><text class="v">{{payLabel}}（已付 ¥{{paidAmountText}}）</text></view>
+      <view wx:if="{{canPay}}" class="kv"><text class="k">剩余待付</text><text class="v price-text">¥{{unpaidAmountText}}</text></view>
+    </view>
+
+    <!-- 订单信息 -->
+    <view class="card">
+      <view class="card-hd"><text class="card-title">订单信息</text></view>
+      <view class="kv" bindtap="copyOrderNo"><text class="k">订单编号</text><text class="v">{{order.order_no}}（点击复制）</text></view>
+      <view class="kv"><text class="k">下单时间</text><text class="v">{{order.created_at}}</text></view>
+      <view wx:if="{{order.remark}}" class="kv"><text class="k">订单备注</text><text class="v">{{order.remark}}</text></view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="foot-bar">
+    <view class="btn-outline foot-btn" bindtap="callSales">📞 联系业务员</view>
+    <view wx:if="{{canPay}}" class="btn-wxpay foot-btn" bindtap="onPayNow">
+      {{paying ? '支付中...' : '微信支付 ¥' + unpaidAmountText}}
+    </view>
+    <view wx:elif="{{order.can_cancel}}" class="btn-danger foot-btn" bindtap="onCancel">取消订单</view>
+    <view wx:else class="btn-primary foot-btn" bindtap="onReorder">再来一单</view>
+  </view>
+</view>

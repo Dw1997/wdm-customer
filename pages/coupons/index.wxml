@@ -1,0 +1,47 @@
+<view class="page-root coupons-page {{fontClass}}">
+  <!-- 顶部三段切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{status === 'unused' ? 'on' : ''}}" data-status="unused" bindtap="switchTab">
+      可使用 ({{counts.unused}})
+    </view>
+    <view class="tab-item {{status === 'used' ? 'on' : ''}}" data-status="used" bindtap="switchTab">
+      已使用 ({{counts.used}})
+    </view>
+    <view class="tab-item {{status === 'expired' ? 'on' : ''}}" data-status="expired" bindtap="switchTab">
+      已过期 ({{counts.expired}})
+    </view>
+  </view>
+
+  <view class="list-wrap">
+    <view wx:if="{{loading}}" class="empty-tip">加载中...</view>
+    <view wx:elif="{{!items.length}}" class="empty-tip">
+      <view class="empty-ico">🎫</view>
+      <view>暂无{{status === 'unused' ? '可用' : (status === 'used' ? '已使用' : '已过期')}}优惠券</view>
+    </view>
+
+    <view wx:for="{{items}}" wx:key="id" class="cp-card {{status !== 'unused' ? 'muted' : ''}}">
+      <view class="cp-left">
+        <view class="cp-price">
+          <text class="cp-yuan">¥</text>
+          <text class="cp-num">{{item.amountText}}</text>
+        </view>
+        <view class="cp-th">{{item.thresholdText}}</view>
+      </view>
+      <view class="cp-right">
+        <view class="cp-top">
+          <text class="cp-name">{{item.name}}</text>
+          <text class="cp-tag">{{item.typeLabel}}</text>
+        </view>
+        <view class="cp-date">有效期至 {{item.validToText}}</view>
+        <view wx:if="{{item.issue_remark}}" class="cp-remark">{{item.issue_remark}}</view>
+        <view class="cp-bottom">
+          <view wx:if="{{status === 'unused'}}" class="use-btn" bindtap="goUse">去使用</view>
+          <view wx:elif="{{status === 'used'}}" class="used-link" data-order-id="{{item.order_id}}" bindtap="goOrder">
+            已抵扣 ¥{{item.discountText}} · 查看订单 ›
+          </view>
+          <view wx:else class="exp-txt">已过期</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

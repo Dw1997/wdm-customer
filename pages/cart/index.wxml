@@ -1,0 +1,74 @@
+<view class="page-root cart-page {{fontClass}}">
+  <!-- 空状态 -->
+  <view wx:if="{{!validItems.length && !invalidItems.length}}" class="empty-state">
+    <view class="empty-title">购物车还是空的</view>
+    <view class="empty-desc">去分类页挑点常购货品吧</view>
+    <view class="btn-primary" style="display:inline-block;padding:0 64rpx;" bindtap="goCategory">去挑货</view>
+  </view>
+
+  <view wx:else class="cart-body">
+    <view class="top-bar">
+      <text class="tip-txt">价格已按您今日最新批发价实时计算</text>
+      <view class="manage-btn {{managing ? 'on' : ''}}" bindtap="toggleManage">{{managing ? '完成' : '管理'}}</view>
+    </view>
+
+    <!-- 有效商品列表 -->
+    <view wx:for="{{validItems}}" wx:key="sku_id" class="item-card">
+      <view class="chk {{item.checked ? 'on' : ''}}" data-sku-id="{{item.sku_id}}" bindtap="toggleCheck">
+        <text wx:if="{{item.checked}}">✓</text>
+      </view>
+      <view class="item-thumb" data-spu-id="{{item.spu_id}}" bindtap="goDetail">
+        <image wx:if="{{item.image_url}}" class="item-img" src="{{item.image_url}}" mode="aspectFill" lazy-load webp />
+        <text wx:else class="item-placeholder">{{item.shortTitle}}</text>
+      </view>
+      <view class="item-info">
+        <view class="item-name" data-spu-id="{{item.spu_id}}" bindtap="goDetail">{{item.name}}</view>
+        <view class="item-spec">{{item.spec}}</view>
+        <view class="item-foot">
+          <view class="item-price">¥{{item.priceText}}<text class="u">/{{item.unit}}</text></view>
+          <qty-stepper
+            value="{{item.quantity}}"
+            allowDecimal="{{item.allow_decimal}}"
+            label="{{item.name}}（{{item.spec}}）"
+            data-sku-id="{{item.sku_id}}"
+            bind:change="onQtyChange"
+          />
+        </view>
+      </view>
+    </view>
+
+    <!-- 失效商品区 -->
+    <view wx:if="{{invalidItems.length}}" class="invalid-card">
+      <view class="inv-hd">
+        <text class="inv-title">以下商品已下架</text>
+        <view class="inv-clear" bindtap="clearInvalid">一键清空</view>
+      </view>
+      <view wx:for="{{invalidItems}}" wx:key="sku_id" class="inv-row">
+        <view class="inv-thumb">
+          <image wx:if="{{item.image_url}}" class="inv-img" src="{{item.image_url}}" mode="aspectFill" lazy-load webp />
+          <text wx:else class="inv-placeholder">{{item.shortTitle}}</text>
+        </view>
+        <text class="inv-tag">已下架</text>
+        <text class="inv-name">{{item.name}}（{{item.spec}}）</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部固定结算栏 -->
+  <view wx:if="{{validItems.length}}" class="checkout-bar">
+    <view class="all-wrap" bindtap="toggleAll">
+      <view class="chk {{allChecked ? 'on' : ''}}"><text wx:if="{{allChecked}}">✓</text></view>
+      <text class="all-txt">全选</text>
+    </view>
+    <view wx:if="{{!managing}}" class="sum-wrap">
+      <view class="sum-amt">¥{{selectedAmountText}}</view>
+      <view class="sum-sub">已选 {{selectedKinds}} 种共 {{selectedQty}} 件</view>
+    </view>
+    <view
+      class="go-btn {{managing ? 'danger' : ''}} {{selectedKinds === 0 ? 'disabled' : ''}}"
+      bindtap="onMainAction"
+    >
+      {{managing ? '删除 (' + selectedKinds + ')' : '去下单 (' + selectedKinds + ')'}}
+    </view>
+  </view>
+</view>

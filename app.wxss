@@ -1,0 +1,168 @@
+/* 全局基础样式与适老化字体变量体系（默认大字版，可在「我的」切换标准版） */
+page {
+  background-color: #F4F6FA;
+  color: #1F2B3E;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  box-sizing: border-box;
+  --primary: #1B4B91;
+  --primary-dark: #12376E;
+  --primary-soft: #EBF2FC;
+  --price: #E8452A;
+  --price-soft: #FFF1EE;
+  --ink: #111927;
+  --text: #1F2B3E;
+  --muted: #5E6C80;
+  --line: #E5ECF4;
+  --bg: #F4F6FA;
+  --card: #FFFFFF;
+  --warn-bg: #FFF6DF;
+  --warn-text: #9E5A00;
+  --success: #157347;
+  --danger: #D93829;
+}
+
+view, text, scroll-view, input, textarea, button {
+  box-sizing: border-box;
+}
+
+/* 默认大字版（适老化） */
+.font-large {
+  --fs-xs: 25rpx;
+  --fs-sm: 27rpx;
+  --fs-md: 31rpx;
+  --fs-lg: 34rpx;
+  --fs-xl: 40rpx;
+  --fs-price: 40rpx;
+  --fs-price-lg: 54rpx;
+  --fs-hero: 56rpx;
+  --btn-h: 92rpx;
+  --step-sz: 60rpx;
+  --cat-w: 156rpx;
+}
+
+/* 标准版 */
+.font-normal {
+  --fs-xs: 22rpx;
+  --fs-sm: 24rpx;
+  --fs-md: 27rpx;
+  --fs-lg: 30rpx;
+  --fs-xl: 34rpx;
+  --fs-price: 32rpx;
+  --fs-price-lg: 44rpx;
+  --fs-hero: 44rpx;
+  --btn-h: 80rpx;
+  --step-sz: 48rpx;
+  --cat-w: 144rpx;
+}
+
+.page-root {
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-md);
+}
+
+.card {
+  background: var(--card);
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(26, 35, 50, 0.04);
+}
+
+.card-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.card-sub {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.btn-primary {
+  height: var(--btn-h);
+  line-height: var(--btn-h);
+  border-radius: 46rpx;
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  text-align: center;
+  padding: 0 40rpx;
+  border: none;
+}
+
+.btn-primary::after,
+.btn-outline::after,
+.btn-danger::after {
+  border: none;
+}
+
+.btn-outline {
+  height: var(--btn-h);
+  line-height: var(--btn-h);
+  border-radius: 46rpx;
+  background: #FFFFFF;
+  color: var(--ink);
+  border: 2rpx solid #C8D4E6;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  text-align: center;
+  padding: 0 32rpx;
+}
+
+.btn-danger {
+  height: var(--btn-h);
+  line-height: var(--btn-h);
+  border-radius: 46rpx;
+  background: #FFF4F2;
+  color: var(--danger);
+  border: 2rpx solid #E56452;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  text-align: center;
+  padding: 0 32rpx;
+}
+
+.price-text {
+  color: var(--price);
+  font-weight: 800;
+}
+
+.price-hidden-tag {
+  display: inline-block;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  background: #F1F4F8;
+  padding: 6rpx 14rpx;
+  border-radius: 10rpx;
+  font-weight: 600;
+}
+
+.empty-state {
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+
+.empty-title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 12rpx;
+}
+
+.empty-desc {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-bottom: 36rpx;
+  line-height: 1.6;
+}

@@ -1,0 +1,47 @@
+<view wx:if="{{visible}}" class="sheet-mask" catchtap="onClose">
+  <view class="sheet-panel" catchtap="noop">
+    <view class="sheet-hd">
+      <view class="hd-thumb">
+        <image wx:if="{{thumbUrl}}" class="hd-img" src="{{thumbUrl}}" mode="aspectFill" webp />
+        <text wx:else class="hd-placeholder">{{shortTitle}}</text>
+      </view>
+      <view class="hd-info">
+        <view class="hd-name">{{product.name}}</view>
+        <view class="hd-sub">可同时给多个规格填数量 · 点数字可手输</view>
+      </view>
+      <view class="hd-close" bindtap="onClose">×</view>
+    </view>
+
+    <scroll-view class="sku-scroll" scroll-y>
+      <view wx:for="{{skus}}" wx:key="sku_id" class="sku-row">
+        <view class="sku-left">
+          <view class="sku-spec">{{item.spec}}</view>
+          <view wx:if="{{item.price !== null}}" class="sku-price">
+            <text class="yen">¥</text>{{item.priceText}}
+            <text class="unit">/{{item.unit}}</text>
+          </view>
+          <view wx:else class="sku-hidden">{{priceHiddenText}}</view>
+        </view>
+        <qty-stepper
+          value="{{item.qty}}"
+          allowDecimal="{{item.allow_decimal}}"
+          label="{{product.name}}（{{item.spec}}）"
+          data-sku-id="{{item.sku_id}}"
+          bind:change="onSkuQtyChange"
+        />
+      </view>
+    </scroll-view>
+
+    <view class="sheet-ft">
+      <view class="sum-box">
+        <text class="sum-label">已选合计</text>
+        <text wx:if="{{hasVisiblePrice}}" class="sum-val">¥{{subtotalText}}</text>
+        <text wx:else class="sku-hidden">{{priceHiddenText}}</text>
+      </view>
+      <view class="ft-actions">
+        <view class="cart-btn" bindtap="onGoCart">去购物车</view>
+        <view class="ok-btn" bindtap="onClose">完成</view>
+      </view>
+    </view>
+  </view>
+</view>

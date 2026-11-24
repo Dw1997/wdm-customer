@@ -1,0 +1,103 @@
+<view class="page-root order-page {{fontClass}} {{selectedCount > 0 ? 'has-batch-bar' : ''}}">
+  <!-- 状态筛选条 -->
+  <scroll-view class="filter-bar" scroll-x>
+    <view class="filter-inner">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="f-pill {{activeTab === item.key ? 'on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onSelectTab"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="list-wrap">
+    <view wx:if="{{!isLoggedIn}}" class="empty-state">
+      <view class="empty-title">登录后查看您的订单</view>
+      <view class="empty-desc">绑定手机号即可查询历史订单与在线支付</view>
+      <view class="btn-primary" style="display:inline-block;padding:0 64rpx;margin-top:24rpx;" bindtap="goLogin">去登录</view>
+    </view>
+
+    <view wx:elif="{{!orders.length}}" class="empty-state">
+      <view class="empty-title">暂无相关订单</view>
+      <view class="empty-desc">去分类页选货下单吧</view>
+    </view>
+
+    <view
+      wx:for="{{orders}}"
+      wx:key="id"
+      class="o-card {{item.status === 'pending_approval' ? 'appr' : ''}} {{item.checked ? 'checked' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="goDetail"
+    >
+      <!-- 审批中大号置顶横幅 -->
+      <view wx:if="{{item.status === 'pending_approval'}}" class="appr-banner">
+        <text class="appr-big">审批中</text>
+        <text class="appr-step">直接微信支付可免审批发货</text>
+      </view>
+
+      <view class="o-body">
+        <view class="o-top">
+          <view class="o-top-left">
+            <view
+              wx:if="{{item.can_pay}}"
+              class="o-check {{item.checked ? 'on' : ''}}"
+              data-id="{{item.id}}"
+              catchtap="toggleSelectOrder"
+            >
+              <text wx:if="{{item.checked}}">✓</text>
+            </view>
+            <text class="o-no">{{item.order_no}}</text>
+          </view>
+          <view class="o-tags">
+            <text wx:if="{{item.status !== 'pending_approval'}}" class="st-tag st-{{item.status}}">{{item.statusLabel}}</text>
+            <text class="pay-tag pay-{{item.payment_status}}">{{item.payLabel}}</text>
+          </view>
+        </view>
+
+        <view class="o-ship">🚚 {{item.delivery_mode_label}} · {{item.delivery_date}}</view>
+
+        <view class="o-goods">
+          <view wx:for="{{item.previewItems}}" wx:for-item="g" wx:key="sku_id" class="g-line">
+            <text class="g-nm">{{g.name}}（{{g.spec}}）</text>
+            <text class="g-qt">× {{g.quantity}}{{g.unit}}</text>
+          </view>
+        </view>
+
+        <view wx:if="{{item.reject_reason}}" class="o-note">未通过原因：{{item.reject_reason}}</view>
+
+        <view class="o-foot">
+          <view>
+            <view class="amt-lbl">{{item.can_pay ? '待付金额' : '订单总额'}}</view>
+            <view class="amt-val">¥{{item.can_pay ? item.unpaidAmountText : item.totalAmountText}}</view>
+          </view>
+          <view class="o-acts" catchtap="noop">
+            <view wx:if="{{item.can_pay}}" class="act-wx" data-id="{{item.id}}" bindtap="onPaySingle">去支付</view>
+            <view wx:if="{{item.can_cancel}}" class="act-o" data-id="{{item.id}}" bindtap="onCancelOrder">取消</view>
+            <view wx:elif="{{!item.can_pay}}" class="act-o" data-id="{{item.id}}" bindtap="onReorder">再来一单</view>
+            <view class="act-p" data-id="{{item.id}}" bindtap="goDetail">详情</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部勾选合并支付汇总栏 -->
+  <view wx:if="{{selectedCount > 0}}" class="batch-bar">
+    <view class="batch-left" bindtap="toggleSelectAll">
+      <view class="o-check {{allPayableSelected ? 'on' : ''}}">
+        <text wx:if="{{allPayableSelected}}">✓</text>
+      </view>
+      <view>
+        <view class="batch-cnt">已选 {{selectedCount}} 单</view>
+        <view class="batch-amt">合计 ¥{{selectedTotalText}}</view>
+      </view>
+    </view>
+    <view class="batch-btn {{paying ? 'disabled' : ''}}" bindtap="onPayBatch">
+      {{paying ? '支付中...' : '合并微信支付'}}
+    </view>
+  </view>
+</view>

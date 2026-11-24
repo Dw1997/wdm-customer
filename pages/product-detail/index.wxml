@@ -1,0 +1,128 @@
+<view class="page-root detail-page {{fontClass}}">
+  <!-- 顶部商品图 -->
+  <swiper wx:if="{{product.image_urls && product.image_urls.length}}" class="gallery" indicator-dots>
+    <swiper-item wx:for="{{product.image_urls}}" wx:key="*this">
+      <image class="gallery-img" src="{{item}}" mode="aspectFill" webp />
+    </swiper-item>
+  </swiper>
+  <view wx:else class="gallery-placeholder">
+    <text class="ph-text">{{product.name}}</text>
+    <text class="ph-sub">货号：{{product.code}}</text>
+  </view>
+
+  <view class="wrap">
+    <!-- 核心信息卡 -->
+    <view class="card">
+      <view class="top-row">
+        <view wx:if="{{minPriceText}}" class="main-price">
+          <text class="yen">¥</text><text class="num">{{minPriceText}}</text>
+          <text class="unit">{{skus.length > 1 ? '起' : '/' + skus[0].unit}}</text>
+        </view>
+        <view wx:else class="price-hidden-tag">{{priceHiddenText}}</view>
+        <button class="share-btn" open-type="share">↗ 分享</button>
+      </view>
+      <view class="p-title">{{product.name}}</view>
+      <view class="p-meta">
+        <text class="meta-tag">货号：{{product.code}}</text>
+        <text class="meta-tag">基础单位：{{product.base_unit}}</text>
+      </view>
+    </view>
+
+    <!-- 规格选择卡 -->
+    <view class="card">
+      <view class="card-hd">
+        <text class="card-title">选择规格与数量</text>
+        <text class="card-sub">点数字可直接输数量</text>
+      </view>
+      <view wx:for="{{skus}}" wx:key="sku_id" class="sku-row">
+        <view class="sku-l">
+          <view class="sku-spec">{{item.spec}}</view>
+          <view wx:if="{{item.price !== null}}" class="sku-pr">
+            ¥{{item.priceText}} <text class="sku-unit">/{{item.unit}}</text>
+          </view>
+          <view wx:else class="sku-hid">{{priceHiddenText}}</view>
+        </view>
+        <qty-stepper
+          value="{{item.qty}}"
+          allowDecimal="{{item.allow_decimal}}"
+          label="{{product.name}}（{{item.spec}}）"
+          data-sku-id="{{item.sku_id}}"
+          bind:change="onSkuQtyChange"
+        />
+      </view>
+    </view>
+
+    <!-- 商品说明卡 -->
+    <view wx:if="{{product.description}}" class="card">
+      <view class="card-hd"><text class="card-title">商品说明</text></view>
+      <text class="desc-txt">{{product.description}}</text>
+    </view>
+  </view>
+
+  <!-- 底部固定栏 -->
+  <view class="foot-bar">
+    <view class="foot-l" bindtap="toggleCartSheet">
+      <view class="cart-badge-wrap">
+        <text class="cart-ico">🛒</text>
+        <text wx:if="{{totalCartCount > 0}}" class="c-badge">{{totalCartCount}}</text>
+      </view>
+      <view>
+        <view class="f-sum">¥{{selfSumText}}</view>
+        <view class="f-sub">{{selfQty > 0 ? '本品已选 ' + selfQty + ' 件 · 点此看购物车' : '点此查看已选购物车'}}</view>
+      </view>
+    </view>
+    <view class="go-cart-btn" bindtap="goCart">去购物车</view>
+  </view>
+
+  <!-- 底部弹出：已选购物车半屏卡片 -->
+  <view wx:if="{{cartSheetVisible}}" class="cart-sheet-mask" bindtap="closeCartSheet">
+    <view class="cart-sheet-panel" catchtap="noop">
+      <view class="cart-sheet-hd">
+        <view class="cart-sheet-title-wrap">
+          <text class="cart-sheet-title">购物车已选</text>
+          <text class="cart-sheet-count">共 {{totalCartCount}} 件</text>
+        </view>
+        <view class="cart-sheet-close" bindtap="closeCartSheet">×</view>
+      </view>
+
+      <scroll-view wx:if="{{cartItems.length}}" class="cart-sheet-scroll" scroll-y>
+        <view wx:for="{{cartItems}}" wx:key="sku_id" class="cart-item-row">
+          <view class="ci-thumb">
+            <image wx:if="{{item.image_url}}" class="ci-img" src="{{item.image_url}}" mode="aspectFill" webp />
+            <text wx:else class="ci-ph">{{item.shortTitle}}</text>
+          </view>
+          <view class="ci-info">
+            <view class="ci-name">{{item.name}}</view>
+            <view class="ci-spec">{{item.spec}}</view>
+            <view wx:if="{{item.priceText}}" class="ci-price">
+              <text class="ci-yen">¥</text>{{item.priceText}}<text class="ci-unit">/{{item.unit}}</text>
+            </view>
+          </view>
+          <qty-stepper
+            value="{{item.quantity}}"
+            allowDecimal="{{item.allow_decimal}}"
+            label="{{item.name}}（{{item.spec}}）"
+            data-sku-id="{{item.sku_id}}"
+            bind:change="onSkuQtyChange"
+          />
+        </view>
+      </scroll-view>
+
+      <view wx:else class="cart-sheet-empty">
+        <view class="empty-txt">购物车还是空的</view>
+        <view class="empty-sub">在当前页面选择规格与数量即可加入购物车</view>
+      </view>
+
+      <view class="cart-sheet-ft">
+        <view class="cs-sum-wrap">
+          <text class="cs-sum-label">购物车合计</text>
+          <text class="cs-sum-val">¥{{cartTotalAmountText}}</text>
+        </view>
+        <view class="cs-actions">
+          <view class="cs-continue-btn" bindtap="closeCartSheet">继续选品</view>
+          <view class="cs-go-btn" bindtap="goCart">去购物车</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

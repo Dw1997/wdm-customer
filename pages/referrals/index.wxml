@@ -1,0 +1,88 @@
+<view class="page-root ref-page {{fontClass}}">
+  <!-- 顶部活动说明 -->
+  <view class="hero">
+    <view class="hero-tag">老客专属福利</view>
+    <view wx:if="{{rewardEnabled}}" class="hero-title">
+      邀请新客户首单送达，立得 <text class="hero-num">¥{{rewardAmountText}}</text> 拉新券
+    </view>
+    <view wx:else class="hero-title">邀请同行好友加入味都美副食</view>
+    <view class="hero-steps">
+      1. 分享专属码给好友 → 2. 销售/管理员审核通过 → 3. 好友首单送达后自动发券
+    </view>
+    <view wx:if="{{rewardEnabled}}" class="hero-tip">
+      {{couponMinAmount > 0 ? ('满 ¥' + couponMinAmountText + ' 可用') : '无使用门槛'}} · 发放后 {{couponValidDays}} 天有效 · 邀请人数不限
+    </view>
+  </view>
+
+  <view class="wrap">
+    <!-- 专属小程序码卡片 -->
+    <view class="card qr-card">
+      <view class="card-title">我的专属邀请码</view>
+      <view class="qr-sub">分享码：{{shareInfo.share_code || '--'}} · 好友扫码绑定即记您为介绍人</view>
+
+      <view class="qr-box">
+        <image
+          wx:if="{{shareInfo.qrcode_url}}"
+          class="qr-img"
+          src="{{shareInfo.qrcode_url}}"
+          mode="aspectFit"
+          bindtap="previewQrcode"
+        />
+        <view wx:else class="qr-empty">
+          <text class="qr-code-big">{{shareInfo.share_code || '--'}}</text>
+          <text class="qr-empty-tip">可直接点击下方按钮转发给好友</text>
+        </view>
+      </view>
+
+      <view class="qr-actions">
+        <button class="btn-primary" open-type="share">转发给好友</button>
+        <view wx:if="{{shareInfo.qrcode_url}}" class="btn-secondary" bindtap="saveQrcode">保存图片</view>
+      </view>
+    </view>
+
+    <!-- 我的拉新战绩 -->
+    <view class="card">
+      <view class="card-hd">
+        <text class="card-title">我的拉新记录</text>
+        <text class="reward-total">已获券 ¥{{totalRewardAmountText}}</text>
+      </view>
+      <view class="stat-grid">
+        <view class="stat-item">
+          <view class="s-num">{{summary.total_invited}}</view>
+          <view class="s-lbl">累计邀请</view>
+        </view>
+        <view class="stat-item">
+          <view class="s-num warn">{{summary.pending_audit_count}}</view>
+          <view class="s-lbl">待审核</view>
+        </view>
+        <view class="stat-item">
+          <view class="s-num blue">{{summary.pending_order_count}}</view>
+          <view class="s-lbl">待首单</view>
+        </view>
+        <view class="stat-item">
+          <view class="s-num green">{{summary.rewarded_count}}</view>
+          <view class="s-lbl">已得券</view>
+        </view>
+      </view>
+
+      <!-- 明细列表 -->
+      <view wx:if="{{items.length === 0}}" class="empty-tip">
+        还没有邀请记录，快把专属码发给同行好友吧！
+      </view>
+      <view wx:else class="ref-list">
+        <view wx:for="{{items}}" wx:key="customer_id" class="ref-item">
+          <view class="ref-left">
+            <view class="ref-name">{{item.name}}</view>
+            <view class="ref-meta">{{item.phone || '未留手机号'}} · {{item.registeredAtText}}</view>
+          </view>
+          <view class="ref-right">
+            <view class="stage-tag {{item.stage}}">{{item.stage_label}}</view>
+            <view wx:if="{{item.stage === 'rewarded' && item.rewardAmountText}}" class="ref-reward">
+              +¥{{item.rewardAmountText}}券
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

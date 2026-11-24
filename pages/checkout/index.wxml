@@ -1,0 +1,224 @@
+<view class="page-root checkout-page {{fontClass}}">
+  <!-- 空清单保护 -->
+  <view wx:if="{{!items.length}}" class="empty-state">
+    <view class="empty-title">还没有选择要下单的商品</view>
+    <view class="empty-desc">请先回购物车勾选商品后再下单</view>
+    <view class="btn-primary" style="display:inline-block;padding:0 64rpx;margin-top:24rpx;" bindtap="backToCart">返回购物车</view>
+  </view>
+
+  <view wx:else class="wrap">
+    <!-- 提交失败/商品下架等错误提示条 -->
+    <view wx:if="{{submitError}}" class="err-banner">
+      ❌ {{submitError}}
+    </view>
+
+    <!-- 顶部提醒条（超额度/线路不覆盖等，只提示不阻止） -->
+    <view wx:for="{{warnings}}" wx:key="code" class="warn-banner">
+      ⚠️ {{item.message}}
+    </view>
+
+    <!-- 1. 收货信息（只读） -->
+    <view class="card">
+      <view class="addr-hd">
+        <text class="addr-name">{{customer.name}}</text>
+        <text class="ro-tag">店里维护 · 只读</text>
+      </view>
+      <view class="addr-loc">📍 {{customer.address}}</view>
+      <view wx:if="{{customer.sales_name || customer.sales_phone}}" class="sales-row">
+        <text class="sales-txt">专属业务员：{{customer.sales_name || '店家'}}</text>
+        <view wx:if="{{customer.sales_phone}}" class="call-btn" bindtap="callSales">📞 联系业务员</view>
+      </view>
+    </view>
+
+    <!-- 2. 配送方式 -->
+    <view class="card">
+      <view class="card-hd">
+        <text class="card-title">配送方式</text>
+        <text class="card-sub">按送货地点匹配</text>
+      </view>
+      <view class="mode-grid">
+        <view
+          wx:for="{{modeCards}}"
+          wx:key="key"
+          class="mode-opt {{deliveryMode === item.key ? 'on' : ''}} {{item.disabled ? 'disabled' : ''}}"
+          data-key="{{item.key}}"
+          data-disabled="{{item.disabled}}"
+          bindtap="selectMode"
+        >
+          <view class="mode-name">{{item.name}}</view>
+          <view class="mode-sub">{{item.sub}}</view>
+        </view>
+      </view>
+
+      <!-- 多趟次送货日期选择 -->
+      <view wx:if="{{deliveryMode === 'route' && tripDates.length > 1}}" class="sub-opts">
+        <view
+          wx:for="{{tripDates}}"
+          wx:key="trip_id"
+          class="sub-pill {{selectedTripIndex === index ? 'on' : ''}}"
+          data-index="{{index}}"
+          bindtap="selectTrip"
+        >{{item.trip_name}}</view>
+      </view>
+
+      <!-- 多条物流线路选择 -->
+      <view wx:if="{{deliveryMode === 'freight' && freightLines.length > 1}}" class="sub-opts">
+        <view
+          wx:for="{{freightLines}}"
+          wx:key="line_id"
+          class="sub-pill {{selectedLineIndex === index ? 'on' : ''}}"
+          data-index="{{index}}"
+          bindtap="selectFreightLine"
+        >{{item.name}}（{{item.depart_time}}发车）</view>
+      </view>
+
+      <view class="mode-detail">
+        <text>{{modeDetailText}}</text>
+        <view wx:if="{{cutoffWarnText}}" class="cutoff-warn">⏰ {{cutoffWarnText}}</view>
+      </view>
+    </view>
+
+    <!-- 3. 商品清单（含主图，可微调数量） -->
+    <view class="card">
+      <view class="card-hd">
+        <text class="card-title">商品清单</text>
+        <text class="card-sub">共 {{items.length}} 种</text>
+      </view>
+      <view wx:for="{{items}}" wx:key="sku_id" class="g-row">
+        <view class="g-thumb">
+          <image wx:if="{{item.image_url}}" class="g-img" src="{{item.image_url}}" mode="aspectFill" lazy-load webp />
+          <text wx:else class="g-placeholder">{{item.shortTitle}}</text>
+        </view>
+        <view class="g-l">
+          <view class="g-name">{{item.name}}</view>
+          <view class="g-spec">{{item.spec}} · ¥{{item.priceText}}/{{item.unit}}</view>
+          <view wx:if="{{item.invalid_reason}}" class="g-inv">该商品已下架</view>
+        </view>
+        <view class="g-r">
+          <view class="g-sub-amt">¥{{item.subtotalText}}</view>
+          <qty-stepper
+            value="{{item.quantity}}"
+            min="1"
+            allowDecimal="{{item.allow_decimal}}"
+            label="{{item.name}}（{{item.spec}}）"
+            data-sku-id="{{item.sku_id}}"
+            bind:change="onItemQtyChange"
+          />
+        </view>
+      </view>
+    </view>
+
+    <!-- 4. 费用与结算 -->
+    <view class="card">
+      <view class="card-hd"><text class="card-title">费用与结算</text></view>
+      <view class="kv-row">
+        <text class="kv-k">商品金额合计</text>
+        <text class="kv-v">¥{{totalAmountText}}</text>
+      </view>
+      <view class="kv-row coupon-row" bindtap="openCouponPicker">
+        <text class="kv-k">优惠券</text>
+        <view class="kv-v">
+          <text wx:if="{{couponDeductAmount > 0}}" class="coupon-val">-¥{{couponDeductText}}（{{selectedCouponName}}） ›</text>
+          <text wx:elif="{{usableCouponCount > 0}}" class="coupon-avail">{{usableCouponCount}} 张可用，点击选择 ›</text>
+          <text wx:elif="{{availableCoupons.length > 0}}" class="coupon-muted">暂未满足使用门槛 ›</text>
+          <text wx:else class="coupon-muted">暂无可用</text>
+        </view>
+      </view>
+      <view class="kv-row">
+        <text class="kv-k">运费</text>
+        <text class="kv-v">{{freightText}}</text>
+      </view>
+      <view class="kv-row">
+        <text class="kv-k">本单应付</text>
+        <text class="kv-v payable-val">¥{{payableAmountText}}</text>
+      </view>
+
+      <!-- 结算方式二选一：记账 / 立即微信支付 -->
+      <view class="pay-method-title">选择结算方式</view>
+      <view class="pay-method-grid">
+        <view
+          class="pay-opt {{payMethod === 'credit' ? 'on' : ''}}"
+          data-method="credit"
+          bindtap="selectPayMethod"
+        >
+          <view class="pay-opt-name">🧾 记账下单</view>
+          <view class="pay-opt-sub">货到/账期结算</view>
+        </view>
+        <view
+          class="pay-opt wx {{payMethod === 'wxpay' ? 'on' : ''}}"
+          data-method="wxpay"
+          bindtap="selectPayMethod"
+        >
+          <view class="pay-opt-name">💚 立即微信支付</view>
+          <view class="pay-opt-sub">付清直接发，超额免审批</view>
+        </view>
+      </view>
+      <view wx:if="{{payMethod === 'credit'}}" class="credit-note">
+        🧾 记账下单：本单不在线付钱，随账单线下结算（后续也可在订单列表随时微信付款）
+      </view>
+      <view wx:else class="wxpay-note">
+        💚 立即微信支付：提交后将拉起微信支付 ¥{{payableAmountText}}；超额订单付清自动免审批，线上一概不支持自助退款
+      </view>
+    </view>
+
+    <!-- 5. 备注 -->
+    <view class="card">
+      <view class="card-hd">
+        <text class="card-title">订单备注</text>
+        <text class="card-sub">选填，最多 200 字</text>
+      </view>
+      <textarea
+        class="remark-box"
+        maxlength="200"
+        value="{{remark}}"
+        placeholder="例如：辣椒粉要粗的、早上 9 点前送到"
+        bindinput="onRemarkInput"
+      />
+    </view>
+  </view>
+
+  <!-- 底部固定提交栏 -->
+  <view wx:if="{{items.length}}" class="foot-bar">
+    <view>
+      <view class="f-hint">
+        {{payMethod === 'wxpay' ? '微信实付' : '记账合计'}}（{{items.length}} 种 {{totalQty}} 件）<text wx:if="{{couponDeductAmount > 0}}" class="f-saved">已减 ¥{{couponDeductText}}</text>
+      </view>
+      <view class="f-amt">¥{{payableAmountText}}</view>
+    </view>
+    <view class="submit-btn {{payMethod === 'wxpay' ? 'wx-btn' : ''}} {{submitting || loading || hasInvalidItem ? 'disabled' : ''}}" bindtap="onSubmit">
+      {{submitting ? '提交中...' : (payMethod === 'wxpay' ? '提交并微信支付' : '提交订单')}}
+    </view>
+  </view>
+
+  <!-- 优惠券选择抽屉 -->
+  <view wx:if="{{showCouponPicker}}" class="cp-mask" catchtap="closeCouponPicker">
+    <view class="cp-sheet" catchtap="noop">
+      <view class="cp-head">
+        <text class="cp-title">选择优惠券</text>
+        <text class="cp-close" bindtap="closeCouponPicker">关闭</text>
+      </view>
+      <scroll-view scroll-y class="cp-list">
+        <view
+          wx:for="{{availableCoupons}}"
+          wx:key="id"
+          class="cp-item {{selectedCouponId === item.id ? 'on' : ''}} {{!item.usable ? 'disabled' : ''}}"
+          data-id="{{item.id}}"
+          data-usable="{{item.usable}}"
+          bindtap="chooseCoupon"
+        >
+          <view class="cp-amt">
+            <text class="cp-yuan">¥</text><text class="cp-num">{{item.amountText}}</text>
+            <view class="cp-th">{{item.thresholdText}}</view>
+          </view>
+          <view class="cp-info">
+            <view class="cp-name">{{item.name}}</view>
+            <view class="cp-meta">{{item.typeLabel}} · 有效期至 {{item.validToText}}</view>
+            <view wx:if="{{!item.usable}}" class="cp-reason">{{item.unusable_reason}}</view>
+          </view>
+          <view class="cp-radio">{{selectedCouponId === item.id ? '✓' : ''}}</view>
+        </view>
+      </scroll-view>
+      <view class="cp-foot" bindtap="clearCoupon">不使用优惠券</view>
+    </view>
+  </view>
+</view>

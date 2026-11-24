@@ -1,0 +1,148 @@
+.stepper-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.btn-plus-only,
+.btn-plus,
+.btn-minus {
+  width: var(--step-sz, 60rpx);
+  height: var(--step-sz, 60rpx);
+  flex: none;
+  box-sizing: border-box;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--step-fs, 36rpx);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.btn-plus-only,
+.btn-plus {
+  background: var(--primary, #1B4B91);
+  color: #FFFFFF;
+}
+
+.btn-minus {
+  background: #FFFFFF;
+  color: var(--primary, #1B4B91);
+  border: 2.5rpx solid #B5C6DF;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--step-gap, 8rpx);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.qty-num {
+  min-width: var(--step-num-w, 64rpx);
+  height: var(--step-sz, 60rpx);
+  padding: 0 10rpx;
+  box-sizing: border-box;
+  border-radius: 12rpx;
+  background: var(--primary-soft, #EBF2FC);
+  color: var(--primary, #1B4B91);
+  font-size: var(--step-num-fs, var(--fs-md, 31rpx));
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.modal-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(16, 25, 42, 0.55);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 600rpx;
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  padding: 36rpx;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #111927;
+}
+
+.modal-sub {
+  margin-top: 8rpx;
+  font-size: 27rpx;
+  color: #5E6C80;
+}
+
+.modal-input {
+  margin-top: 24rpx;
+  height: 92rpx;
+  border: 3rpx solid #1B4B91;
+  border-radius: 18rpx;
+  text-align: center;
+  font-size: 42rpx;
+  font-weight: 800;
+  color: #111927;
+}
+
+.quick-row {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+
+.quick-btn {
+  flex: 1;
+  height: 68rpx;
+  line-height: 68rpx;
+  text-align: center;
+  background: #F4F6FA;
+  border-radius: 14rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #111927;
+}
+
+.modal-btns {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 30rpx;
+}
+
+.m-cancel,
+.m-confirm {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  border-radius: 18rpx;
+  font-size: 31rpx;
+  font-weight: 700;
+}
+
+.m-cancel {
+  background: #F4F6FA;
+  color: #1F2B3E;
+}
+
+.m-confirm {
+  background: #1B4B91;
+  color: #FFFFFF;
+}

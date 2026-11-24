@@ -1,0 +1,82 @@
+<view class="page-root login-page {{fontClass}}">
+  <!-- 顶部品牌视觉区（与深蓝导航栏无缝衔接） -->
+  <view class="hero">
+    <view class="hero-orb hero-orb-1"></view>
+    <view class="hero-orb hero-orb-2"></view>
+    <view class="brand">
+      <view class="logo-wrap">
+        <view class="logo">味</view>
+      </view>
+      <view class="brand-title">味都美副食批发</view>
+      <view class="brand-sub">老客户自助看价 · 一键复单 · 挂账对账</view>
+      <view wx:if="{{hasReferral}}" class="ref-tag">
+        <view class="ref-dot"></view>
+        <text>已识别专属推广码 · 绑定后自动关联业务员</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主体操作区 -->
+  <view class="main-wrap">
+    <!-- 驳回/禁止登录提示卡 -->
+    <view wx:if="{{blockReason}}" class="login-card err-card">
+      <view class="err-badge">!</view>
+      <view class="err-title">账号暂无法登录</view>
+      <view class="err-desc">{{blockReason}}</view>
+      <view class="btn-primary err-call-btn" hover-class="btn-hover" bindtap="callShop">
+        联系业务员 / 店家
+      </view>
+    </view>
+
+    <!-- 正常登录卡 -->
+    <view wx:else class="login-card">
+      <view class="card-heading">欢迎使用味都美商城</view>
+      <view class="card-desc">使用微信绑定手机号，快速同步您的专属批发价</view>
+
+      <button
+        class="wx-btn {{submitting ? 'wx-btn-loading' : ''}}"
+        hover-class="wx-btn-hover"
+        open-type="getPhoneNumber"
+        bindgetphonenumber="onGetPhoneNumber"
+        disabled="{{submitting}}"
+      >
+        <view class="wx-icon">
+          <view class="wx-bubble-lg"></view>
+          <view class="wx-bubble-sm"></view>
+        </view>
+        <text class="wx-btn-text">{{submitting ? '正在登录...' : '微信手机号一键登录'}}</text>
+      </button>
+
+      <view class="agree-row" bindtap="toggleAgree">
+        <view class="chk {{agreed ? 'on' : ''}}">
+          <text wx:if="{{agreed}}" class="chk-mark">✓</text>
+        </view>
+        <view class="agree-txt">
+          <text>我已阅读并同意</text>
+          <text class="agree-link">《用户服务协议》</text>
+          <text>与</text>
+          <text class="agree-link">《隐私政策》</text>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+
+      <view class="skip-btn" hover-class="skip-btn-hover" bindtap="onSkip">
+        <text>暂不登录，先看看商品</text>
+        <text class="skip-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 底部说明卡 -->
+    <view class="foot-tips">
+      <view class="tip-item">
+        <view class="tip-dot"></view>
+        <text class="tip-text">老客户绑定店里登记的手机号，自动同步等级与专属价</text>
+      </view>
+      <view class="tip-item">
+        <view class="tip-dot"></view>
+        <text class="tip-text">新客户提交后由管理员审核通过即可看价下单</text>
+      </view>
+    </view>
+  </view>
+</view>

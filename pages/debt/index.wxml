@@ -1,0 +1,199 @@
+<view class="page-root debt-page {{fontClass}}">
+  <view class="wrap">
+    <!-- 欠款与额度总览大卡 -->
+    <view class="summary">
+      <view class="s-lbl">当前总欠款（元）</view>
+      <view class="s-big">¥{{debtAmountText}}</view>
+      <view wx:if="{{!hasDebt && !loading}}" class="s-good">✓ 当前无欠款，信用良好</view>
+      <view class="grid3">
+        <view class="g-col">
+          <view class="g-lbl">已逾期金额</view>
+          <view class="g-val {{hasOverdue ? 'ov' : ''}}">¥{{overdueAmountText}}</view>
+        </view>
+        <view class="g-col">
+          <view class="g-lbl">信用额度</view>
+          <view class="g-val">¥{{creditLimitText}}</view>
+        </view>
+        <view class="g-col">
+          <view class="g-lbl">可用额度</view>
+          <view class="g-val">¥{{availableCreditText}}</view>
+        </view>
+      </view>
+      <view wx:if="{{hasOverdue}}" class="ov-warn">
+        ⚠️ 存在逾期欠款，请及时联系业务员结清，逾期超期将暂停下单
+      </view>
+    </view>
+
+    <!-- 三标签切换栏 -->
+    <view class="tabs">
+      <view class="t-item {{tab === 'orders' ? 'on' : ''}}" data-t="orders" bindtap="switchTab">
+        未结清订单<text wx:if="{{unpaidOrders.length}}" class="t-cnt">({{unpaidOrders.length}})</text>
+      </view>
+      <view class="t-item {{tab === 'ledger' ? 'on' : ''}}" data-t="ledger" bindtap="switchTab">往来流水</view>
+      <view class="t-item {{tab === 'stmt' ? 'on' : ''}}" data-t="stmt" bindtap="switchTab">对账单</view>
+    </view>
+
+    <!-- 加载中提示 -->
+    <view wx:if="{{loading}}" class="card loading-box">正在加载账务数据…</view>
+
+    <!-- 未结清订单 -->
+    <view wx:elif="{{tab === 'orders'}}">
+      <view wx:if="{{!unpaidOrders.length}}" class="empty-state">
+        <view class="empty-title">暂无未结清订单</view>
+        <view class="empty-desc">当前无欠款，信用良好</view>
+      </view>
+      <view
+        wx:for="{{unpaidOrders}}"
+        wx:key="id"
+        class="card {{item.overdue_days > 0 ? 'ov-card' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="goOrderDetail"
+      >
+        <view class="ord-top">
+          <text class="ord-no">{{item.order_no}}</text>
+          <text class="due-badge {{item.badgeClass}}">{{item.badgeText}}</text>
+        </view>
+        <view class="ord-mid">
+          <text>送达：{{item.order_date || '—'}}</text>
+          <text>到期日：{{item.dueText}}</text>
+        </view>
+        <view class="ord-bot">
+          <text class="ord-tot">实送金额 ¥{{item.totalText}}</text>
+          <text class="ord-unpaid">待付 ¥{{item.unpaidText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 往来流水 -->
+    <view wx:elif="{{tab === 'ledger'}}" class="card">
+      <view wx:if="{{!ledger.length}}" class="empty-state">
+        <view class="empty-title">暂无往来流水</view>
+        <view class="empty-desc">送达挂账与线下还款记录将在此展示</view>
+      </view>
+      <view wx:for="{{ledger}}" wx:key="id" class="led-row">
+        <view class="led-l">
+          <view class="led-title">{{item.displayTitle}}</view>
+          <view class="led-time">{{item.created_at}}</view>
+        </view>
+        <view class="led-r">
+          <view class="led-delta {{item.isAdd ? 'add' : 'sub'}}">{{item.deltaText}}</view>
+          <view class="led-bal">余额 ¥{{item.balanceText}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 对账单 -->
+    <view wx:elif="{{tab === 'stmt'}}">
+      <view wx:if="{{!statements.length}}" class="empty-state">
+        <view class="empty-title">暂无历史对账单</view>
+        <view class="empty-desc">产生往来账后将按月自动汇总对账单</view>
+      </view>
+      <view
+        wx:for="{{statements}}"
+        wx:key="id"
+        class="card stmt-card"
+        data-index="{{index}}"
+        bindtap="openStatement"
+      >
+        <view class="stmt-top">
+          <view class="stmt-title">{{item.period}}</view>
+          <view class="stmt-btn">查看对账单</view>
+        </view>
+        <view class="stmt-grid">
+          <view class="stmt-cell">
+            <view class="stmt-lbl">期初欠款</view>
+            <view class="stmt-num">¥{{item.openingText}}</view>
+          </view>
+          <view class="stmt-cell">
+            <view class="stmt-lbl">本期挂账</view>
+            <view class="stmt-num add">+¥{{item.debitText}}</view>
+          </view>
+          <view class="stmt-cell">
+            <view class="stmt-lbl">本期还款/冲抵</view>
+            <view class="stmt-num sub">-¥{{item.creditText}}</view>
+          </view>
+          <view class="stmt-cell">
+            <view class="stmt-lbl">期末欠款</view>
+            <view class="stmt-num bold">¥{{item.endingText}}</view>
+          </view>
+        </view>
+        <view class="stmt-foot">
+          <text>共 {{item.item_count}} 笔往来</text>
+          <text>统计至 {{item.created_at}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部固定提示栏（不做在线收款） -->
+  <view class="foot-bar">
+    <view class="foot-tip">
+      <view>本小程序不做在线收款</view>
+      <view>还款请联系业务员线下核销</view>
+    </view>
+    <view class="call-btn" bindtap="callSales">📞 联系业务员</view>
+  </view>
+
+  <!-- 对账单详情弹窗 -->
+  <view wx:if="{{activeStmt}}" class="mask" catchtap="closeStatement">
+    <view class="stmt-modal" catchtap="noop">
+      <view class="sm-hd">
+        <view>
+          <view class="sm-title">{{activeStmt.period}}</view>
+          <view class="sm-sub">{{activeStmt.period_start}} 至 {{activeStmt.period_end}}</view>
+        </view>
+        <view class="sm-close" bindtap="closeStatement">✕</view>
+      </view>
+
+      <view class="sm-summary">
+        <view class="sm-sitem">
+          <text class="sm-slbl">期初欠款</text>
+          <text class="sm-sval">¥{{activeStmt.openingText}}</text>
+        </view>
+        <view class="sm-sitem">
+          <text class="sm-slbl">本期挂账</text>
+          <text class="sm-sval add">+¥{{activeStmt.debitText}}</text>
+        </view>
+        <view class="sm-sitem">
+          <text class="sm-slbl">本期还款/冲抵</text>
+          <text class="sm-sval sub">-¥{{activeStmt.creditText}}</text>
+        </view>
+        <view class="sm-sitem">
+          <text class="sm-slbl">期末欠款</text>
+          <text class="sm-sval bold">¥{{activeStmt.endingText}}</text>
+        </view>
+      </view>
+
+      <scroll-view scroll-y class="sm-list">
+        <view wx:if="{{!activeStmt.entries.length}}" class="sm-empty">本期无往来明细</view>
+        <view wx:for="{{activeStmt.entries}}" wx:key="id" class="led-row">
+          <view class="led-l">
+            <view class="led-title">{{item.displayTitle}}</view>
+            <view class="led-time">{{item.created_at}}</view>
+          </view>
+          <view class="led-r">
+            <view class="led-delta {{item.isAdd ? 'add' : 'sub'}}">{{item.deltaText}}</view>
+            <view class="led-bal">余额 ¥{{item.balanceText}}</view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="sm-actions">
+        <view class="sm-btn outline" bindtap="previewStatementImage">
+          {{generatingImg ? '生成中…' : '预览大图'}}
+        </view>
+        <view class="sm-btn primary" bindtap="saveStatementImage">
+          {{generatingImg ? '生成中…' : '保存到相册'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 离屏高清对账单画布 -->
+  <canvas
+    type="2d"
+    id="stmtCanvas"
+    class="offscreen-canvas"
+    style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"
+  />
+</view>

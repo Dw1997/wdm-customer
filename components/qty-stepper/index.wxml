@@ -1,0 +1,33 @@
+<view class="stepper-wrap" catchtap="noop">
+  <view wx:if="{{value <= 0}}" class="btn-plus-only" bindtap="onPlus">+</view>
+  <view wx:else class="stepper">
+    <view class="btn-minus" bindtap="onMinus">−</view>
+    <view class="qty-num" bindtap="openInput">{{value}}</view>
+    <view class="btn-plus" bindtap="onPlus">+</view>
+  </view>
+
+  <!-- 点击数字弹出手动输入数量弹窗 -->
+  <view wx:if="{{showModal}}" class="modal-mask" catchtap="closeInput">
+    <view class="modal-box" catchtap="noop">
+      <view class="modal-title">输入购买数量</view>
+      <view wx:if="{{label}}" class="modal-sub">{{label}}</view>
+      <input
+        class="modal-input"
+        type="{{allowDecimal ? 'digit' : 'number'}}"
+        value="{{draft}}"
+        focus="{{showModal}}"
+        bindinput="onDraftInput"
+      />
+      <view class="quick-row">
+        <view class="quick-btn" data-num="10" bindtap="pickQuick">10</view>
+        <view class="quick-btn" data-num="20" bindtap="pickQuick">20</view>
+        <view class="quick-btn" data-num="50" bindtap="pickQuick">50</view>
+        <view class="quick-btn" data-num="100" bindtap="pickQuick">100</view>
+      </view>
+      <view class="modal-btns">
+        <view class="m-cancel" bindtap="closeInput">取消</view>
+        <view class="m-confirm" bindtap="confirmInput">确定</view>
+      </view>
+    </view>
+  </view>
+</view>

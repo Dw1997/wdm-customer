@@ -1,0 +1,138 @@
+.coupons-page {
+  min-height: 100vh;
+  background: #F4F6FA;
+}
+.tab-bar {
+  display: flex;
+  background: #FFFFFF;
+  border-bottom: 1rpx solid #EAEEF5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 26rpx 0;
+  font-size: 30rpx;
+  color: #6B798E;
+  font-weight: 500;
+  border-bottom: 6rpx solid transparent;
+}
+.tab-item.on {
+  color: #1B4B91;
+  font-weight: 700;
+  border-bottom-color: #1B4B91;
+}
+.list-wrap {
+  padding: 24rpx;
+}
+.empty-tip {
+  text-align: center;
+  padding: 120rpx 0;
+  color: #8C99AB;
+  font-size: 30rpx;
+}
+.empty-ico {
+  font-size: 72rpx;
+  margin-bottom: 16rpx;
+}
+.cp-card {
+  display: flex;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(24, 35, 52, 0.05);
+}
+.cp-card.muted {
+  opacity: 0.65;
+}
+.cp-left {
+  width: 210rpx;
+  background: linear-gradient(135deg, #E54836 0%, #C82315 100%);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 12rpx;
+}
+.cp-card.muted .cp-left {
+  background: #94A3B8;
+}
+.cp-price {
+  display: flex;
+  align-items: baseline;
+}
+.cp-yuan {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+.cp-num {
+  font-size: 48rpx;
+  font-weight: 800;
+}
+.cp-th {
+  font-size: 24rpx;
+  margin-top: 8rpx;
+  opacity: 0.92;
+}
+.cp-right {
+  flex: 1;
+  padding: 22rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cp-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+.cp-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #182334;
+}
+.cp-tag {
+  font-size: 22rpx;
+  color: #1B4B91;
+  background: #EEF4FC;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  white-space: nowrap;
+}
+.cp-date {
+  font-size: 26rpx;
+  color: #6B798E;
+  margin-top: 10rpx;
+}
+.cp-remark {
+  font-size: 24rpx;
+  color: #8C99AB;
+  margin-top: 6rpx;
+}
+.cp-bottom {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14rpx;
+}
+.use-btn {
+  background: #D93829;
+  color: #FFFFFF;
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 10rpx 28rpx;
+  border-radius: 999rpx;
+}
+.used-link {
+  color: #1B4B91;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+.exp-txt {
+  color: #94A3B8;
+  font-size: 26rpx;
+}

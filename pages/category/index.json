@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "味都美副食",
+  "usingComponents": {
+    "qty-stepper": "../../components/qty-stepper/index",
+    "spec-sheet": "../../components/spec-sheet/index"
+  }
+}

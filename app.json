@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/category/index",
+    "pages/cart/index",
+    "pages/order-list/index",
+    "pages/mine/index",
+    "pages/product-detail/index",
+    "pages/checkout/index",
+    "pages/order-detail/index",
+    "pages/debt/index",
+    "pages/coupons/index",
+    "pages/referrals/index",
+    "pages/login/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#1B4B91",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "味都美副食",
+    "backgroundColor": "#F4F6FA",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#6B798E",
+    "selectedColor": "#1B4B91",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/category/index",
+        "text": "分类",
+        "iconPath": "assets/tabbar/category.png",
+        "selectedIconPath": "assets/tabbar/category-active.png"
+      },
+      {
+        "pagePath": "pages/cart/index",
+        "text": "购物车",
+        "iconPath": "assets/tabbar/cart.png",
+        "selectedIconPath": "assets/tabbar/cart-active.png"
+      },
+      {
+        "pagePath": "pages/order-list/index",
+        "text": "订单",
+        "iconPath": "assets/tabbar/order.png",
+        "selectedIconPath": "assets/tabbar/order-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "assets/tabbar/mine.png",
+        "selectedIconPath": "assets/tabbar/mine-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

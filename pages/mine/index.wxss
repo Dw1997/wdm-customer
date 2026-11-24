@@ -1,0 +1,519 @@
+.mine-page {
+  padding-bottom: 40rpx;
+}
+
+.hero {
+  background: linear-gradient(180deg, #1B4B91, #235CAE);
+  padding: 28rpx 32rpx 56rpx;
+  color: #FFFFFF;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 4rpx solid rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 46rpx;
+  font-weight: 800;
+  flex: none;
+}
+
+.p-info {
+  flex: 1;
+}
+
+.p-name {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  flex-wrap: wrap;
+}
+
+.st-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40rpx;
+  line-height: 1;
+  font-size: 22rpx;
+  font-weight: 600;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.35);
+  flex: none;
+  white-space: nowrap;
+}
+
+.st-pill.warn {
+  background: #F59E0B;
+  border-color: transparent;
+}
+
+.p-phone {
+  margin-top: 10rpx;
+  font-size: var(--fs-sm);
+  opacity: 0.9;
+}
+
+.wrap {
+  padding: 0 24rpx;
+  margin-top: -28rpx;
+}
+
+.debt-card {
+  border: 2rpx solid #DCE7F7;
+}
+
+.debt-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.debt-more {
+  font-size: var(--fs-sm);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.debt-nums {
+  display: flex;
+  margin-top: 22rpx;
+  gap: 20rpx;
+}
+
+.debt-col {
+  flex: 1;
+}
+
+.d-lbl {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.d-val {
+  margin-top: 8rpx;
+  font-size: var(--fs-price-lg);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.d-val.red {
+  color: var(--price);
+}
+
+.overdue-strip {
+  margin-top: 18rpx;
+  background: #FFF1EE;
+  color: #C82814;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  padding: 14rpx 18rpx;
+  border-radius: 14rpx;
+}
+
+/* 雷霆双列大按钮：优惠券 + 邀请好友有礼 */
+.promo-grid {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.promo-btn {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 28rpx;
+  padding: 26rpx 24rpx 24rpx;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 224rpx;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.promo-hover {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+.promo-coupon {
+  background: linear-gradient(135deg, #FF7038 0%, #E83422 100%);
+  box-shadow: 0 12rpx 26rpx rgba(232, 52, 34, 0.24);
+}
+
+.promo-invite {
+  background: linear-gradient(135deg, #2563EB 0%, #173F8A 100%);
+  box-shadow: 0 12rpx 26rpx rgba(23, 63, 138, 0.24);
+}
+
+.promo-glow {
+  position: absolute;
+  right: -36rpx;
+  top: -36rpx;
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  pointer-events: none;
+}
+
+.promo-head {
+  position: relative;
+  z-index: 1;
+}
+
+.promo-title {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  letter-spacing: 1rpx;
+  line-height: 1.3;
+}
+
+.coupon-amt-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  margin: 14rpx 0 16rpx;
+  line-height: 1;
+}
+
+.coupon-yen {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  margin-right: 4rpx;
+}
+
+.coupon-amt {
+  font-size: var(--fs-hero);
+  font-weight: 900;
+  letter-spacing: -1rpx;
+}
+
+.promo-pill {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1rpx solid rgba(255, 255, 255, 0.34);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.invite-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12rpx;
+  margin-top: 14rpx;
+}
+
+.invite-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14rpx;
+}
+
+.invite-desc {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.35;
+}
+
+.invite-pill {
+  background: rgba(255, 214, 102, 0.26);
+  border-color: rgba(255, 224, 130, 0.55);
+  color: #FFF7D6;
+}
+
+.invite-thumb-wrap {
+  width: 102rpx;
+  height: 102rpx;
+  border-radius: 18rpx;
+  background: #FFFFFF;
+  padding: 6rpx;
+  flex: none;
+  box-shadow: 0 6rpx 16rpx rgba(10, 26, 64, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.invite-thumb {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+  display: block;
+}
+
+.invite-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+  background: #EBF2FC;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+}
+
+.qr-mini-grid {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6rpx;
+}
+
+.qr-mini-sq {
+  width: 19rpx;
+  height: 19rpx;
+  border: 4rpx solid var(--primary);
+  border-radius: 4rpx;
+}
+
+.qr-mini-sq.dot {
+  background: var(--primary);
+}
+
+.qr-mini-txt {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.pending-card {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.sales-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.sales-l {
+  flex: 1;
+}
+
+.call-btn {
+  background: var(--primary);
+  color: #FFFFFF;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  padding: 18rpx 32rpx;
+  border-radius: 38rpx;
+  flex: none;
+}
+
+.ro-tag {
+  font-size: 22rpx;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 4rpx 14rpx;
+  border-radius: 10rpx;
+}
+
+.addr-txt {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.addr-tip {
+  margin-top: 10rpx;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-top: 2rpx solid #EEF2F7;
+}
+
+.menu-row:first-child {
+  border-top: none;
+  padding-top: 4rpx;
+}
+
+.menu-row:last-child {
+  padding-bottom: 4rpx;
+}
+
+.m-l {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.m-r {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.font-switch {
+  display: inline-flex;
+  background: var(--bg);
+  border: 2rpx solid var(--line);
+  border-radius: 34rpx;
+  padding: 6rpx;
+}
+
+.fs-opt {
+  padding: 10rpx 26rpx;
+  border-radius: 28rpx;
+  font-size: 27rpx;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.fs-opt.on {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+.logout-btn {
+  height: var(--btn-h);
+  line-height: var(--btn-h);
+  text-align: center;
+  background: #FFFFFF;
+  border: 2rpx solid #D9E2EF;
+  border-radius: 24rpx;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(16, 25, 42, 0.58);
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+}
+
+.qr-box {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 32rpx;
+  padding: 40rpx 36rpx;
+  text-align: center;
+}
+
+.qr-title {
+  font-size: 38rpx;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.qr-sub {
+  margin-top: 10rpx;
+  font-size: 27rpx;
+  color: var(--muted);
+}
+
+.qr-img {
+  width: 360rpx;
+  height: 360rpx;
+  margin: 28rpx auto;
+}
+
+.qr-placeholder {
+  margin: 28rpx auto;
+  padding: 60rpx 24rpx;
+  border-radius: 24rpx;
+  background: var(--primary-soft);
+  border: 4rpx dashed var(--primary);
+}
+
+.qr-code-txt {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.qr-code-sub {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: var(--muted);
+}
+
+.qr-btns {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 16rpx;
+}
+
+.qr-share,
+.qr-close {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 42rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.qr-share {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+.qr-share::after {
+  border: none;
+}
+
+.qr-close {
+  background: var(--bg);
+  color: var(--text);
+}

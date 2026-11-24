@@ -1,0 +1,256 @@
+.ref-page {
+  min-height: 100vh;
+  background: #F4F6FA;
+  padding-bottom: 48rpx;
+}
+
+.hero {
+  background: linear-gradient(135deg, #1B4B91 0%, #2C67BA 100%);
+  color: #FFFFFF;
+  padding: 36rpx 32rpx 52rpx;
+}
+
+.hero-tag {
+  display: inline-block;
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.2);
+  margin-bottom: 16rpx;
+}
+
+.hero-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.hero-num {
+  color: #FFE066;
+  font-size: 44rpx;
+}
+
+.hero-steps {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  opacity: 0.92;
+  line-height: 1.5;
+}
+
+.hero-tip {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #FFE8A3;
+}
+
+.wrap {
+  padding: 0 24rpx;
+  margin-top: -28rpx;
+}
+
+.card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(27, 75, 145, 0.06);
+}
+
+.card-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1D2939;
+}
+
+.reward-total {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #D9480F;
+}
+
+.qr-card {
+  text-align: center;
+}
+
+.qr-sub {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #667085;
+}
+
+.qr-box {
+  margin: 28rpx auto;
+  display: flex;
+  justify-content: center;
+}
+
+.qr-img {
+  width: 360rpx;
+  height: 360rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #EAECF0;
+}
+
+.qr-empty {
+  width: 360rpx;
+  height: 220rpx;
+  border-radius: 16rpx;
+  background: #F8FAFC;
+  border: 2rpx dashed #CBD5E1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.qr-code-big {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1B4B91;
+}
+
+.qr-empty-tip {
+  font-size: 24rpx;
+  color: #667085;
+}
+
+.qr-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 12rpx;
+}
+
+.btn-primary {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  background: #1B4B91;
+  color: #FFFFFF;
+  font-size: 30rpx;
+  font-weight: 600;
+  border-radius: 14rpx;
+  border: none;
+  padding: 0;
+}
+
+.btn-secondary {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  background: #EEF4FF;
+  color: #1B4B91;
+  font-size: 30rpx;
+  font-weight: 600;
+  border-radius: 14rpx;
+  text-align: center;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+  padding: 16rpx 0 24rpx;
+  border-bottom: 1rpx solid #F2F4F7;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.s-num {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1D2939;
+}
+
+.s-num.warn { color: #D97706; }
+.s-num.blue { color: #1B4B91; }
+.s-num.green { color: #15803D; }
+
+.s-lbl {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #667085;
+}
+
+.empty-tip {
+  padding: 40rpx 0 16rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #98A2B3;
+}
+
+.ref-list {
+  margin-top: 12rpx;
+}
+
+.ref-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #F2F4F7;
+}
+
+.ref-item:last-child {
+  border-bottom: none;
+}
+
+.ref-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1D2939;
+}
+
+.ref-meta {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #667085;
+}
+
+.ref-right {
+  text-align: right;
+}
+
+.stage-tag {
+  display: inline-block;
+  font-size: 24rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+  font-weight: 500;
+}
+
+.stage-tag.pending_audit {
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.stage-tag.pending_order {
+  background: #E0F2FE;
+  color: #0369A1;
+}
+
+.stage-tag.rewarded {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.stage-tag.rejected {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+.ref-reward {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #D9480F;
+}

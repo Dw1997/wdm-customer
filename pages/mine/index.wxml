@@ -1,0 +1,147 @@
+<view class="page-root mine-page {{fontClass}}">
+  <!-- 顶部深蓝客户名片 -->
+  <view class="hero">
+    <view wx:if="{{customer}}" class="profile-row">
+      <view class="avatar">{{avatarChar}}</view>
+      <view class="p-info">
+        <view class="p-name">
+          <text>{{customer.name}}</text>
+          <view class="st-pill {{customer.status === 'pending' ? 'warn' : ''}}">{{customer.status === 'pending' ? '审核中' : '已认证'}}</view>
+        </view>
+        <view class="p-phone">手机号：{{customer.phone}}</view>
+      </view>
+    </view>
+
+    <view wx:else class="profile-row" bindtap="goLogin">
+      <view class="avatar">👤</view>
+      <view class="p-info">
+        <view class="p-name">点击登录 / 绑定手机号 ›</view>
+        <view class="p-phone">登录后查看专属批发价、欠款与订单</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="wrap">
+    <!-- 我的欠款摘要卡（已审核通过客户可见） -->
+    <view wx:if="{{customer && customer.status !== 'pending'}}" class="card debt-card" bindtap="goDebt">
+      <view class="debt-top">
+        <text class="card-title">💰 我的欠款与对账</text>
+        <text class="debt-more">查看明细 ›</text>
+      </view>
+      <view class="debt-nums">
+        <view class="debt-col">
+          <view class="d-lbl">当前总欠款</view>
+          <view class="d-val">¥{{debtAmountText}}</view>
+        </view>
+        <view class="debt-col">
+          <view class="d-lbl">已逾期金额</view>
+          <view class="d-val {{hasOverdue ? 'red' : ''}}">¥{{overdueAmountText}}</view>
+        </view>
+      </view>
+      <view wx:if="{{hasOverdue}}" class="overdue-strip">
+        ⚠️ 存在逾期欠款，请及时联系业务员线下结清
+      </view>
+    </view>
+
+    <!-- 雷霆双列大按钮：我的优惠券 + 邀请好友有礼 -->
+    <view wx:if="{{customer && customer.status !== 'pending'}}" class="promo-grid">
+      <view class="promo-btn promo-coupon" hover-class="promo-hover" hover-stay-time="80" bindtap="goCoupons">
+        <view class="promo-glow"></view>
+        <view class="promo-head">
+          <text class="promo-title">🎫 我的优惠券</text>
+        </view>
+        <view class="coupon-amt-row">
+          <text class="coupon-yen">¥</text>
+          <text class="coupon-amt">{{couponAmountText}}</text>
+        </view>
+        <view class="promo-pill">
+          {{customer.available_coupon_count > 0 ? customer.available_coupon_count + '张可用 ›' : '暂无可用 ›'}}
+        </view>
+      </view>
+
+      <view wx:if="{{customer.status === 'active'}}" class="promo-btn promo-invite" hover-class="promo-hover" hover-stay-time="80" bindtap="goReferrals">
+        <view class="promo-glow"></view>
+        <view class="promo-head">
+          <text class="promo-title">🎁 邀请好友有礼</text>
+        </view>
+        <view class="invite-body">
+          <view class="invite-meta">
+            <view class="invite-desc">{{referralRewardText}}</view>
+            <view class="promo-pill invite-pill">去邀请 ›</view>
+          </view>
+          <view class="invite-thumb-wrap">
+            <image
+              wx:if="{{shareThumbUrl}}"
+              class="invite-thumb"
+              src="{{shareThumbUrl}}"
+              mode="aspectFill"
+            />
+            <view wx:else class="invite-thumb-placeholder">
+              <view class="qr-mini-grid">
+                <view class="qr-mini-sq"></view>
+                <view class="qr-mini-sq"></view>
+                <view class="qr-mini-sq"></view>
+                <view class="qr-mini-sq dot"></view>
+              </view>
+              <text class="qr-mini-txt">邀请码</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 待审核提醒 -->
+    <view wx:if="{{customer && customer.status === 'pending'}}" class="card pending-card">
+      ⏳ 您的资料正在审核中，审核通过后即可查看专属价格、欠款与分享码。
+    </view>
+
+    <!-- 专属业务员卡 -->
+    <view wx:if="{{customer && customer.sales_name}}" class="card sales-card">
+      <view class="sales-l">
+        <view class="card-title">专属业务员：{{customer.sales_name}}</view>
+        <view class="card-sub">{{customer.sales_phone}} · 下单/改址/对账随时联系</view>
+      </view>
+      <view class="call-btn" bindtap="callSales">📞 拨号</view>
+    </view>
+
+    <!-- 只读收货信息 -->
+    <view wx:if="{{customer && customer.address}}" class="card">
+      <view class="card-hd">
+        <text class="card-title">收货信息</text>
+        <text class="ro-tag">店里维护 · 只读</text>
+      </view>
+      <view class="addr-txt">📍 {{customer.address}}</view>
+      <view class="addr-tip">送货地点决定配车线路，如需更改请联系业务员。</view>
+    </view>
+
+    <!-- 功能与设置（含大字/标准字体切换） -->
+    <view class="card">
+      <view class="menu-row">
+        <text class="m-l">🔤 字体大小</text>
+        <view class="font-switch">
+          <view class="fs-opt {{fontScale === 'large' ? 'on' : ''}}" data-scale="large" bindtap="onSwitchFont">大字</view>
+          <view class="fs-opt {{fontScale === 'normal' ? 'on' : ''}}" data-scale="normal" bindtap="onSwitchFont">标准</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{customer}}" class="logout-btn" bindtap="onLogout">退出登录</view>
+  </view>
+
+  <!-- 分享码弹窗 -->
+  <view wx:if="{{showShareModal}}" class="mask" catchtap="closeShareCode">
+    <view class="qr-box" catchtap="noop">
+      <view class="qr-title">我的专属分享码</view>
+      <view class="qr-sub">好友扫此码注册下单，自动记您为介绍人</view>
+      <image wx:if="{{shareInfo.poster_url}}" class="qr-img" src="{{shareInfo.poster_url}}" mode="aspectFit" />
+      <view wx:else class="qr-placeholder">
+        <text class="qr-code-txt">分享码：{{shareInfo.share_code}}</text>
+        <text class="qr-code-sub">（接入后端后展示真实小程序码图片）</text>
+      </view>
+      <view class="qr-btns">
+        <button class="qr-share" open-type="share">转发给好友</button>
+        <view class="qr-close" bindtap="closeShareCode">关闭</view>
+      </view>
+    </view>
+  </view>
+</view>

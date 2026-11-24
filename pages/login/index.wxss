@@ -1,0 +1,371 @@
+.login-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部深蓝品牌区，与系统导航栏自然衔接 */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1B4B91 0%, #235BB0 65%, #2C6BC7 100%);
+  padding: 56rpx 40rpx 136rpx;
+  border-bottom-left-radius: 56rpx;
+  border-bottom-right-radius: 56rpx;
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-orb-1 {
+  width: 340rpx;
+  height: 340rpx;
+  top: -120rpx;
+  right: -80rpx;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 72%);
+}
+
+.hero-orb-2 {
+  width: 260rpx;
+  height: 260rpx;
+  bottom: -90rpx;
+  left: -60rpx;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+}
+
+.brand {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.logo-wrap {
+  width: 152rpx;
+  height: 152rpx;
+  margin: 0 auto 28rpx;
+  padding: 10rpx;
+  border-radius: 42rpx;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 18rpx 40rpx rgba(11, 34, 72, 0.24);
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  border-radius: 34rpx;
+  background: linear-gradient(145deg, #FFFFFF 0%, #EEF4FC 100%);
+  color: #1B4B91;
+  font-size: 68rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 2rpx;
+}
+
+.brand-title {
+  font-size: var(--fs-hero);
+  font-weight: 900;
+  color: #FFFFFF;
+  letter-spacing: 2rpx;
+}
+
+.brand-sub {
+  margin-top: 14rpx;
+  font-size: var(--fs-sm);
+  color: rgba(255, 255, 255, 0.86);
+  letter-spacing: 1rpx;
+}
+
+.ref-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 24rpx;
+  background: rgba(255, 255, 255, 0.16);
+  border: 2rpx solid rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+}
+
+.ref-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #4ADE80;
+  flex: none;
+}
+
+/* 主体内容区 */
+.main-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0 32rpx calc(48rpx + env(safe-area-inset-bottom));
+  margin-top: -76rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.login-card {
+  background: #FFFFFF;
+  border-radius: 36rpx;
+  padding: 48rpx 36rpx 36rpx;
+  box-shadow: 0 16rpx 48rpx rgba(27, 75, 145, 0.08);
+}
+
+.card-heading {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--ink);
+  text-align: center;
+}
+
+.card-desc {
+  margin-top: 12rpx;
+  margin-bottom: 44rpx;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* 覆盖微信小程序 style:v2 下 button:not([size='mini']) 的默认宽度限制 */
+button.wx-btn {
+  width: 100% !important;
+  min-height: 104rpx;
+  height: 104rpx;
+  margin: 0;
+  padding: 0 32rpx;
+  border-radius: 52rpx;
+  background: linear-gradient(135deg, #07C160 0%, #06AD56 100%);
+  color: #FFFFFF;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  box-shadow: 0 14rpx 28rpx rgba(7, 193, 96, 0.28);
+  line-height: 1;
+}
+
+button.wx-btn::after {
+  border: none;
+}
+
+.wx-btn-hover {
+  opacity: 0.92;
+  transform: scale(0.985);
+}
+
+.wx-btn-loading {
+  opacity: 0.75;
+}
+
+/* 纯 CSS 微信双气泡图标，替代生硬的 emoji */
+.wx-icon {
+  position: relative;
+  width: 44rpx;
+  height: 38rpx;
+  flex: none;
+}
+
+.wx-bubble-lg {
+  position: absolute;
+  left: 0;
+  top: 2rpx;
+  width: 30rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+}
+
+.wx-bubble-lg::after {
+  content: '';
+  position: absolute;
+  left: 4rpx;
+  bottom: -4rpx;
+  width: 0;
+  height: 0;
+  border-top: 8rpx solid #FFFFFF;
+  border-right: 10rpx solid transparent;
+}
+
+.wx-bubble-sm {
+  position: absolute;
+  right: 0;
+  bottom: 2rpx;
+  width: 24rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3rpx solid #07C160;
+}
+
+.wx-btn-text {
+  white-space: nowrap;
+}
+
+.agree-row {
+  margin-top: 32rpx;
+  padding: 8rpx 4rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 14rpx;
+}
+
+.chk {
+  width: 38rpx;
+  height: 38rpx;
+  border-radius: 50%;
+  border: 3rpx solid #BAC7D9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 24rpx;
+  font-weight: 800;
+  flex: none;
+  margin-top: 4rpx;
+  background: #FFFFFF;
+  transition: all 0.15s ease;
+}
+
+.chk.on {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.chk-mark {
+  line-height: 1;
+}
+
+.agree-txt {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.agree-link {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.divider {
+  height: 2rpx;
+  background: var(--line);
+  margin: 34rpx 0 18rpx;
+}
+
+.skip-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--muted);
+  padding: 18rpx 16rpx;
+  border-radius: 24rpx;
+}
+
+.skip-btn-hover {
+  background: #F4F6FA;
+  color: var(--primary);
+}
+
+.skip-arrow {
+  font-size: var(--fs-lg);
+  line-height: 1;
+}
+
+/* 异常/驳回提示卡 */
+.err-card {
+  background: #FFFFFF;
+  border: 3rpx solid #F4B3A8;
+  text-align: center;
+  padding: 48rpx 36rpx 40rpx;
+}
+
+.err-badge {
+  width: 96rpx;
+  height: 96rpx;
+  margin: 0 auto 24rpx;
+  border-radius: 50%;
+  background: #FFF1EE;
+  color: #D93829;
+  font-size: 52rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.err-title {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: #B82A14;
+}
+
+.err-desc {
+  margin: 18rpx 0 38rpx;
+  font-size: var(--fs-md);
+  color: #475569;
+  line-height: 1.6;
+}
+
+.err-call-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  border-radius: 48rpx;
+  box-shadow: 0 10rpx 24rpx rgba(27, 75, 145, 0.22);
+}
+
+.btn-hover {
+  opacity: 0.9;
+}
+
+/* 底部说明区 */
+.foot-tips {
+  margin-top: 32rpx;
+  padding: 24rpx 28rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 2rpx solid #E5ECF4;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14rpx;
+}
+
+.tip-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #8FA3BF;
+  margin-top: 15rpx;
+  flex: none;
+}
+
+.tip-text {
+  flex: 1;
+  font-size: var(--fs-xs);
+  color: #6B798E;
+  line-height: 1.6;
+}
