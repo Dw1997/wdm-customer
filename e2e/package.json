@@ -1,0 +1,13 @@
+{
+  "name": "wdm-customer-e2e",
+  "private": true,
+  "version": "0.1.0",
+  "description": "味都美小程序商城 UI 冒烟自动化（miniprogram-automator + Jest）",
+  "scripts": {
+    "test": "jest --runInBand --forceExit"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "miniprogram-automator": "^0.12.1"
+  }
+}
