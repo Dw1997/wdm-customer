@@ -95,13 +95,16 @@ async function request({
   idempotent = false,
   idempotencyKey = '',
   silent = false,
-  skipAuth = false
+  skipAuth = false,
+  _retried = false
 }) {
   const headers = { 'Content-Type': 'application/json' };
   const token = skipAuth ? '' : getAccessToken();
   if (token) headers.Authorization = 'Bearer ' + token;
+  let effectiveIdempotencyKey = '';
   if (idempotent || method === 'POST' || method === 'PUT' || method === 'DELETE') {
-    headers['Idempotency-Key'] = idempotencyKey || generateIdempotencyKey();
+    effectiveIdempotencyKey = idempotencyKey || generateIdempotencyKey();
+    headers['Idempotency-Key'] = effectiveIdempotencyKey;
   }
 
   const res = await rawRequest({
@@ -112,9 +115,20 @@ async function request({
   });
 
   if (res.statusCode === 401 && !skipAuth) {
-    const refreshed = await tryRefreshToken();
-    if (refreshed) {
-      return request({ url, method, data, idempotent, idempotencyKey, silent, skipAuth });
+    if (!_retried && url !== '/auth/refresh') {
+      const refreshed = await tryRefreshToken();
+      if (refreshed) {
+        return request({
+          url,
+          method,
+          data,
+          idempotent,
+          idempotencyKey: effectiveIdempotencyKey,
+          silent,
+          skipAuth,
+          _retried: true
+        });
+      }
     }
     clearTokens();
     if (silent) {
