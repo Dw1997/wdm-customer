@@ -55,9 +55,10 @@ function rawRequest(options) {
   });
 }
 
+// 返回值：'ok' 刷新成功 / 'unauthorized' 令牌失效 / 'network_error' 弱网或断网，令牌保持不动
 async function tryRefreshToken() {
   const refreshToken = wx.getStorageSync(REFRESH_KEY);
-  if (!refreshToken) return false;
+  if (!refreshToken) return 'unauthorized';
   if (!refreshingPromise) {
     refreshingPromise = rawRequest({
       url: getBaseUrl() + '/auth/refresh',
@@ -67,16 +68,23 @@ async function tryRefreshToken() {
     })
       .then((res) => {
         const okCode = res.data && (res.data.code === 0 || res.data.code === 200);
-        if (res.statusCode === 200 && okCode && res.data.data) {
+        if (
+          res.statusCode === 200 &&
+          okCode &&
+          res.data.data &&
+          res.data.data.access_token
+        ) {
           setTokens(res.data.data.access_token, res.data.data.refresh_token);
-          return true;
+          return 'ok';
         }
-        clearTokens();
-        return false;
+        if (res.statusCode === 401 || res.statusCode === 403) {
+          clearTokens();
+          return 'unauthorized';
+        }
+        return 'network_error';
       })
       .catch(() => {
-        clearTokens();
-        return false;
+        return 'network_error';
       })
       .finally(() => {
         refreshingPromise = null;
@@ -116,8 +124,8 @@ async function request({
 
   if (res.statusCode === 401 && !skipAuth) {
     if (!_retried && url !== '/auth/refresh') {
-      const refreshed = await tryRefreshToken();
-      if (refreshed) {
+      const refreshStatus = await tryRefreshToken();
+      if (refreshStatus === 'ok') {
         return request({
           url,
           method,
@@ -128,6 +136,15 @@ async function request({
           skipAuth,
           _retried: true
         });
+      }
+      if (refreshStatus === 'network_error') {
+        if (!silent) {
+          wx.showToast({ title: '网络异常，请稍后重试', icon: 'none', duration: 2200 });
+        }
+        const netErr = new Error('网络异常，请稍后重试');
+        netErr.code = 'network_error';
+        netErr.statusCode = 401;
+        throw netErr;
       }
     }
     clearTokens();
